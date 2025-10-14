@@ -534,7 +534,7 @@ app.get("/api/sensors", async (req, res) => {
 
   try {
     connectWithRetry();
-    const sensors = await Sensor.find(query).limit(10); //limita qui
+    const sensors = await Sensor.find(query); //limita qui
     res.json(sensors);
   } catch (error) {
     res.status(500).json({ error: error.message });

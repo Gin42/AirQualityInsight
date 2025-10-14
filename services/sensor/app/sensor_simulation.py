@@ -69,7 +69,7 @@ def get_sensors_from_db(limit=None):
         client.close()
         sys.exit(0)
 
-    logger.info(f"Found {count} sensors.")
+    logger.info(f"Found {count} sensors. PAPERE")
 
     query = sensors_collection.find()
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         producer = create_producer()
 
         # Get sensor list from db
-        all_sensors = get_sensors_from_db(limit=10) #limita qui
+        all_sensors = get_sensors_from_db() #limita qui
 
         # Create and start a thread for each sensor
         threads = []
