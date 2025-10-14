@@ -142,7 +142,7 @@ function generateIPAddresses(i) {
     168, // Math.floor(i / (256**2)) % 256;
     Math.floor(i / 256) % 256,
     i % 256,
-  ].join('.');
+  ].join(".");
 }
 
 function toSensorId(n, digits = 5) {
@@ -156,7 +156,7 @@ function randomHex(length = 16) {
     result += chars[Math.floor(Math.random() * chars.length)];
   return result;
 }
-const fs = require('fs');
+const fs = require("fs");
 
 if (reset) {
   printSection("Cleaning existing data");
@@ -165,7 +165,12 @@ if (reset) {
 
   try {
     print("Loading sensor data...");
-    const data = JSON.parse(fs.readFileSync("/docker-entrypoint-initdb.d/sensor_locations.json", "utf8"));
+    const data = JSON.parse(
+      fs.readFileSync(
+        "/docker-entrypoint-initdb.d/sensor_locations.json",
+        "utf8"
+      )
+    );
     const sensors = data.elements;
     print(`Found ${sensors.length} sensors in JSON`);
 
@@ -181,7 +186,7 @@ if (reset) {
         ip: generateIPAddresses(i),
         active: true,
       };
-      console.log(entry)
+      console.log(entry);
       db.sensors.insertOne(entry);
     }
     print(`Inserted ${sensors.length} sensors`);

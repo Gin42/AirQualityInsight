@@ -1,11 +1,11 @@
 <!-- components/MapComponent.vue -->
 <script>
 import L from "leaflet";
-import 'leaflet.heat';
+import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import { ref } from "vue";
-import pushpinSvg from '@/assets/pushpin.svg';
-import pushpinHomeSvg from '@/assets/pushpin_home.svg';
+import pushpinSvg from "@/assets/pushpin.svg";
+import pushpinHomeSvg from "@/assets/pushpin_home.svg";
 
 export default {
   name: "MapComponent",
@@ -22,33 +22,37 @@ export default {
         so2: [],
         temperature: [],
         humidity: [],
-        pressure: []
-      })
+        pressure: [],
+      }),
     },
     minMeasurements: {
       type: Number,
-      required: true
+      required: true,
     },
     maxMeasurements: {
       type: Number,
-      required: true
+      required: true,
     },
     getIntensity: {
       type: Function,
-      required: true
+      required: true,
     },
     thresholds: {
       type: Object,
-      required: true
+      required: true,
     },
   },
   data() {
     return {
-      center: ref({ lng: '11.3426000', lat: '44.4939000', name: 'Piazza Maggiore' }), // Piazza Maggiore, Bologna
+      center: ref({
+        lng: "11.3426000",
+        lat: "44.4939000",
+        name: "Piazza Maggiore",
+      }), // Piazza Maggiore, Bologna
       zoom: ref(13),
       map: null,
       heatLayer: null,
-      selectedMeasurement: 'pm25',
+      selectedMeasurement: "pm25",
       maxHeatLatLng: 250,
       error: false,
       loading: ref(false),
@@ -73,7 +77,7 @@ export default {
         zones: [],
         ztl: [],
       },
-      gridType: 'none',
+      gridType: "none",
       isHovered: ref(false),
       isPinned: ref(false),
     };
@@ -93,7 +97,7 @@ export default {
         this.loading = false;
       }
     },
-    // Initialization of OpenStreetMap's map
+    // Initialization of OpenStreetMap's map, using Leaflet
     initMap() {
       // Leaflet's interactive map
       this.map = L.map("map").setView(
@@ -114,15 +118,11 @@ export default {
         iconAnchor: [12, 20],
         popupAnchor: [0, -20],
       });
-      const homeMarker = L.marker([
-        this.center.lat,
-        this.center.lng,
-      ],
-        { icon: pushpinHomeIcon }
-      );
-      homeMarker.bindPopup(`Center of the map: “${this.center.name}”`)
+      const homeMarker = L.marker([this.center.lat, this.center.lng], {
+        icon: pushpinHomeIcon,
+      });
+      homeMarker.bindPopup(`Center of the map: “${this.center.name}”`);
       homeMarker.addTo(this.map);
-
 
       let currentLat, currentLng;
 
@@ -168,13 +168,8 @@ export default {
             }, 1.5 * 1000); // ms
           })
           .catch((err) => {
-            console.error(
-              "Error copying coordinates: ",
-              err
-            );
-            alert(
-              "Could not copy coordinates. Try doing it manually."
-            );
+            console.error("Error copying coordinates: ", err);
+            alert("Could not copy coordinates. Try doing it manually.");
           });
       });
 
@@ -184,7 +179,7 @@ export default {
           this.map.invalidateSize();
         }, 100);
       });
-      window.addEventListener('resize', () => {
+      window.addEventListener("resize", () => {
         this.map.invalidateSize();
       });
 
@@ -209,7 +204,12 @@ export default {
         postalCodeBoundaries: ["neighborhoods", "zones", "ztl"],
         neighborhoods: ["postalCodeBoundaries", "zones", "ztl"],
         zones: ["postalCodeBoundaries", "neighborhoods", "ztl"],
-        ztl: ["neighborhoods", "zones", "postalCodeBoundaries", "neighborhoods"]
+        ztl: [
+          "neighborhoods",
+          "zones",
+          "postalCodeBoundaries",
+          "neighborhoods",
+        ],
       };
 
       if (this.show[layer]) {
@@ -220,8 +220,7 @@ export default {
       } else this.clearLayer(layer);
     },
     clearLayer(layer) {
-      for (const l of this.layers[layer])
-        if (this.map) this.map.removeLayer(l);
+      for (const l of this.layers[layer]) if (this.map) this.map.removeLayer(l);
 
       this.layers[layer] = [];
     },
@@ -234,17 +233,27 @@ export default {
       this.highlightSensor(sensor);
 
       for (const measurementType of Object.keys(this.measurements)) {
-        const intensity = this.getIntensity(data[measurementType], measurementType);
+        const intensity = this.getIntensity(
+          data[measurementType],
+          measurementType
+        );
 
         const latLng = [sensor.lat, sensor.lng, intensity.value];
         this.measurements[measurementType].heatLatLng.unshift(latLng);
-        if (this.measurements[measurementType].heatLatLng.length > this.maxHeatLatLng)
-          this.measurements[measurementType].heatLatLng = this.measurements[measurementType].heatLatLng.slice(0, this.maxHeatLatLng);
+        if (
+          this.measurements[measurementType].heatLatLng.length >
+          this.maxHeatLatLng
+        )
+          this.measurements[measurementType].heatLatLng = this.measurements[
+            measurementType
+          ].heatLatLng.slice(0, this.maxHeatLatLng);
       }
       this.updateHeatmap();
     },
     updateHeatmap() {
-      this.heatLayer.setLatLngs(this.measurements[this.selectedMeasurement].heatLatLng);
+      this.heatLayer.setLatLngs(
+        this.measurements[this.selectedMeasurement].heatLatLng
+      );
     },
     highlightSensor(sensor) {
       sensor.marker?.setOpacity(0.75);
@@ -252,6 +261,7 @@ export default {
         sensor.marker?.setOpacity(1);
       }, 250);
     },
+    //To add new sensors or to add them manually the code that needs to change or that needs to be expanded is this
     async fetchSensorDataFromAPI() {
       try {
         const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
@@ -261,11 +271,10 @@ export default {
           throw new Error(`HTTP error! status: ${jsonResponse.status}`);
 
         const response = await jsonResponse.json();
-        if (!response)
-          throw new Error(response || 'API request failed');
+        if (!response) throw new Error(response || "API request failed");
 
         const sensors = new Map(
-          response.map(sensor => [
+          response.map((sensor) => [
             sensor.sensor_id,
             {
               id: sensor.sensor_id,
@@ -273,24 +282,24 @@ export default {
               lng: sensor.location.coordinates[0], // longitude
               desc: sensor.sensor_id, //sensor.name,
               active: sensor.active,
-              status: sensor.active ? 'Active' : 'Inactive',
+              status: sensor.active ? "Active" : "Inactive",
               ip: sensor.ip,
               last_seen: sensor.last_seen,
               measurements: Object.fromEntries(
-                Object.keys(this.measurements).map(type => [
+                Object.keys(this.measurements).map((type) => [
                   type,
-                  { stats: null, data: [] }
+                  { stats: null, data: [] },
                 ])
-              )
-            }
-          ]
-          ));
+              ),
+            },
+          ])
+        );
 
-        this.$emit('sensors-loaded', sensors);
+        this.$emit("sensors-loaded", sensors);
         console.log(`Loaded ${sensors.size} sensors from API`);
         return sensors;
       } catch (error) {
-        console.error('Unable to fetch sensors from API:', error);
+        console.error("Unable to fetch sensors from API:", error);
       }
     },
     async populateLayer(layer) {
@@ -331,17 +340,13 @@ export default {
 
       if ("sensorLocations" === layer) {
         for (const sensorLocation of this.data[layer].values()) {
-          const marker = L.marker([
-            sensorLocation.lat,
-            sensorLocation.lng,
-          ],
-            { icon: pushpinIcon }
-          );
-          if (sensorLocation.desc)
-            marker.bindPopup(sensorLocation.desc);
+          const marker = L.marker([sensorLocation.lat, sensorLocation.lng], {
+            icon: pushpinIcon,
+          });
+          if (sensorLocation.desc) marker.bindPopup(sensorLocation.desc);
           marker.addTo(this.map);
-          marker.on('click', () => {
-            this.$emit('marker-click', sensorLocation);
+          marker.on("click", () => {
+            this.$emit("marker-click", sensorLocation);
           });
 
           this.layers[layer].push(marker);
@@ -521,42 +526,44 @@ export default {
           propertyKey: "@id",
           labelKey: "ZTL",
           displayKey: "alt_name",
-          colorMap: {}
-        }
+          colorMap: {},
+        },
       };
 
       return configs[layer];
     },
     centerOnLocation(lat, lng, zoom = 16) {
-      if (!this.map) throw 'Map not initialized';
+      if (!this.map) throw "Map not initialized";
 
       this.map.flyTo([lat, lng], zoom, {
         animate: true,
-        duration: 1.5 // sec
+        duration: 1.5, // sec
       });
     },
     onGridChange() {
-      const mapContainer = document.querySelector('.map-container');
+      const mapContainer = document.querySelector(".map-container");
       if (!mapContainer) return;
       mapContainer.classList.remove(
-        'grid-simple',
-        'grid-dark',
-        'grid-fine',
-        'grid-coordinate',
-        'grid-crosshair',
-        'grid-dashed',
-        'grid-dots',
-        'grid-animated'
+        "grid-simple",
+        "grid-dark",
+        "grid-fine",
+        "grid-coordinate",
+        "grid-crosshair",
+        "grid-dashed",
+        "grid-dots",
+        "grid-animated"
       );
-      if (this.gridType !== 'none') mapContainer.classList.add(`grid-${this.gridType}`);
+      if (this.gridType !== "none")
+        mapContainer.classList.add(`grid-${this.gridType}`);
     },
     clearMeasurements() {
-      const count = this.measurements[this.selectedMeasurement].heatLatLng.length;
+      const count =
+        this.measurements[this.selectedMeasurement].heatLatLng.length;
       for (const measurementType of Object.keys(this.measurements))
         this.measurements[measurementType].heatLatLng = [];
       this.updateHeatmap();
-      this.$emit('measurements-cleared', count);
-    }
+      this.$emit("measurements-cleared", count);
+    },
   },
   async mounted() {
     this.initMap();
@@ -584,23 +591,40 @@ export default {
         <div class="spinner"></div>
       </div>
       <div id="map"></div>
-      <div v-if="gridType === 'gray'" class="map-grid-overlay map-grid-overlay--gray"></div>
-      <div v-if="gridType === 'red'" class="map-grid-overlay map-grid-overlay--red"></div>
-      <div v-if="gridType === 'crosshair'" class="map-grid-overlay map-grid-overlay--crosshair"></div>
+      <div
+        v-if="gridType === 'gray'"
+        class="map-grid-overlay map-grid-overlay--gray"
+      ></div>
+      <div
+        v-if="gridType === 'red'"
+        class="map-grid-overlay map-grid-overlay--red"
+      ></div>
+      <div
+        v-if="gridType === 'crosshair'"
+        class="map-grid-overlay map-grid-overlay--crosshair"
+      ></div>
       <div class="center-marker">
         <div class="icon"></div>
       </div>
-      <div :class="['controls', { pinned: isPinned }]" :aria-expanded="isHovered" @mouseover="isHovered = true"
-        @mouseleave="isHovered = false">
+      <div
+        :class="['controls', { pinned: isPinned }]"
+        :aria-expanded="isHovered"
+        @mouseover="isHovered = true"
+        @mouseleave="isHovered = false"
+      >
         <div class="tools">
           <h2>Controls</h2>
-          <div class="pushpin" @click="isPinned = !isPinned" title="Pin / Unpin"></div>
+          <div
+            class="pushpin"
+            @click="isPinned = !isPinned"
+            title="Pin / Unpin"
+          ></div>
         </div>
         <pre>
           <span>Markers:</span>
           <span>{{ this.data.sensorLocations?.size }}</span>
         </pre>
-        <hr>
+        <hr />
         <pre>
           <span>Latitude:</span>
           <span>{{ this.center.lat }}</span>
@@ -613,41 +637,67 @@ export default {
           <span>Zoom:</span>
           <span>{{ this.zoom }}</span>
         </pre>
-        <button class="copy-btn" id="coordinates-copy-btn">
-          Copy
-        </button>
-        <button v-for="(value, key) in show" :key="key" class="toggle-btn" @click="toggleLayer(key)"
-          :class="{ active: value }">
+        <button class="copy-btn" id="coordinates-copy-btn">Copy</button>
+        <button
+          v-for="(value, key) in show"
+          :key="key"
+          class="toggle-btn"
+          @click="toggleLayer(key)"
+          :class="{ active: value }"
+        >
           {{ value ? "Hide" : "Show" }}
           {{ getDisplayName(key) }}
         </button>
-        <hr>
+        <hr />
         <div class="measurements-controls">
           <label><strong>Measurement:</strong></label>
           <select v-model="selectedMeasurement" @change="updateHeatmap">
-            <option v-for="type in Object.keys(this.measurements)" :key="type" :value="type">
+            <option
+              v-for="type in Object.keys(this.measurements)"
+              :key="type"
+              :value="type"
+            >
               {{ this.measurements[type].label }}
             </option>
           </select>
         </div>
         <p>Limit of measurements:</p>
         <div class="measurements-controls">
-          <input id="parameter-slider" type="range" v-model="this.maxHeatLatLng" :min="this.minMeasurements"
-            :max="this.maxMeasurements" step="10" />
-          <span class="help" title="The higher the limit, the more accurate the measurements.">{{ this.maxHeatLatLng
-            }}</span>
+          <input
+            id="parameter-slider"
+            type="range"
+            v-model="this.maxHeatLatLng"
+            :min="this.minMeasurements"
+            :max="this.maxMeasurements"
+            step="10"
+          />
+          <span
+            class="help"
+            title="The higher the limit, the more accurate the measurements."
+            >{{ this.maxHeatLatLng }}</span
+          >
         </div>
         <div class="measurements-controls">
           <p>Current measurements:</p>
-          <p>{{ this.measurements[this.selectedMeasurement].heatLatLng.length }}</p>
+          <p>
+            {{ this.measurements[this.selectedMeasurement].heatLatLng.length }}
+          </p>
         </div>
-        <button @click="clearMeasurements" class="btn btn-danger clear-measurements">
+        <button
+          @click="clearMeasurements"
+          class="btn btn-danger clear-measurements"
+        >
           <i class="fas fa-trash"></i> Clear
         </button>
-        <hr>
+        <hr />
         <div class="grid-controls">
           <label><strong>Grid:</strong></label>
-          <select id="grid-select" v-model="gridType" class="grid-select" @change="onGridChange">
+          <select
+            id="grid-select"
+            v-model="gridType"
+            class="grid-select"
+            @change="onGridChange"
+          >
             <option value="none">None</option>
             <option value="gray">Gray</option>
             <option value="red">Red</option>
@@ -678,7 +728,7 @@ export default {
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   }
-
+  //?Quale marker?
   &-marker {
     width: 20px;
     height: 20px;
@@ -709,14 +759,17 @@ export default {
   }
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+    background-image: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.3) 1px,
+        transparent 1px
+      ),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
     background-size: 30px 30px;
     pointer-events: none;
@@ -744,8 +797,11 @@ export default {
   &--gray {
     border-bottom: solid 1px var(--gray-line-color);
     border-right: solid 1px var(--gray-line-color);
-    background-image:
-      linear-gradient(to right, var(--gray-line-color) 1px, transparent 1px),
+    background-image: linear-gradient(
+        to right,
+        var(--gray-line-color) 1px,
+        transparent 1px
+      ),
       linear-gradient(to bottom, var(--gray-line-color) 1px, transparent 1px);
     background-size: 5% 5%;
   }
@@ -753,8 +809,11 @@ export default {
   &--red {
     border-bottom: solid 2px var(--red-line-color);
     border-right: solid 2px var(--red-line-color);
-    background-image:
-      linear-gradient(to right, var(--red-line-color) 2px, transparent 2px),
+    background-image: linear-gradient(
+        to right,
+        var(--red-line-color) 2px,
+        transparent 2px
+      ),
       linear-gradient(to bottom, var(--red-line-color) 2px, transparent 2px);
     background-size: 10% 10%;
   }
@@ -764,7 +823,7 @@ export default {
 
     &::before,
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       background: var(--red-line-color);
     }
@@ -808,7 +867,7 @@ export default {
   background-color: white;
   background-clip: padding-box;
   background-size: 24px 24px;
-  background-image: url('../pushpin.svg');
+  background-image: url("../pushpin.svg");
   background-repeat: no-repeat;
   background-position-x: center;
   background-position-y: center;
@@ -847,7 +906,7 @@ export default {
     .pushpin {
       background-clip: padding-box;
       background-size: 24px 24px;
-      background-image: url('../pushpin.svg');
+      background-image: url("../pushpin.svg");
       background-repeat: no-repeat;
       background-position-x: center;
       background-position-y: center;
@@ -876,7 +935,7 @@ export default {
     margin: 0.5rem 0;
   }
 
-  .measurements-controls+p {
+  .measurements-controls + p {
     margin-top: 1rem;
   }
 
@@ -1053,7 +1112,7 @@ export default {
   animation: pulse 2s infinite;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;

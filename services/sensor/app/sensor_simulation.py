@@ -101,7 +101,7 @@ if __name__ == "__main__":
         producer = create_producer()
 
         # Get sensor list from db
-        all_sensors = get_sensors_from_db()
+        all_sensors = get_sensors_from_db(limit=10) #limita qui
 
         # Create and start a thread for each sensor
         threads = []

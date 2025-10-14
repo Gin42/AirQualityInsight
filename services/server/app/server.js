@@ -15,7 +15,7 @@ const express = require("express");
 const app = express();
 const server = http.createServer(app);
 
-const corsOrigin = "*"; // process.env.CORS_ORIGIN || 'http://localhost:5173';
+const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5173"; // process.env.CORS_ORIGIN || 'http://localhost:5173';
 
 const io = socketIo(server, { cors: { origin: corsOrigin } });
 
@@ -80,7 +80,9 @@ function createThingDescription(sensor) {
     "@type": ["Thing", "saref:Sensor"],
     id: `urn:sensor:air-quality:${sensor.sensor_id}`,
     title: sensor.name || `Air Quality Sensor ${sensor.sensor_id}`,
-    description: `Air Quality Sensor monitoring environmental parameters at ${sensor.location?.coordinates || 'Unknown location'}`,
+    description: `Air Quality Sensor monitoring environmental parameters at ${
+      sensor.location?.coordinates || "Unknown location"
+    }`,
     base: baseUrl,
     securityDefinitions: {
       nosec_sc: { scheme: "nosec" },
@@ -532,7 +534,7 @@ app.get("/api/sensors", async (req, res) => {
 
   try {
     connectWithRetry();
-    const sensors = await Sensor.find(query);
+    const sensors = await Sensor.find(query).limit(10); //limita qui
     res.json(sensors);
   } catch (error) {
     res.status(500).json({ error: error.message });
