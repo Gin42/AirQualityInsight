@@ -4,6 +4,7 @@ const {
   Sensor,
   Measurement,
   saveMeasurement,
+  createSensor,
 } = require("./database.js");
 const { Kafka } = require("kafkajs");
 const socketIo = require("socket.io");
@@ -533,7 +534,7 @@ app.get("/api/sensors", async (req, res) => {
   if (sensorId) query.sensor_id = sensorId;
 
   try {
-    connectWithRetry();
+    await connectWithRetry();
     const sensors = await Sensor.find(query); //limita qui
     res.json(sensors);
   } catch (error) {
@@ -549,6 +550,12 @@ app.get("/api/latest", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+app.post("/api/createSensor", async (req, res) => {
+  const newSensor = req.body;
+  res.send("Sensor submitted successfully! SERVER" + newSensor);
+  createSensor(newSensor);
 });
 
 server.listen(port, async () => {

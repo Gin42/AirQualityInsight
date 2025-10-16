@@ -71,6 +71,21 @@ const connectWithRetry = async () => {
   }
 };
 
+const createSensor = async (sensorData) => {
+  try {
+    const result = await new Sensor(sensorData).save();
+  } catch (err) {
+    console.error("Error saving sensor:", err);
+    if (err.errInfo && err.errInfo.details) {
+      console.error(
+        "Validation details:",
+        JSON.stringify(err.errInfo.details, null, 2)
+      );
+    }
+  }
+  console.log("probably successfull" + result);
+};
+
 const saveMeasurement = async (measurement) => {
   const processedMeasurement = {
     ...measurement,
@@ -87,7 +102,7 @@ const saveMeasurement = async (measurement) => {
     so2: parseFloat(measurement.so2),
   };
 
-  if (DEBUG) console.log('Processed Measurement:', processedMeasurement);
+  if (DEBUG) console.log("Processed Measurement:", processedMeasurement);
 
   try {
     const result = await new Measurement(processedMeasurement).save();
@@ -95,7 +110,10 @@ const saveMeasurement = async (measurement) => {
   } catch (err) {
     console.error("Error saving measurement:", err);
     if (err.errInfo && err.errInfo.details) {
-      console.error("Validation details:", JSON.stringify(err.errInfo.details, null, 2));
+      console.error(
+        "Validation details:",
+        JSON.stringify(err.errInfo.details, null, 2)
+      );
     }
   }
 };
@@ -105,4 +123,5 @@ module.exports = {
   Measurement,
   connectWithRetry,
   saveMeasurement,
+  createSensor,
 };

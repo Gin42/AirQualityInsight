@@ -296,8 +296,32 @@ export default {
         );
 
         this.$emit("sensors-loaded", sensors);
-        console.log(`Loaded ${sensors.size} sensors from API`);
+        console.log(`Loaded ${sensors.size} sensors from API`); //check here
         return sensors;
+      } catch (error) {
+        console.error("Unable to fetch sensors from API:", error);
+      }
+    },
+    async sendSensorDataToAPI() {
+      try {
+        const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+        const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", // Set content type to application/json
+          },
+          body: JSON.stringify({
+            sensor_id: "SENSOR00005", // String, unique identifier for the sensor
+            name: "Temperature Sensor", // String, descriptive name of the sensor
+            location: {
+              type: "Point", // String, indicates it's a point type for GeoJSON
+              coordinates: [32.13948, -43.8908], // Array of numbers representing longitude and latitude
+            },
+            ip: "192.168.1.1", // String, IP address of the sensor
+            active: true, // Boolean, indicates if the sensor is currently active
+            last_seen: new Date(), // Date, timestamp of the last time the sensor was seen
+          }),
+        });
       } catch (error) {
         console.error("Unable to fetch sensors from API:", error);
       }
@@ -585,6 +609,7 @@ export default {
 </script>
 
 <template>
+  <button class="try-button" @click="sendSensorDataToAPI">Try me</button>
   <div class="map">
     <div class="map-container">
       <div v-if="loading" class="loading-overlay">
