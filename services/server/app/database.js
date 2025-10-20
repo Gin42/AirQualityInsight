@@ -74,6 +74,7 @@ const connectWithRetry = async () => {
 const createSensor = async (sensorData) => {
   try {
     const result = await new Sensor(sensorData).save();
+    return true;
   } catch (err) {
     console.error("Error saving sensor:", err);
     if (err.errInfo && err.errInfo.details) {
@@ -82,8 +83,8 @@ const createSensor = async (sensorData) => {
         JSON.stringify(err.errInfo.details, null, 2)
       );
     }
+    return false;
   }
-  console.log("probably successfull" + result);
 };
 
 const saveMeasurement = async (measurement) => {

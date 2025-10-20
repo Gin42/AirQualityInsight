@@ -5,7 +5,7 @@ import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import { ref } from "vue";
 import pushpinSvg from "@/assets/pushpin.svg";
-import pushpinHomeSvg from "@/assets/pushpin_home.svg";
+import pushpinHomeSvg from "@/assets/pushpinVector.svg";
 
 export default {
   name: "MapComponent",
@@ -113,6 +113,7 @@ export default {
       }).addTo(this.map);
 
       const pushpinHomeIcon = L.icon({
+        //da colorare pushpinVectorHome
         iconUrl: pushpinHomeSvg,
         iconSize: [24, 24],
         iconAnchor: [12, 20],
@@ -193,6 +194,15 @@ export default {
         maxZoom: 17,
         gradient,
       }).addTo(this.map);
+
+      //se clicco sulla mappa posso aggiungere un pin nell coordinate selezionate
+      this.map.on("click", (e) => {
+        if (
+          confirm(`Add a new sensor at [${e.latlng.lat}, ${e.latlng.lng}]?`)
+        ) {
+          this.sendSensorData(e.latlng.lng, e.latlng.lat); // Now correctly calls the method
+        }
+      });
     },
     toggleLayer(layer, hideOrEvent = false) {
       const hide = hideOrEvent instanceof Event ? false : hideOrEvent;
@@ -262,7 +272,7 @@ export default {
       }, 250);
     },
     //To add new sensors or to add them manually the code that needs to change or that needs to be expanded is this
-    async fetchSensorDataFromAPI() {
+    async fetchSensorData() {
       try {
         const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
         const jsonResponse = await fetch(`${apiUrl}/api/sensors`);
@@ -302,30 +312,65 @@ export default {
         console.error("Unable to fetch sensors from API:", error);
       }
     },
-    async sendSensorDataToAPI() {
+    async fetchLastSensorID() {
       try {
         const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-        const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json", // Set content type to application/json
-          },
-          body: JSON.stringify({
-            sensor_id: "SENSOR00005", // String, unique identifier for the sensor
-            name: "Temperature Sensor", // String, descriptive name of the sensor
-            location: {
-              type: "Point", // String, indicates it's a point type for GeoJSON
-              coordinates: [32.13948, -43.8908], // Array of numbers representing longitude and latitude
-            },
-            ip: "192.168.1.1", // String, IP address of the sensor
-            active: true, // Boolean, indicates if the sensor is currently active
-            last_seen: new Date(), // Date, timestamp of the last time the sensor was seen
-          }),
-        });
+        const response = await fetch(`${apiUrl}/api/lastID`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const sensorID = await response.json(); // Convert to JSON
+        return sensorID;
       } catch (error) {
         console.error("Unable to fetch sensors from API:", error);
       }
     },
+    async sendSensorData(lng, lat) {
+      let sensorID = await this.fetchLastSensorID(); // Await the fetch
+      let sensorID = sensorID.toInteger + 1;
+      console.log(sensorID, lat, lng);
+      if (sensorID) {
+        try {
+          const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+          const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // Set content type to application/json
+            },
+            body: JSON.stringify({
+              sensor_id: sensorID, // String, unique identifier for the sensor
+              name: "Temperature Sensor", // String, descriptive name of the sensor
+              location: {
+                type: "Point", // String, indicates it's a point type for GeoJSON
+                coordinates: [lng, lat], // Array of numbers representing longitude and latitude
+              },
+              ip: this.generateIPAddresses(sensorID), // String, IP address of the sensor
+              active: true, // Boolean, indicates if the sensor is currently active
+              last_seen: new Date(), // Date, timestamp of the last time the sensor was seen
+            }),
+          });
+          const response = await jsonResponse.json();
+          if (!response) throw new Error(response || "API request failed");
+
+          this.refreshSensorData();
+        } catch (error) {
+          console.error("Unable to send sensor to API:", error);
+        }
+      } else {
+        throw new Error("No sensor ID returned");
+      }
+    },
+    async generateIPAddresses(i) {
+      return [
+        Math.floor(i / 256 ** 3) % 256,
+        Math.floor(i / 256 ** 2) % 256,
+        Math.floor(i / 256) % 256,
+        i % 256,
+      ].join(".");
+    },
+    //richiama refresh sensor data per aggiungere pin?
     async populateLayer(layer) {
       const dataFile = {
         sensorLocations: null,
@@ -338,7 +383,7 @@ export default {
       let data;
 
       if ("sensorLocations" === layer) {
-        data = await this.fetchSensorDataFromAPI();
+        data = await this.fetchSensorData();
         if (!data) throw "Data not provided";
         this.data[layer] = data;
       } else {
@@ -349,7 +394,7 @@ export default {
     },
     async refreshSensorData() {
       this.data.sensorLocations = null;
-      const data = await this.fetchSensorDataFromAPI();
+      const data = await this.fetchSensorData();
       if (!data) throw "Data not provided";
       this.data.sensorLocations = data;
     },
@@ -609,7 +654,6 @@ export default {
 </script>
 
 <template>
-  <button class="try-button" @click="sendSensorDataToAPI">Try me</button>
   <div class="map">
     <div class="map-container">
       <div v-if="loading" class="loading-overlay">

@@ -542,6 +542,30 @@ app.get("/api/sensors", async (req, res) => {
   }
 });
 
+app.get("/api/lastID", async (req, res) => {
+  const { sensorId } = req.query;
+  const query = {};
+
+  if (sensorId) query.sensor_id = sensorId;
+
+  try {
+    await connectWithRetry();
+    const lastSensor = await Sensor.find(query)
+      .sort({ sensor_id: -1 }) // Assuming you have a createdAt field to sort by
+      .limit(1); // Limit to only the last entry
+
+    // Check if a sensor was found
+    if (lastSensor.length === 0) {
+      return res.status(404).json({ error: "No sensors found" });
+    }
+
+    // Return the last sensor ID
+    res.json(lastSensor[0].sensor_id); // Adjust this if your schema uses a different field
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get("/api/latest", async (req, res) => {
   try {
     connectWithRetry();
@@ -554,8 +578,8 @@ app.get("/api/latest", async (req, res) => {
 
 app.post("/api/createSensor", async (req, res) => {
   const newSensor = req.body;
-  res.send("Sensor submitted successfully! SERVER" + newSensor);
   createSensor(newSensor);
+  res.send(createSensor);
 });
 
 server.listen(port, async () => {

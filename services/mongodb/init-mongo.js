@@ -138,8 +138,8 @@ db.createCollection("measurements", {
 
 function generateIPAddresses(i) {
   return [
-    192, // Math.floor(i / (256**3)) % 256;
-    168, // Math.floor(i / (256**2)) % 256;
+    Math.floor(i / 256 ** 3) % 256,
+    Math.floor(i / 256 ** 2) % 256,
     Math.floor(i / 256) % 256,
     i % 256,
   ].join(".");
@@ -174,11 +174,11 @@ if (reset) {
     const sensors = data.elements;
     print(`Found ${sensors.length} sensors in JSON`);
 
-    for (let i = 1; i <= sensors.length; i++) {
+    for (let i = 0; i <= sensors.length; i++) {
       const { lon, lat } = sensors[i];
       const entry = {
-        sensor_id: toSensorId(i),
-        name: randomHex(),
+        sensor_id: toSensorId(i), //questo diverrebbe un id di mongoDB
+        name: randomHex(), //questo un nome del tipo SENSOR-X
         location: {
           type: "Point",
           coordinates: [lon, lat],
