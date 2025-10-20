@@ -4,6 +4,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  background-color: #f1e3f3;
 }
 :root {
   --light-blue: #007bff;
@@ -88,9 +89,10 @@ pre .line::before {
   padding-right: 1rem;
   border-right: 1px solid #4a5568;
 }
+/*
 pre .line:nth-child(even) {
-  /* background-color: #efefef; */
-}
+  /* background-color: #efefef; 
+}*/
 .code-container {
   position: relative;
 }
