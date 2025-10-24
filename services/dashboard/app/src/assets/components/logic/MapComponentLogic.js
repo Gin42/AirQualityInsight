@@ -195,11 +195,10 @@ export default {
 
       //se clicco sulla mappa posso aggiungere un pin nell coordinate selezionate
       this.map.on("click", (e) => {
-        if (
-          confirm(`Add a new sensor at [${e.latlng.lat}, ${e.latlng.lng}]?`)
-        ) {
-          this.sendSensorData(e.latlng.lng, e.latlng.lat); // Now correctly calls the method
-        }
+        const longitude = e.latlng.lng;
+        const latitude = e.latlng.lat;
+        console.log("current coord:" + longitude + latitude);
+        this.$emit("open-form", { longitude: longitude, latitude: latitude });
       });
     },
     toggleLayer(layer, hideOrEvent = false) {

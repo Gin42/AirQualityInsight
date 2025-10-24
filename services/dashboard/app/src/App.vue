@@ -5,6 +5,7 @@ import io from "socket.io-client";
 import MapComponent from "./assets/components/MapComponent.vue";
 import TableComponent from "./assets/components/TableComponent.vue";
 import LogComponent from "./assets/components/LogComponent.vue";
+import FormComponent from "./assets/components/FormComponent.vue";
 
 export default {
   name: "App",
@@ -12,6 +13,7 @@ export default {
     MapComponent,
     TableComponent,
     LogComponent,
+    FormComponent,
   },
   data() {
     return {
@@ -377,6 +379,9 @@ export default {
       activeSensors: false,
       timeUpdateInterval: null,
       eaqi: null,
+      isFormVisible: false,
+      latitude: null,
+      longitude: null,
     };
   },
   created() {
@@ -733,6 +738,50 @@ export default {
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     },
+    showForm({ longitude, latitude }) {
+      console.log("hey" + longitude + latitude);
+      this.longitude = longitude;
+      this.latitude = latitude;
+      this.isFormVisible = true;
+    },
+    hideForm() {
+      this.isFormVisible = false;
+    },
+    async handleSubmit(formData) {
+      try {
+        const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+        const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", // Set content type to application/json
+          },
+          body: JSON.stringify({
+            name: formData.name, // String, descriptive name of the sensor
+            location: {
+              type: "Point", // String, indicates it's a point type for GeoJSON
+              coordinates: [formData.lng, formData.lat], // Array of numbers representing longitude and latitude
+            },
+            ip: this.generateIPAddresses(1), // String, IP address of the sensor
+            active: formData.active, // Boolean, indicates if the sensor is currently active
+            last_seen: new Date(), // Date, timestamp of the last time the sensor was seen
+          }),
+        });
+        const response = await jsonResponse.json();
+        if (!response) throw new Error(response || "API request failed");
+        console.log("success");
+        this.hideForm();
+      } catch (error) {
+        console.error("Unable to send sensor to API:", error);
+      }
+    },
+    generateIPAddresses(i) {
+      return [
+        Math.floor(i / 256 ** 3) % 256,
+        Math.floor(i / 256 ** 2) % 256,
+        Math.floor(i / 256) % 256,
+        i % 256,
+      ].join(".");
+    },
   },
 };
 </script>
@@ -874,7 +923,15 @@ export default {
           @marker-click="handleMarkerClick"
           @sensors-loaded="handleSensorsLoaded"
           @measurements-cleared="handleMeasurementsCleared"
+          @open-form="showForm"
         />
+        <FormComponent
+          v-if="isFormVisible"
+          @close-form="hideForm"
+          @submit-form="handleSubmit"
+          :initial-latitude="latitude"
+          :initial-longitude="longitude"
+        ></FormComponent>
       </div>
 
       <div class="dashboard-component eaqi-component-container">
