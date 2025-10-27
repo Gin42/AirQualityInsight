@@ -177,8 +177,8 @@ if (reset) {
     for (let i = 0; i <= sensors.length; i++) {
       const { lon, lat } = sensors[i];
       const entry = {
-        sensor_id: toSensorId(i), //questo diverrebbe un id di mongoDB
-        name: randomHex(), //questo un nome del tipo SENSOR-X
+        sensor_id: objectID(),
+        name: "Sensore di prova",
         location: {
           type: "Point",
           coordinates: [lon, lat],

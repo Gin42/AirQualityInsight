@@ -33,7 +33,12 @@
       />
 
       <label for="active" class="switch">Active:</label>
-      <input type="checkbox" name="active" v-model="formData.active" />
+      <input
+        type="checkbox"
+        name="active"
+        v-model="formData.active"
+        id="checkbox"
+      />
       <span class="slider round"></span>
 
       <button type="submit" class="btn">Create</button>
@@ -88,3 +93,13 @@ export default {
   },
 };
 </script>
+
+<style>
+#longitudeField:hover,
+#latitudeField:hover {
+  cursor: context-menu;
+}
+#checkbox:hover {
+  cursor: pointer;
+}
+</style>

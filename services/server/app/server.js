@@ -577,10 +577,29 @@ app.get("/api/latest", async (req, res) => {
 });
 
 app.post("/api/createSensor", async (req, res) => {
-  const newSensor = req.body;
+  let count = await Sensor.countDocuments();
+  count = count + 1;
+  console.log(count);
+  const newSensor = {
+    sensor_id: "",
+    name: req.body.name,
+    location: req.body.location,
+    ip: generateIPAddresses(count),
+    active: req.body.active,
+    last_seen: req.body.last_seen,
+  };
   createSensor(newSensor);
-  res.send(createSensor);
+  res.send(newSensor);
 });
+
+function generateIPAddresses(i) {
+  return [
+    Math.floor(i / 256 ** 3) % 256,
+    Math.floor(i / 256 ** 2) % 256,
+    Math.floor(i / 256) % 256,
+    i % 256,
+  ].join(".");
+}
 
 server.listen(port, async () => {
   console.log(`Server with WoT Gateway running on http://localhost:${port}`);

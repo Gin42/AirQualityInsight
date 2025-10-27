@@ -739,7 +739,6 @@ export default {
       return R * c;
     },
     showForm({ longitude, latitude }) {
-      console.log("hey" + longitude + latitude);
       this.longitude = longitude;
       this.latitude = latitude;
       this.isFormVisible = true;
@@ -759,9 +758,8 @@ export default {
             name: formData.name, // String, descriptive name of the sensor
             location: {
               type: "Point", // String, indicates it's a point type for GeoJSON
-              coordinates: [formData.lng, formData.lat], // Array of numbers representing longitude and latitude
+              coordinates: [formData.longitude, formData.latitude], // Array of numbers representing longitude and latitude
             },
-            ip: this.generateIPAddresses(1), // String, IP address of the sensor
             active: formData.active, // Boolean, indicates if the sensor is currently active
             last_seen: new Date(), // Date, timestamp of the last time the sensor was seen
           }),
@@ -773,14 +771,6 @@ export default {
       } catch (error) {
         console.error("Unable to send sensor to API:", error);
       }
-    },
-    generateIPAddresses(i) {
-      return [
-        Math.floor(i / 256 ** 3) % 256,
-        Math.floor(i / 256 ** 2) % 256,
-        Math.floor(i / 256) % 256,
-        i % 256,
-      ].join(".");
     },
   },
 };
