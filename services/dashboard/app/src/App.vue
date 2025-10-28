@@ -766,8 +766,8 @@ export default {
         });
         const response = await jsonResponse.json();
         if (!response) throw new Error(response || "API request failed");
-        console.log("success");
         this.hideForm();
+        this.$refs.mapComponent.refreshSensorData();
       } catch (error) {
         console.error("Unable to send sensor to API:", error);
       }

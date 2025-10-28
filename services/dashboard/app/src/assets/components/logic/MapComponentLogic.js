@@ -309,64 +309,6 @@ export default {
         console.error("Unable to fetch sensors from API:", error);
       }
     },
-    async fetchLastSensorID() {
-      try {
-        const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-        const response = await fetch(`${apiUrl}/api/lastID`);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const sensorID = await response.json(); // Convert to JSON
-        return sensorID;
-      } catch (error) {
-        console.error("Unable to fetch sensors from API:", error);
-      }
-    },
-    async sendSensorData(lng, lat) {
-      let sensorID = await this.fetchLastSensorID(); // Await the fetch
-      sensorID = sensorID.toInteger + 1;
-      console.log(sensorID, lat, lng);
-      if (sensorID) {
-        try {
-          const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-          const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json", // Set content type to application/json
-            },
-            body: JSON.stringify({
-              sensor_id: sensorID, // String, unique identifier for the sensor
-              name: "Temperature Sensor", // String, descriptive name of the sensor
-              location: {
-                type: "Point", // String, indicates it's a point type for GeoJSON
-                coordinates: [lng, lat], // Array of numbers representing longitude and latitude
-              },
-              ip: this.generateIPAddresses(sensorID), // String, IP address of the sensor
-              active: true, // Boolean, indicates if the sensor is currently active
-              last_seen: new Date(), // Date, timestamp of the last time the sensor was seen
-            }),
-          });
-          const response = await jsonResponse.json();
-          if (!response) throw new Error(response || "API request failed");
-
-          this.refreshSensorData();
-        } catch (error) {
-          console.error("Unable to send sensor to API:", error);
-        }
-      } else {
-        throw new Error("No sensor ID returned");
-      }
-    },
-    async generateIPAddresses(i) {
-      return [
-        Math.floor(i / 256 ** 3) % 256,
-        Math.floor(i / 256 ** 2) % 256,
-        Math.floor(i / 256) % 256,
-        i % 256,
-      ].join(".");
-    },
     //richiama refresh sensor data per aggiungere pin?
     async populateLayer(layer) {
       const dataFile = {
@@ -394,6 +336,7 @@ export default {
       const data = await this.fetchSensorData();
       if (!data) throw "Data not provided";
       this.data.sensorLocations = data;
+      this.drawLayer("sensorLocations");
     },
     async drawLayer(layer) {
       if (!this.data[layer]) return console.error("Data not provided");
