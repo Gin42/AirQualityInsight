@@ -384,6 +384,7 @@ export default {
       isFormVisible: false,
       latitude: null,
       longitude: null,
+      address: null,
     };
   },
   created() {
@@ -742,7 +743,8 @@ export default {
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     },
-    showForm({ longitude, latitude }) {
+    showForm({ longitude, latitude, address }) {
+      this.address = address;
       this.longitude = longitude;
       this.latitude = latitude;
       this.isFormVisible = true;
@@ -925,6 +927,7 @@ export default {
           @submit-form="handleSubmit"
           :initial-latitude="latitude"
           :initial-longitude="longitude"
+          :initial-address="address"
         ></FormComponent>
       </div>
 

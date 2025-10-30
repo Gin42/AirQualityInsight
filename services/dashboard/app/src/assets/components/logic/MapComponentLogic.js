@@ -194,12 +194,48 @@ export default {
       }).addTo(this.map);
 
       //se clicco sulla mappa posso aggiungere un pin nell coordinate selezionate
-      this.map.on("click", (e) => {
+      this.map.on("click", async (e) => {
         const longitude = e.latlng.lng;
         const latitude = e.latlng.lat;
-        console.log("current coord:" + longitude + latitude);
-        this.$emit("open-form", { longitude: longitude, latitude: latitude });
+        let address = await this.fetchAddressFromAPI(latitude, longitude);
+
+        console.log("address: " + address);
+        this.$emit("open-form", {
+          longitude: longitude,
+          latitude: latitude,
+          address: address,
+        });
       });
+    },
+    async fetchAddressFromAPI(lat, lng) {
+      try {
+        const params = "format=json";
+        const jsonResponse = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&${params}`
+        );
+        if (!jsonResponse.ok) {
+          throw new Error(`HTTP error! status: ${jsonResponse.status}`);
+        }
+
+        const response = await jsonResponse.json();
+
+        if (!response) {
+          throw new Error("API request failed");
+        }
+
+        console.log(response);
+
+        const { road, house_number, city, country } = response.address;
+
+        // Assemble the address string, checking for undefined values
+        const addressParts = [road, city, house_number, country].filter(
+          Boolean
+        ); // Filter out any undefined parts
+
+        return addressParts.join(", ");
+      } catch (error) {
+        console.error("Unable to fetch sensors from API:", error);
+      }
     },
     toggleLayer(layer, hideOrEvent = false) {
       const hide = hideOrEvent instanceof Event ? false : hideOrEvent;

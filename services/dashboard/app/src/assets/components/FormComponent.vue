@@ -4,13 +4,7 @@
       <h1>Create new sensor</h1>
 
       <label for="name">Sensor Name:</label>
-      <input
-        type="text"
-        placeholder="Ex. sensor address"
-        name="name"
-        v-model="formData.name"
-        required
-      />
+      <input type="text" name="address" v-model="formData.address" required />
 
       <label for="longitudeField">Longitude:</label>
       <input
@@ -60,11 +54,15 @@ export default {
       type: Number,
       required: true,
     },
+    initialAddress: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       formData: {
-        name: "",
+        name: this.initialAddress,
         latitude: this.initialLatitude,
         longitude: this.initialLongitude,
         active: true,
@@ -77,7 +75,7 @@ export default {
       this.resetForm();
     },
     resetForm() {
-      this.formData.name = "";
+      this.formData.name = this.initialAddress;
       this.formData.latitude = this.initialLatitude;
       this.formData.longitude = this.initialLongitude;
       this.formData.active = false;
@@ -89,6 +87,9 @@ export default {
     },
     initialLongitude(newLng) {
       this.formData.longitude = newLng;
+    },
+    initialAddress(newAddress) {
+      this.formData.address = newAddress;
     },
   },
 };
