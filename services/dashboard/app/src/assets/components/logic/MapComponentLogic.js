@@ -234,7 +234,7 @@ export default {
     registerNewMeasurement(data) {
       if (!this.data.sensorLocations?.size) return;
 
-      const sensor = this.data.sensorLocations.get(data.sensor_id);
+      const sensor = this.data.sensorLocations.get(data.name);
       if (!sensor) return;
 
       this.highlightSensor(sensor);
@@ -285,10 +285,11 @@ export default {
             sensor.sensor_id,
             {
               id: sensor.sensor_id,
+              name: sensor.name,
               lat: sensor.location.coordinates[1], // latitude
               lng: sensor.location.coordinates[0], // longitude
-              desc: sensor.sensor_id, //sensor.name,
-              active: sensor.active,
+              desc: sensor.sensor_id, //sensor.name, !!!!
+              active: sensor.active, //!!!
               status: sensor.active ? "Active" : "Inactive",
               ip: sensor.ip,
               last_seen: sensor.last_seen,

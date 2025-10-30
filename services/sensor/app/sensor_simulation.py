@@ -52,9 +52,9 @@ def send_message(producer, message):
     try:
         # Block until the message is sent (or timeout)
         record_metadata = future.get(timeout=10)
-        logger.info(f"Message sent from {message['sensor_id']} to {record_metadata.topic} partition {record_metadata.partition} offset {record_metadata.offset}")
+        logger.info(f"Message sent from {message['name']} to {record_metadata.topic} partition {record_metadata.partition} offset {record_metadata.offset}")
     except Exception as e:
-        logger.error(f"Failed to send message from {message.get('sensor_id', 'unknown')}: {e}")
+        logger.error(f"Failed to send message from {message.get('name', 'unknown')}: {e}")
 
 def get_sensors_from_db(limit=None):
     """Obtain all sensors from database"""

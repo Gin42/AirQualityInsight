@@ -331,7 +331,8 @@ export default {
       },
       collectedMeasurement: {
         columns: [
-          { key: "sensor_id", label: "Sensor ID" },
+          { key: "sensor_id", label: "Id" },
+          { key: "name", label: "Name" },
           { key: "timestamp", label: "Timestamp", center: true },
         ],
         data: [],
@@ -350,7 +351,8 @@ export default {
       },
       sensors: {
         columns: [
-          { key: "id", label: "Sensor ID", sortable: true },
+          { key: "sensor_id", label: "Id", sortable: true },
+          { key: "name", label: "Name", sortable: true },
           { key: "lat", label: "Latitude", center: true, sortable: true },
           { key: "lng", label: "Longitude", center: true, sortable: true },
           { key: "status", label: "Status", center: true, sortable: true },
@@ -452,6 +454,7 @@ export default {
 
         const formattedData = {
           sensor_id: message.sensor_id,
+          name: message.name,
           timestamp: message.timestamp,
           temperature: parseFloat(message.temperature).toFixed(2),
           humidity: parseFloat(message.humidity).toFixed(2),
@@ -675,6 +678,7 @@ export default {
     },
     handleSensorsLoaded(sensors) {
       this.sensors.data = sensors;
+      console.log(this.sensors.data);
       for (const sensor of this.sensors.data.values()) {
         sensor.distanceFromCenter = this.calculateDistance(
           this.center.lat,
@@ -767,7 +771,7 @@ export default {
         const response = await jsonResponse.json();
         if (!response) throw new Error(response || "API request failed");
         this.hideForm();
-        this.$refs.mapComponent.refreshSensorData();
+        this.refreshSensors();
       } catch (error) {
         console.error("Unable to send sensor to API:", error);
       }

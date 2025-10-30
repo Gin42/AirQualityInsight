@@ -99,6 +99,7 @@ class AirQualitySensor:
         # Create the new reading
         new_reading = {
             'sensor_id': self.sensor['sensor_id'],
+            'name': self.sensor['name'],
             'timestamp': datetime.now().isoformat(),
             'temperature': round(temp, 2),
             'humidity': round(humidity, 2),

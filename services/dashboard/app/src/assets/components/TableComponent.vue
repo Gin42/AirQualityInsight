@@ -1,4 +1,5 @@
 <!-- components/TableComponent.vue -->
+<script src="./logic/TableComponentLogic.js"></script>
 <template>
   <div class="table-wrapper">
     <table>
@@ -63,8 +64,6 @@
     <div v-if="data.length === 0" class="no-data">No data to display</div>
   </div>
 </template>
-
-<script src="./logic/TableComponentLogic.js"></script>
 
 <style scoped lang="scss">
 .table-wrapper {
