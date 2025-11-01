@@ -149,13 +149,6 @@ function toSensorId(n, digits = 5) {
   return "SENSOR" + n.toString().padStart(digits, "0");
 }
 
-function randomHex(length = 16) {
-  const chars = "0123456789abcdef";
-  let result = "";
-  for (let i = 0; i < length; i++)
-    result += chars[Math.floor(Math.random() * chars.length)];
-  return result;
-}
 const fs = require("fs");
 
 if (reset) {
@@ -171,13 +164,14 @@ if (reset) {
         "utf8"
       )
     );
+    console.log(data.elements);
     const sensors = data.elements;
     print(`Found ${sensors.length} sensors in JSON`);
 
-    for (let i = 0; i <= sensors.length; i++) {
+    for (let i = 0; i < sensors.length; i++) {
       const { lon, lat } = sensors[i];
       const entry = {
-        sensor_id: objectID(),
+        sensor_id: toSensorId(i),
         name: "Sensore di prova",
         location: {
           type: "Point",

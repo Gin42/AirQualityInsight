@@ -4,16 +4,11 @@
   "elements": [
     {
       "type": "node",
-      "id": "SENSOR-0",
       "lat": 44.4914668,
-      "lon": 11.3464661,
-      "tags": {
-        "highway": "traffic_signals"
-      }
+      "lon": 11.3464661
     },
     {
       "type": "node",
-      "id": "SENSOR-1",
       "lat": 44.4856545,
       "lon": 11.3482468
     }
