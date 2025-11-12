@@ -4,10 +4,15 @@ import store from "../store/index";
 const serverUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
 const socket = io(serverUrl);
 
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}
+
 socket.on("kafka-message", (message) => {
   /*this.addInfo("Received new measurement");*/
 
-  message.timestamp = this.formatTimestamp(message.timestamp || new Date());
+  message.timestamp = formatTimestamp(message.timestamp || new Date());
   //this.$refs.mapComponent?.registerNewMeasurement(message);
 
   const formattedData = {
@@ -28,7 +33,9 @@ socket.on("kafka-message", (message) => {
 
   store.dispatch("measurements/updateMeasurement", formattedData);
 
-  store.dispatch("statistics/updateStats");
+  store.dispatch("sensors/updateLastMeasurement", formattedData.sensor_id);
+
+  store.dispatch("statistics/updateStats", message);
 
   store.dispatch("eaqi/updateEAQI");
 });

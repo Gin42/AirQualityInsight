@@ -1,0 +1,260 @@
+{
+  "thresholds": {
+    "good": {
+      "label": "Good",
+      "value": 0.15,
+      "color": "#50f0e6",
+      "advice": {
+        "general": "The air quality is good. Enjoy your usual outdoor activities.",
+        "sensitive": "The air quality is good. Enjoy your usual outdoor activities."
+      }
+    },
+    "fair": {
+      "label": "Fair",
+      "value": 0.3,
+      "color": "#50ccaa",
+      "advice": {
+        "general": "Enjoy your usual outdoor activities.",
+        "sensitive": "Enjoy your usual outdoor activities."
+      }
+    },
+    "moderate": {
+      "label": "Moderate",
+      "value": 0.45,
+      "color": "#f0e641",
+      "advice": {
+        "general": "Enjoy your usual outdoor activities.",
+        "sensitive": "Consider reducing intense outdoor activities, if you experience symptoms."
+      }
+    },
+    "poor": {
+      "label": "Poor",
+      "value": 0.6,
+      "color": "#ff5050",
+      "advice": {
+        "general": "Consider reducing intense activities outdoors, if you experience symptoms such as sore eyes, a cough or sore throat.",
+        "sensitive": "Consider reducing physical activities, particularly outdoors, especially if you experience symptoms."
+      }
+    },
+    "very_poor": {
+      "label": "Very poor",
+      "value": 0.75,
+      "color": "#960032",
+      "advice": {
+        "general": "Consider reducing intense activities outdoors, if you experience symptoms such as sore eyes, a cough or sore throat.",
+        "sensitive": "Reduce physical activities, particularly outdoors, especially if you experience symptoms."
+      }
+    },
+    "extremely_poor": {
+      "label": "Extremely poor",
+      "value": 1,
+      "color": "#7d2181",
+      "advice": {
+        "general": "Reduce physical activities outdoors.",
+        "sensitive": "Avoid physical activities outdoors."
+      }
+    }
+  },
+  "measurementsTypes": {
+    "temperature": {
+      "label": "Temperature",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": [18, 24],
+        "fair": [15, 27],
+        "moderate": [12, 30],
+        "poor": [9, 33],
+        "very_poor": [0, 35],
+        "extremely_poor": ["otherwise"]
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": -15,
+        "max": 30,
+        "measurementUnit": "°C",
+        "description": "Measures ambient air temperature, expressed in degrees Celsius, indicating thermal conditions in the monitored environment."
+      }
+    },
+    "humidity": {
+      "label": "Humidity",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": [40, 60],
+        "fair": [35, 65],
+        "moderate": [30, 70],
+        "poor": [20, 80],
+        "very_poor": [10, 90],
+        "extremely_poor": ["otherwise"]
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 30,
+        "max": 100,
+        "measurementUnit": "%",
+        "description": "Records relative humidity levels as a percentage, showing the amount of moisture present in the air compared to maximum capacity at current temperature."
+      }
+    },
+    "pressure": {
+      "label": "Pressure",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": [1013, 1020],
+        "fair": [1005, 1020],
+        "moderate": [1000, 1020],
+        "poor": [995, 1020],
+        "very_poor": [990, 1020],
+        "extremely_poor": ["otherwise"]
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 980,
+        "max": 1020,
+        "measurementUnit": "hPa",
+        "description": "Monitors atmospheric pressure, usually measured in hPa (hectopascals), indicating air pressure changes that can affect weather patterns."
+      }
+    },
+    "voc": {
+      "label": "VOC",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": 0.3,
+        "fair": 0.6,
+        "moderate": 1.2,
+        "poor": 2.0,
+        "very_poor": 2.5,
+        "extremely_poor": 2.5
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 0,
+        "max": 30,
+        "measurementUnit": "ppm",
+        "description": "Volatile Organic Compounds detection, measuring gaseous chemicals from various sources that can affect indoor air quality and human health."
+      }
+    },
+    "co2": {
+      "label": "CO2",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": 450,
+        "fair": 600,
+        "moderate": 1000,
+        "poor": 1500,
+        "very_poor": 1800,
+        "extremely_poor": 1800
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 400,
+        "max": 2000,
+        "measurementUnit": "ppm",
+        "description": "Carbon dioxide concentration measurement in parts per million (ppm), indicating air quality and ventilation effectiveness in enclosed spaces."
+      }
+    },
+    "pm25": {
+      "label": "PM2.5",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": 5,
+        "fair": 15,
+        "moderate": 50,
+        "poor": 90,
+        "very_poor": 140,
+        "extremely_poor": 140
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 0,
+        "max": 50,
+        "measurementUnit": "µg/m³",
+        "description": "Detects fine particulate matter with diameter ≤2.5 micrometers, measuring dangerous airborne particles that can penetrate deep into lungs and bloodstream."
+      }
+    },
+    "pm10": {
+      "label": "PM10",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": 15,
+        "fair": 45,
+        "moderate": 120,
+        "poor": 195,
+        "very_poor": 270,
+        "extremely_poor": 270
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 0,
+        "max": 100,
+        "measurementUnit": "µg/m³",
+        "description": "Measures coarse particulate matter with diameter ≤10 micrometers, monitoring larger airborne particles that can cause respiratory irritation."
+      }
+    },
+    "no2": {
+      "label": "NO2",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": 60,
+        "fair": 100,
+        "moderate": 120,
+        "poor": 160,
+        "very_poor": 180,
+        "extremely_poor": 180
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 0,
+        "max": 200,
+        "measurementUnit": "µg/m³",
+        "description": "A reddish-brown gas primarily produced by vehicle emissions and industrial combustion. It contributes to smog formation, acid rain, and can cause respiratory irritation. High concentrations are often found in urban areas with heavy traffic."
+      }
+    },
+    "o3": {
+      "label": "O3",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": 10,
+        "fair": 25,
+        "moderate": 60,
+        "poor": 100,
+        "very_poor": 150,
+        "extremely_poor": 150
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 0,
+        "max": 200,
+        "measurementUnit": "µg/m³",
+        "description": "At ground level, ozone is a harmful pollutant formed when nitrogen oxides and volatile organic compounds react in sunlight. It's a key component of smog and can cause breathing problems, especially during hot, sunny days. Note that this is different from the protective ozone layer in the upper atmosphere."
+      }
+    },
+    "so2": {
+      "label": "SO2",
+      "data": [],
+      "stats": {},
+      "thresholds": {
+        "good": 20,
+        "fair": 40,
+        "moderate": 125,
+        "poor": 190,
+        "very_poor": 275,
+        "extremely_poor": 275
+      },
+      "heatLatLng": [],
+      "info": {
+        "min": 0,
+        "max": 300,
+        "measurementUnit": "µg/m³",
+        "description": "A colorless gas with a sharp, irritating smell, mainly produced by burning fossil fuels containing sulfur (coal, oil) and industrial processes. It can cause respiratory problems and contributes to acid rain formation. Power plants and refineries are major sources."
+      }
+    }
+  }
+}

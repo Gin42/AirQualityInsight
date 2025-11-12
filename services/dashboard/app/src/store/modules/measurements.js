@@ -17,10 +17,10 @@ const getters = {
 
 //MUTATIONS
 const mutations = {
-  addMeasurement(state, { sensorId, data }) {
-    state.measurements[sensorId].data.unshift(data);
-    if (state.measurements.length > state.maxMessages) {
-      state.measurements = state.measurement.slice(0, state.maxMessages);
+  addMeasurement(state, data, rootState) {
+    state.measurements.unshift(data);
+    if (state.measurements.length > rootState.maxMessages) {
+      state.measurements = state.measurements.slice(0, rootState.maxMessages);
     }
   },
 };
@@ -28,7 +28,7 @@ const mutations = {
 //ACTIONS
 const actions = {
   updateMeasurements({ commit }, measurement) {
-    commit("addMeasurements", measurement);
+    commit("addMeasurement", measurement);
   },
 };
 

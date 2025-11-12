@@ -1,0 +1,77 @@
+{
+  "infoTable": {
+    "columns": [
+      { "key": "measurement", "label": "Measurement" },
+      { "key": "measurementUnit", "label": "Measurement unit", "center": true },
+      { "key": "min", "label": "Min", "center": true },
+      { "key": "max", "label": "Max", "center": true },
+      { "key": "thresholdGood", "label": "Good", "center": true, "html": true },
+      { "key": "thresholdFair", "label": "Fair", "center": true, "html": true },
+      {
+        "key": "thresholdModerate",
+        "label": "Moderate",
+        "center": true,
+        "html": true
+      },
+      { "key": "thresholdPoor", "label": "Poor", "center": true, "html": true },
+      {
+        "key": "thresholdVeryPoor",
+        "label": "Very poor",
+        "center": true,
+        "html": true
+      },
+      {
+        "key": "thresholdExtremelyPoor",
+        "label": "Extremely poor",
+        "center": true,
+        "html": true
+      },
+      { "key": "info", "label": "Info", "center": true, "html": true }
+    ]
+  },
+  "measurementsTable": {
+    "columns": [
+      { "key": "sensor_id", "label": "Id" },
+      { "key": "name", "label": "Name" },
+      { "key": "timestamp", "label": "Timestamp", "center": true }
+    ]
+  },
+  "statsTable": {
+    "columns": [
+      { "key": "measurement", "label": "Measurement" },
+      { "key": "mean", "label": "Mean", "center": true },
+      { "key": "median", "label": "Median", "center": true },
+      { "key": "min", "label": "Min", "center": true },
+      { "key": "max", "label": "Max", "center": true },
+      { "key": "range", "label": "Range", "center": true },
+      { "key": "quality", "label": "Quality", "center": true, "html": true }
+    ]
+  },
+  "sensorsTable": {
+    "columns": [
+      { "key": "sensor_id", "label": "Id", "sortable": true },
+      { "key": "name", "label": "Name", "sortable": true },
+      { "key": "lat", "label": "Latitude", "center": true, "sortable": true },
+      { "key": "lng", "label": "Longitude", "center": true, "sortable": true },
+      { "key": "status", "label": "Status", "center": true, "sortable": true },
+      {
+        "key": "distanceFromCenter",
+        "label": "Distance from center (m)",
+        "center": true,
+        "sortable": true
+      },
+      {
+        "key": "lastMeasurementReceived",
+        "label": "Last measurement received",
+        "center": true,
+        "sortable": true
+      },
+      {
+        "key": "timeSinceLastMeasurement",
+        "label": "Time since last measurement",
+        "center": true,
+        "sortable": true
+      }
+    ]
+  }
+}

@@ -2,7 +2,7 @@ const state = {};
 const getter = {};
 const mutations = {
   updateEAQI() {
-    this.eaqi = this.calculateEAQI([
+    this.eaqi = calculateEAQI([
       this.statsMeasurement.data.pm25,
       this.statsMeasurement.data.pm10,
       this.statsMeasurement.data.no2,
@@ -12,3 +12,15 @@ const mutations = {
   },
 };
 const actions = {};
+
+function calculateEAQI(pollutants) {
+  let dominantPollutant = null;
+
+  for (const pollutant of pollutants) {
+    if (null === dominantPollutant) dominantPollutant = pollutant;
+    if (dominantPollutant.intensity.value < pollutant.intensity.value)
+      dominantPollutant = pollutant;
+  }
+
+  return dominantPollutant;
+}

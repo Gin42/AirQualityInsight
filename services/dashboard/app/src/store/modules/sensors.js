@@ -1,4 +1,10 @@
-//sensor shape: [{....}]
+/*sensor shape: [{
+sensor_id,
+name,
+position: [lat, lng]
+status,
+ip
+}]*/
 import { fetchFromApi } from "@/services/api";
 const state = () => ({
   sensors: new Map(),
@@ -32,16 +38,18 @@ const state = () => ({
 //GETTERS
 const getters = {
   allSensors: (state) => {
-    Array.from(state.sensors.values());
+    return Array.from(state.sensors.values());
   },
   allSensorsCount: (state) => {
-    return state.sensors.values().lenght();
+    return state.sensors.size;
   },
   allActiveSensors: (state) => {
-    return state.sensors.filter((sensor) => sensor.active);
+    return Array.from(state.sensors.values()).filter((sensor) => sensor.active);
   },
-  getSensor: (state, id) => {
-    return state.sensors.filter((sensor) => sensor.id === id);
+  getSensor: (state) => (id) => {
+    return Array.from(state.sensors.values()).find(
+      (sensor) => sensor.id === id
+    );
   },
 };
 
@@ -70,15 +78,13 @@ const mutations = {
         },
       ])
     );
-    state.sensor = sensorMap;
+    state.sensors = sensorMap;
   },
   resetSensors(state) {
     state.sensors = new Map();
   },
-  updateLastMeasurement(state, getters, id) {
-    if (!state.sensors.data?.size) return;
-
-    const sensor = getters.getSensor(id);
+  updateLastMeasurement(state, { id }) {
+    const sensor = state.sensors.get(id);
     if (!sensor) return;
 
     const now = new Date();
@@ -92,6 +98,7 @@ function formatTimestamp(timestamp) {
   const date = new Date(timestamp);
   return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 }
+
 //ACTIONS
 const actions = {
   async fetchSensors({ commit }) {
@@ -106,7 +113,7 @@ const actions = {
       console.error("Unable to fetch sensors from API:", error);
     }
   },
-  async addSensor(data) {
+  async addSensor({ commit }, data) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
@@ -131,7 +138,7 @@ const actions = {
       console.error("Unable to send sensor to API:", error);
     }
   },
-  refreshSensors() {
+  refreshSensors({ commit, dispatch }) {
     commit("resetSensors");
     dispatch("fetchSensors");
   },

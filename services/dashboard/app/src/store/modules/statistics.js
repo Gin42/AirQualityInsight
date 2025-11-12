@@ -1,45 +1,35 @@
+import { mapGetters } from "vuex";
+
 const state = {
-  columns: [
-    { key: "measurement", label: "Measurement" },
-    { key: "mean", label: "Mean", center: true },
-    { key: "median", label: "Median", center: true },
-    { key: "min", label: "Min", center: true },
-    { key: "max", label: "Max", center: true },
-    { key: "range", label: "Range", center: true },
-    { key: "quality", label: "Quality", center: true, html: true },
-  ],
   data: {},
 };
-const getters = {};
-const mutations = {
-  updateStats(state) {
-    let data = store.allMeasurements(state);
-    for (const measurementType of Object.keys(data)) {
-      let measurement = data[measurementType].data;
-      measurement.unshift(message[measurementType]);
-      if (measurement.length > this.maxMessages)
-        measurement = measurement.slice(0, this.maxMessages);
 
-      const stats = this.calculateStats(measurement);
-      const intensity = this.getIntensity(stats.mean, measurementType);
-      this.statsMeasurement.data[measurementType].intensity = intensity;
-      this.statsMeasurement.data[measurementType].mean = parseFloat(
-        stats.mean
-      ).toFixed(2);
-      this.statsMeasurement.data[measurementType].median = parseFloat(
-        stats.median
-      ).toFixed(2);
-      this.statsMeasurement.data[measurementType].min = parseFloat(
-        stats.min
-      ).toFixed(2);
-      this.statsMeasurement.data[measurementType].max = parseFloat(
-        stats.max
-      ).toFixed(2);
-      this.statsMeasurement.data[measurementType].range = parseFloat(
-        stats.range
-      ).toFixed(2);
-      this.statsMeasurement.data[measurementType].quality =
-        this.getIntensityLabel(intensity);
+const getters = {
+  allMeasurementsTypes: (state, getters, rootState) => {
+    return rootState.data.getMeasurementsTypes;
+  },
+};
+
+const mutations = {
+  updateStats(state, message, rootState) {
+    let types = state.allMeasurementsTypes;
+    for (const measurementType of Object.keys(types)) {
+      let measurement = types[measurementType].data;
+      measurement.unshift(message[measurementType]);
+      if (measurement.length > rootState.maxMessages) {
+        measurement = measurement.slice(0, rootState.maxMessages);
+      }
+      const stats = calculateStats(measurement);
+      const intensity = getIntensity(stats.mean, measurementType);
+      state.data[measurementType] = {
+        intensity,
+        mean: parseFloat(stats.mean).toFixed(2),
+        median: parseFloat(stats.median).toFixed(2),
+        min: parseFloat(stats.min).toFixed(2),
+        max: parseFloat(stats.max).toFixed(2),
+        range: parseFloat(stats.range).toFixed(2),
+        quality: getIntensityLabel(intensity),
+      };
     }
   },
 };
@@ -56,4 +46,52 @@ function calculateStats(values) {
     range: Math.max(...values) - Math.min(...values),
   };
 }
+function getIntensity(concentration, pollutant) {
+  let measurements = state.allMeasurementsTypes;
+  const threshold = measurements[pollutant].thresholds;
+  if (!threshold) throw new Error(`Unknown pollutant: ${pollutant}`);
+
+  if (Array.isArray(threshold.good)) {
+    const [minGood, maxGood] = threshold.good;
+    const [minFair, maxFair] = threshold.fair;
+    const [minModerate, maxModerate] = threshold.moderate;
+    const [minPoor, maxPoor] = threshold.poor;
+    const [minVeryPoor, maxVeryPoor] = threshold.poor;
+
+    if (minGood <= concentration && maxGood >= concentration)
+      return this.thresholds.good;
+    if (minFair <= concentration && maxFair >= concentration)
+      return this.thresholds.fair;
+    if (minModerate <= concentration && maxModerate >= concentration)
+      return this.thresholds.moderate;
+    if (minPoor <= concentration && maxPoor >= concentration)
+      return this.thresholds.poor;
+    if (minVeryPoor <= concentration && maxVeryPoor >= concentration)
+      return this.thresholds.very_poor;
+    return this.thresholds.extremely_poor;
+  }
+
+  if (concentration <= threshold.good) return this.thresholds.good;
+  if (concentration <= threshold.fair) return this.thresholds.fair;
+  if (concentration <= threshold.moderate) return this.thresholds.moderate;
+  if (concentration <= threshold.poor) return this.thresholds.poor;
+  if (concentration <= threshold.very_poor) return this.thresholds.very_poor;
+  return this.thresholds.extremely_poor;
+}
+function getIntensityLabel(intensity) {
+  return `
+        <div class="intensity-label">
+          <i class="threshold-intensity" style="background-color: ${intensity.color}"></i>
+          <span>${intensity.label}</span>
+        </div>
+      `;
+}
+
 const actions = {};
+
+export default {
+  state,
+  getters,
+  mutations,
+  actions,
+};
