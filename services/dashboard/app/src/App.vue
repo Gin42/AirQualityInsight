@@ -1,22 +1,63 @@
 <!-- App.vue -->
 <script>
-import io from "socket.io-client";
-
-import MapComponent from "./assets/components/MapComponent.vue";
+import { mapState, mapActions, mapGetters } from "vuex";
 import TableComponent from "./assets/components/TableComponent.vue";
-import LogComponent from "./assets/components/LogComponent.vue";
-import FormComponent from "./assets/components/FormComponent.vue";
+import tableData from "./assets/data/tableData.json";
 
 export default {
   name: "App",
+  computed: {
+    ...mapState({
+      center: (state) => state.center,
+    }),
+    ...mapGetters("data", ["getMeasurementsTypes"]),
+  },
   components: {
-    MapComponent,
     TableComponent,
-    LogComponent,
-    FormComponent,
   },
   data() {
     return {
+      infoMeasurement: tableData.infoTable,
+    };
+  },
+  methods: {
+    ...mapActions("data", ["initializeData"]),
+    createInfoIcon(title) {
+      return `<i class="fas fa-info-circle" title="${title}"></i>`;
+    },
+  },
+  mounted() {},
+  created() {
+    this.initializeData();
+
+    const explainThreshold = (threshold, extremely_poor = false) => {
+      if (Array.isArray(threshold) && extremely_poor) return threshold;
+      if (Array.isArray(threshold))
+        return `&ge; ${threshold[0]}, &le; ${threshold[1]}`;
+      if (extremely_poor) return `&gt; ${threshold}`;
+      return `&le; ${threshold}`;
+    };
+
+    for (const [key, data] of Object.entries(this.getMeasurementsTypes)) {
+      this.infoMeasurement.data.push({
+        measurement: data.label,
+        measurementUnit: data.info.measurementUnit,
+        min: data.info.min,
+        max: data.info.max,
+        thresholdGood: explainThreshold(data.thresholds.good),
+        thresholdFair: explainThreshold(data.thresholds.fair),
+        thresholdModerate: explainThreshold(data.thresholds.moderate),
+        thresholdPoor: explainThreshold(data.thresholds.poor),
+        thresholdVeryPoor: explainThreshold(data.thresholds.very_poor),
+        thresholdExtremelyPoor: explainThreshold(
+          data.thresholds.extremely_poor,
+          true
+        ),
+        info: this.createInfoIcon(data.info.description),
+      });
+    }
+  } /*
+    /*return {
       socket: null,
       maxMessages: 50,
       center: { lng: "11.3426000", lat: "44.4939000", name: "Piazza Maggiore" }, // Piazza Maggiore, Bologna
@@ -440,7 +481,7 @@ export default {
     if (this.timeUpdateInterval) clearInterval(this.timeUpdateInterval);
   },
   methods: {
-    connectSocket() {
+    /*connectSocket() {
       const serverUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       this.socket = io(serverUrl);
 
@@ -725,12 +766,12 @@ export default {
     },
     createInfoIcon(title) {
       return `<i class="fas fa-info-circle" title="${title}"></i>`;
-    },
-    /**
-     * Function to calculate the distance between two geographic points (Haversine formula)
-     * @see https://en.wikipedia.org/wiki/Haversine_formula
-     */
-    calculateDistance(lat1, lon1, lat2, lon2) {
+    },*/,
+  /**
+   * Function to calculate the distance between two geographic points (Haversine formula)
+   * @see https://en.wikipedia.org/wiki/Haversine_formula
+   */
+  /*calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371000; // Earth radius in meters
       const dLat = ((lat2 - lat1) * Math.PI) / 180;
       const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -778,7 +819,7 @@ export default {
         console.error("Unable to send sensor to API:", error);
       }
     },
-  },
+  },*/
 };
 </script>
 
@@ -807,9 +848,8 @@ export default {
             </span>
             <span>
               The center of the map is located in
-              <i>“{{ this.center.name }}”</i> [ lat:
-              <code>{{ this.center.lat }}</code
-              >, lng: <code>{{ this.center.lng }}</code>
+              <i>“{{ center.name }}”</i> [ lat: <code>{{ center.lat }}</code
+              >, lng: <code>{{ center.lng }}</code>
               ].
             </span>
             <span>
@@ -823,6 +863,7 @@ export default {
             >
           </p>
         </div>
+
         <div class="measurement-ranges">
           <h2>Measurement ranges</h2>
           <TableComponent
@@ -840,6 +881,7 @@ export default {
             description of the measure is displayed.
           </p>
         </div>
+        <!--
         <div class="how-to-use-it">
           <h2>How to use it</h2>
           <ul>
@@ -883,7 +925,7 @@ export default {
           </ul>
         </div>
       </div>
-
+     
       <div class="dashboard-component map-component-container">
         <div class="component-header">
           <h2>Map</h2>
@@ -975,7 +1017,6 @@ export default {
           </div>
         </div>
       </div>
-
       <div class="dashboard-component measurements-component-container">
         <div class="component-header">
           <h2>Last {{ this.maxMessages }} measurements received</h2>
@@ -1042,13 +1083,13 @@ export default {
           :data="Array.from(sensors.data.values())"
           :columns="sensors.columns"
           @row-click="handleSensorRowClick"
-        />
+        />-->
       </div>
     </div>
   </div>
 </template>
 
-<style src="./assets/style.scss"></style>
+<!--<style src="./assets/style.scss"></style>
 <style lang="scss">
 body {
   font-family: "Arial", sans-serif;
@@ -1265,3 +1306,4 @@ tbody tr:nth-child(even) {
   width: 200px;
 }
 </style>
+-->

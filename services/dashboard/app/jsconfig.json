@@ -4,5 +4,6 @@
       "@/*": ["./src/*"]
     }
   },
+  "include": ["src/**/*", "vuex.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

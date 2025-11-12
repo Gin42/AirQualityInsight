@@ -1,4 +1,4 @@
-async function fetchFromApi(url) {
+export async function fetchFromApi(url) {
   const jsonResponse = await fetch(url);
 
   if (!jsonResponse.ok) {

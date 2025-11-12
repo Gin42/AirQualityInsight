@@ -24,3 +24,9 @@ function calculateEAQI(pollutants) {
 
   return dominantPollutant;
 }
+
+export default {
+  state,
+  actions,
+  mutations,
+};

@@ -1,5 +1,4 @@
-import Vue from "vue";
-import Vuex from "vuex";
+import { createStore } from "vuex";
 import sensors from "./modules/sensors";
 import measurements from "./modules/measurements";
 import stats from "./modules/statistics";
@@ -7,9 +6,7 @@ import eaqi from "./modules/eaqi";
 import data from "./modules/data";
 import table from "./modules/table";
 
-Vue.useAttrs(Vuex);
-
-export default new Vuex.Store({
+export const store = createStore({
   state: {
     maxMessages: 50,
     minMeasurements: 50,

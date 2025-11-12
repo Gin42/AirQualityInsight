@@ -27,7 +27,8 @@
         "html": true
       },
       { "key": "info", "label": "Info", "center": true, "html": true }
-    ]
+    ],
+    "data": []
   },
   "measurementsTable": {
     "columns": [
