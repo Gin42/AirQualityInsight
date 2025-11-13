@@ -17,6 +17,12 @@ export const store = createStore({
       name: "Piazza Maggiore",
     },
   },
+  mutations: {
+    setCenter(state, lng, lat) {
+      state.center.lng = lng;
+      state.center.lat = lat;
+    },
+  },
   modules: {
     sensors,
     measurements,

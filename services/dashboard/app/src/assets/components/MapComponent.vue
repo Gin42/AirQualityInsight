@@ -1,13 +1,13 @@
 <!-- components/MapComponent.vue -->
-<script src="./logic/MapComponentLogic.js"></script>
+<script src="./logic/MapLogic.js"></script>
 <template>
   <div class="map">
     <div class="map-container">
-      <div v-if="loading" class="loading-overlay">
+      <!--<div v-if="loading" class="loading-overlay">
         <div class="spinner"></div>
-      </div>
+      </div>-->
       <div id="map"></div>
-      <div
+      <!---<div
         v-if="gridType === 'gray'"
         class="map-grid-overlay map-grid-overlay--gray"
       ></div>
@@ -18,10 +18,11 @@
       <div
         v-if="gridType === 'crosshair'"
         class="map-grid-overlay map-grid-overlay--crosshair"
-      ></div>
+      ></div>-->
       <div class="center-marker">
         <div class="icon"></div>
       </div>
+      <!--
       <div
         :class="['controls', { pinned: isPinned }]"
         :aria-expanded="isHovered"
@@ -30,7 +31,7 @@
       >
         <div class="tools">
           <h2>Controls</h2>
-          <!--Il dover cliccare il pushpin per fissare il pannello delle impostazioni non è chiara come cosa-->
+          Il dover cliccare il pushpin per fissare il pannello delle impostazioni non è chiara come cosa
           <div
             class="pushpin"
             @click="isPinned = !isPinned"
@@ -88,7 +89,7 @@
             :max="this.maxMeasurements"
             step="10"
           />
-          <!--Da trovare un'altra soluzione per questo suggerimento-->
+          Da trovare un'altra soluzione per questo suggerimento
           <span
             class="help"
             title="The higher the limit, the more accurate the measurements."
@@ -123,12 +124,25 @@
           </select>
         </div>
       </div>
-    </div>
+    --></div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.map {
+.map-container {
+  background-color: chocolate;
+  height: 100vh; /* Set to full viewport height */
+  width: 100%;
+}
+#map {
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/*.map {
   height: 100%;
   background-color: #f1e3f3;
   border-radius: 6px;
@@ -483,7 +497,7 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  /* Semi-transparent background */
+  /* Semi-transparent background 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -577,5 +591,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
+}*/
 </style>

@@ -1,11 +1,17 @@
 <!-- App.vue -->
 <script>
-import { mapState, mapActions, mapGetters } from "vuex";
-import TableComponent from "./assets/components/TableComponent.vue";
-import tableData from "./assets/data/tableData.json";
+import { mapGetters } from "vuex";
+import { mapActions } from "vuex";
 
 export default {
   name: "App",
+  methods: {
+    ...mapActions("data", ["initializeData"]),
+  },
+  created() {
+    this.initializeData();
+  },
+  mounted() {},
 }; /*
     /*return {
       socket: null,
@@ -777,7 +783,7 @@ export default {
     <h1>AirQualityInsight - Dashboard</h1>
     <p>Current route path: {{ $route.fullPath }}</p>
     <nav>
-      <RouterLink to="/"> Go to Home </RouterLink>
+      <RouterLink to="/map"> Go to map </RouterLink>
     </nav>
     <div class="dashboard">
       <RouterView></RouterView>

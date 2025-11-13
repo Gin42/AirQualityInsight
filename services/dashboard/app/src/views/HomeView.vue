@@ -25,10 +25,7 @@ export default {
       return `<i class="fas fa-info-circle" title="${title}"></i>`;
     },
   },
-  mounted() {},
   created() {
-    this.initializeData();
-
     const explainThreshold = (threshold, extremely_poor = false) => {
       if (Array.isArray(threshold) && extremely_poor) return threshold;
       if (Array.isArray(threshold))

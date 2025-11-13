@@ -1,4 +1,5 @@
 import jsonData from "../../assets/data/setupData.json";
+
 const state = () => ({
   threshold: {},
   measurementsTypes: [],

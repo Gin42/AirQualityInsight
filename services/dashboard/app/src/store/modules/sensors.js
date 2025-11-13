@@ -6,6 +6,7 @@ status,
 ip
 }]*/
 import { fetchFromApi } from "@/services/api";
+
 const state = () => ({
   sensors: new Map(),
   columns: [
@@ -55,22 +56,22 @@ const getters = {
 
 //MUTATIONS
 const mutations = {
-  setSensorData(state, sensors) {
+  setSensorsData(state, { sensorsData, measurementsTypes }) {
     const sensorMap = new Map(
-      sensors.map((sensor) => [
+      sensorsData.map((sensor) => [
         sensor.sensor_id,
         {
           id: sensor.sensor_id,
           name: sensor.name,
           lat: sensor.location.coordinates[1], // latitude
           lng: sensor.location.coordinates[0], // longitude
-          //desc: sensor.sensor_id,
+          desc: sensor.sensor_id,
           active: sensor.active,
-          //status: sensor.active ? "Active" : "Inactive",
+          status: sensor.active ? "Active" : "Inactive",
           ip: sensor.ip,
           last_seen: sensor.last_seen,
           measurements: Object.fromEntries(
-            Object.keys(this.measurements).map((type) => [
+            Object.keys(measurementsTypes).map((type) => [
               type,
               { stats: null, data: [] },
             ])
@@ -101,14 +102,14 @@ function formatTimestamp(timestamp) {
 
 //ACTIONS
 const actions = {
-  async fetchSensors({ commit }) {
+  async fetchSensors({ commit, state, rootGetters }) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const sensorsData = await fetchFromApi(`${apiUrl}/api/sensors`);
-      commit("setSensorsData", sensorsData);
-
-      //this.$emit("sensors-loaded", sensors);
-      console.log(`Loaded ${sensorsData.size} sensors from API`);
+      const measurementsTypes = rootGetters["data/getMeasurementsTypes"];
+      commit("setSensorsData", { sensorsData, measurementsTypes });
+      console.log(`Loaded ${state.sensors.size} sensors from API`);
+      return state.sensors;
     } catch (error) {
       console.error("Unable to fetch sensors from API:", error);
     }
@@ -145,6 +146,7 @@ const actions = {
 };
 
 export default {
+  namespaced: true,
   state,
   getters,
   actions,

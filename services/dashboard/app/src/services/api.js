@@ -6,8 +6,9 @@ export async function fetchFromApi(url) {
   }
 
   const response = await jsonResponse.json();
-  if (!response) {
-    throw new Error("API request failed");
+
+  if (!response || Object.keys(response).length === 0) {
+    throw new Error("API returned an empty response");
   }
 
   return response;
