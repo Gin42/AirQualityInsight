@@ -5,7 +5,7 @@ const state = {
 };
 
 const getters = {
-  allMeasurementsTypes: (state, getters, rootState) => {
+  allMeasurementsTypes: (rootState) => {
     return rootState.data.getMeasurementsTypes;
   },
 };
@@ -34,31 +34,9 @@ const mutations = {
   },
 };
 
-function calculateStats(values) {
-  const sorted = [...values].sort((a, b) => a - b);
-  const mean = values.reduce((a, b) => a + b) / values.length;
-
-  return {
-    mean: mean.toFixed(2),
-    median: sorted[Math.floor(sorted.length / 2)],
-    min: Math.min(...values),
-    max: Math.max(...values),
-    range: Math.max(...values) - Math.min(...values),
-  };
-}
-
-function getIntensityLabel(intensity) {
-  return `
-        <div class="intensity-label">
-          <i class="threshold-intensity" style="background-color: ${intensity.color}"></i>
-          <span>${intensity.label}</span>
-        </div>
-      `;
-}
-
 const actions = {
-  getIntensity(state, { concentration, pollutant }) {
-    let measurements = state.allMeasurementsTypes;
+  getIntensity({ getters }, { concentration, pollutant }) {
+    let measurements = getters.allMeasurementsTypes;
     const threshold = measurements[pollutant].thresholds;
     if (!threshold) throw new Error(`Unknown pollutant: ${pollutant}`);
 
@@ -90,6 +68,28 @@ const actions = {
     return this.thresholds.extremely_poor;
   },
 };
+
+function calculateStats(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mean = values.reduce((a, b) => a + b) / values.length;
+
+  return {
+    mean: mean.toFixed(2),
+    median: sorted[Math.floor(sorted.length / 2)],
+    min: Math.min(...values),
+    max: Math.max(...values),
+    range: Math.max(...values) - Math.min(...values),
+  };
+}
+
+function getIntensityLabel(intensity) {
+  return `
+        <div class="intensity-label">
+          <i class="threshold-intensity" style="background-color: ${intensity.color}"></i>
+          <span>${intensity.label}</span>
+        </div>
+      `;
+}
 
 export default {
   namespaced: true,

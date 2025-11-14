@@ -1,33 +1,31 @@
-import L, { Handler } from "leaflet";
+import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import { ref, watch } from "vue";
 import { mapState, mapMutations } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
-import { mapActions } from "vuex";
-import { mapGetters } from "vuex";
-import measurements from "@/store/modules/measurements";
+import { mapActions, mapGetters } from "vuex";
+import { fetchFromApi } from "@/services/api";
 
 export default {
   name: "MapComponent",
   computed: {
     ...mapState({
       center: (state) => state.center,
+      newMeasurement: (state) => state.measurements.measurements,
     }),
     ...mapGetters("measurements", ["lastMeasurement"]),
   },
-  /*watch: {
-    lastMeasurement: {
+  watch: {
+    newMeasurement: {
       immediate: true,
-      handler(measurement) {
-        if (measurement.length) {
-          const lastMeasurement = lastMeasurement;
-          this.registerNewMeasurement(lastMeasurement);
-        }
+      handler() {
+        this.registerNewMeasurement(this.lastMeasurement);
       },
+      deep: true,
     },
-  },*/
+  },
   props: {
     measurements: {
       type: Object,
@@ -199,7 +197,7 @@ export default {
         maxZoom: 17,
         gradient,
       }).addTo(this.map);
-      /*
+
       //se clicco sulla mappa posso aggiungere un pin nell coordinate selezionate
       this.map.on("click", async (e) => {
         const longitude = e.latlng.lng;
@@ -207,12 +205,30 @@ export default {
         let address = await this.fetchAddressFromAPI(latitude, longitude);
 
         console.log("address: " + address);
-        this.$emit("open-form", {
+        /*this.$emit("open-form", {
           longitude: longitude,
           latitude: latitude,
           address: address,
-        });
-      });*/
+        });*/
+      });
+    },
+
+    async fetchAddressFromAPI(lat, lng) {
+      try {
+        const params = "format=json";
+        const response = await fetchFromApi(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&${params}`
+        );
+
+        const { road, house_number, city, country } = response.address;
+
+        const addressParts = [road, city, house_number, country].filter(
+          Boolean
+        );
+        return addressParts.join(", ");
+      } catch (error) {
+        console.error("Unable to fetch sensors from API:", error);
+      }
     },
 
     toggleLayer(layer, hideOrEvent = false) {
@@ -351,7 +367,7 @@ export default {
       this.layers[layer] = [];
     },
 
-    /*registerNewMeasurement(data) {
+    registerNewMeasurement(data) {
       if (!this.data.sensorLocations?.size) return;
 
       const sensor = this.data.sensorLocations.get(data.name);
@@ -370,13 +386,14 @@ export default {
         if (
           this.measurements[measurementType].heatLatLng.length >
           this.maxHeatLatLng
-        )
+        ) {
           this.measurements[measurementType].heatLatLng = this.measurements[
             measurementType
           ].heatLatLng.slice(0, this.maxHeatLatLng);
+        }
       }
       this.updateHeatmap();
-    },*/
+    },
 
     highlightSensor(sensor) {
       sensor.marker?.setOpacity(0.75);
@@ -510,9 +527,27 @@ export default {
       );
     },
 
+    centerOnLocation(lat, lng, zoom = 16) {
+      if (!this.map) throw "Map not initialized";
+
+      this.map.flyTo([lat, lng], zoom, {
+        animate: true,
+        duration: 1.5, // sec
+      });
+    },
+
+    clearMeasurements() {
+      const count =
+        this.measurements[this.selectedMeasurement].heatLatLng.length;
+      for (const measurementType of Object.keys(this.measurements))
+        this.measurements[measurementType].heatLatLng = [];
+      this.updateHeatmap();
+      this.$emit("measurements-cleared", count);
+    },
+
     async refreshSensorData() {
       this.data.sensorLocations = null;
-      const data = await this.fetchSensorData();
+      const data = await this.fetchSensors();
       if (!data) throw "Data not provided";
       this.data.sensorLocations = data;
       this.drawLayer("sensorLocations");

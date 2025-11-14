@@ -145,8 +145,6 @@ const actions = {
   },
   updateLastMeasurement({ commit, getters }, id) {
     commit("updateSensor", id);
-    console.log("Dw, sono un sensore");
-    console.log(getters.getSensor(id));
   },
 };
 

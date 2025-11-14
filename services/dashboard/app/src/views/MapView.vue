@@ -27,7 +27,7 @@ export default {
   created() {},
   methods: {
     ...mapActions("sensors", ["fetchSensors"]),
-    /*...mapActions("statistics", ["getIntensity"]),*/
+    ...mapActions("statistics", ["getIntensity"]),
 
     refreshSensors() {
       this.$refs.mapComponent?.refreshSensorData();
@@ -173,6 +173,7 @@ export default {
       :min-measurements="minMeasurements"
       :max-measurements="maxMeasurements"
       :thresholds="getThresholds"
+      :get-intensity="getIntensity"
     /><!--
     <MapComponent
       ref="mapComponent"
