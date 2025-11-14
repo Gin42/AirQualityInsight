@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import store from "../store/index";
+/*import store from "../store/index";*/
 
 const serverUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
 const socket = io(serverUrl);
@@ -31,8 +31,7 @@ socket.on("kafka-message", (message) => {
     so2: parseFloat(message.so2).toFixed(2),
   };
 
-  console("look, a new message:\n");
-  console(formattedData);
+  console.log("look, a new message");
 
   /*store.dispatch("measurements/updateMeasurement", formattedData);
 
