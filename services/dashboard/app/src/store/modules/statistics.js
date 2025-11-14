@@ -11,7 +11,7 @@ const getters = {
 };
 
 const mutations = {
-  updateStats(state, message, rootState) {
+  updateStats(state, { message, rootState }) {
     let types = state.allMeasurementsTypes;
     for (const measurementType of Object.keys(types)) {
       let measurement = types[measurementType].data;
@@ -46,38 +46,7 @@ function calculateStats(values) {
     range: Math.max(...values) - Math.min(...values),
   };
 }
-function getIntensity(concentration, pollutant) {
-  let measurements = state.allMeasurementsTypes;
-  const threshold = measurements[pollutant].thresholds;
-  if (!threshold) throw new Error(`Unknown pollutant: ${pollutant}`);
 
-  if (Array.isArray(threshold.good)) {
-    const [minGood, maxGood] = threshold.good;
-    const [minFair, maxFair] = threshold.fair;
-    const [minModerate, maxModerate] = threshold.moderate;
-    const [minPoor, maxPoor] = threshold.poor;
-    const [minVeryPoor, maxVeryPoor] = threshold.poor;
-
-    if (minGood <= concentration && maxGood >= concentration)
-      return this.thresholds.good;
-    if (minFair <= concentration && maxFair >= concentration)
-      return this.thresholds.fair;
-    if (minModerate <= concentration && maxModerate >= concentration)
-      return this.thresholds.moderate;
-    if (minPoor <= concentration && maxPoor >= concentration)
-      return this.thresholds.poor;
-    if (minVeryPoor <= concentration && maxVeryPoor >= concentration)
-      return this.thresholds.very_poor;
-    return this.thresholds.extremely_poor;
-  }
-
-  if (concentration <= threshold.good) return this.thresholds.good;
-  if (concentration <= threshold.fair) return this.thresholds.fair;
-  if (concentration <= threshold.moderate) return this.thresholds.moderate;
-  if (concentration <= threshold.poor) return this.thresholds.poor;
-  if (concentration <= threshold.very_poor) return this.thresholds.very_poor;
-  return this.thresholds.extremely_poor;
-}
 function getIntensityLabel(intensity) {
   return `
         <div class="intensity-label">
@@ -87,9 +56,43 @@ function getIntensityLabel(intensity) {
       `;
 }
 
-const actions = {};
+const actions = {
+  getIntensity(state, { concentration, pollutant }) {
+    let measurements = state.allMeasurementsTypes;
+    const threshold = measurements[pollutant].thresholds;
+    if (!threshold) throw new Error(`Unknown pollutant: ${pollutant}`);
+
+    if (Array.isArray(threshold.good)) {
+      const [minGood, maxGood] = threshold.good;
+      const [minFair, maxFair] = threshold.fair;
+      const [minModerate, maxModerate] = threshold.moderate;
+      const [minPoor, maxPoor] = threshold.poor;
+      const [minVeryPoor, maxVeryPoor] = threshold.poor;
+
+      if (minGood <= concentration && maxGood >= concentration)
+        return this.thresholds.good;
+      if (minFair <= concentration && maxFair >= concentration)
+        return this.thresholds.fair;
+      if (minModerate <= concentration && maxModerate >= concentration)
+        return this.thresholds.moderate;
+      if (minPoor <= concentration && maxPoor >= concentration)
+        return this.thresholds.poor;
+      if (minVeryPoor <= concentration && maxVeryPoor >= concentration)
+        return this.thresholds.very_poor;
+      return this.thresholds.extremely_poor;
+    }
+
+    if (concentration <= threshold.good) return this.thresholds.good;
+    if (concentration <= threshold.fair) return this.thresholds.fair;
+    if (concentration <= threshold.moderate) return this.thresholds.moderate;
+    if (concentration <= threshold.poor) return this.thresholds.poor;
+    if (concentration <= threshold.very_poor) return this.thresholds.very_poor;
+    return this.thresholds.extremely_poor;
+  },
+};
 
 export default {
+  namespaced: true,
   state,
   getters,
   mutations,

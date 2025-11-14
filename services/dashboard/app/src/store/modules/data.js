@@ -1,18 +1,18 @@
 import jsonData from "../../assets/data/setupData.json";
 
 const state = () => ({
-  threshold: {},
+  thresholds: [],
   measurementsTypes: [],
 });
 
 const getters = {
-  getThreshold: (state) => state.threshold,
+  getThresholds: (state) => state.thresholds,
   getMeasurementsTypes: (state) => state.measurementsTypes,
 };
 
 const mutations = {
-  setThreshold(state, threshold) {
-    state.threshold = threshold;
+  setThresholds(state, thresholds) {
+    state.thresholds = thresholds;
   },
   setMeasurements(state, measurementsTypes) {
     state.measurementsTypes = measurementsTypes;
@@ -20,8 +20,9 @@ const mutations = {
 };
 
 const actions = {
-  initializeData({ commit }) {
-    commit("setThreshold", jsonData.threshold);
+  initializeData({ commit, getters }) {
+    commit("setThresholds", jsonData.thresholds);
+
     commit("setMeasurements", jsonData.measurementsTypes);
   },
 };

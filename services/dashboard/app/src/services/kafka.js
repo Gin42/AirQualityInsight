@@ -31,11 +31,14 @@ socket.on("kafka-message", (message) => {
     so2: parseFloat(message.so2).toFixed(2),
   };
 
-  store.dispatch("measurements/updateMeasurement", formattedData);
+  console("look, a new message:\n");
+  console(formattedData);
+
+  /*store.dispatch("measurements/updateMeasurement", formattedData);
 
   store.dispatch("sensors/updateLastMeasurement", formattedData.sensor_id);
 
   store.dispatch("statistics/updateStats", message);
 
-  store.dispatch("eaqi/updateEAQI");
+  store.dispatch("eaqi/updateEAQI");*/
 });

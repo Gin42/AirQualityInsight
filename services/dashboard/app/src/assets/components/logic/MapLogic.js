@@ -1,11 +1,13 @@
-import L from "leaflet";
+import L, { Handler } from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { mapState, mapMutations } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
 import { mapActions } from "vuex";
+import { mapGetters } from "vuex";
+import measurements from "@/store/modules/measurements";
 
 export default {
   name: "MapComponent",
@@ -13,12 +15,61 @@ export default {
     ...mapState({
       center: (state) => state.center,
     }),
+    ...mapGetters("measurements", ["lastMeasurement"]),
+  },
+  /*watch: {
+    lastMeasurement: {
+      immediate: true,
+      handler(measurement) {
+        if (measurement.length) {
+          const lastMeasurement = lastMeasurement;
+          this.registerNewMeasurement(lastMeasurement);
+        }
+      },
+    },
+  },*/
+  props: {
+    measurements: {
+      type: Object,
+      default: () => ({
+        voc: [],
+        co2: [],
+        pm25: [],
+        pm10: [],
+        no2: [],
+        o3: [],
+        so2: [],
+        temperature: [],
+        humidity: [],
+        pressure: [],
+      }),
+    },
+    minMeasurements: {
+      type: Number,
+      required: true,
+    },
+    maxMeasurements: {
+      type: Number,
+      required: true,
+    },
+    getIntensity: {
+      type: Function,
+      required: true,
+    },
+    thresholds: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
       zoom: ref(13),
       map: null,
+      heatLayer: null,
       loading: ref(false),
+      selectedMeasurement: "pm25",
+      maxHeatLatLng: 250,
+      error: false,
       show: {
         sensorLocations: true,
         postalCodeBoundaries: false,
@@ -40,6 +91,9 @@ export default {
         zones: [],
         ztl: [],
       },
+      gridType: "none",
+      isHovered: ref(false),
+      isPinned: ref(false),
     };
   },
   methods: {
@@ -91,11 +145,11 @@ export default {
       // Update map's coordinates on move
       this.map.on("moveend", () => {
         updateCurrentCoordinates();
-        this.setCenter(currentLng, currentLat);
+        this.setCenter({ currentLng, currentLat });
         this.zoom = this.map.getZoom();
       });
 
-      /*const coordinatesCopyBtn = document.getElementById(
+      const coordinatesCopyBtn = document.getElementById(
         "coordinates-copy-btn"
       );
       if (!coordinatesCopyBtn) return;
@@ -122,7 +176,7 @@ export default {
             console.error("Error copying coordinates: ", err);
             alert("Could not copy coordinates. Try doing it manually.");
           });
-      });*/
+      });
 
       // Leaflet caches on the parent container may result in a misaligned center
       this.map.whenReady(() => {
@@ -134,9 +188,10 @@ export default {
         this.map.invalidateSize();
       });
 
-      /*const gradient = {};
-      for (const threshold of Object.values(this.thresholds))
+      const gradient = {};
+      for (const threshold of Object.values(this.thresholds)) {
         gradient[threshold.value] = threshold.color;
+      }
 
       this.heatLayer = L.heatLayer([], {
         radius: 30,
@@ -144,7 +199,7 @@ export default {
         maxZoom: 17,
         gradient,
       }).addTo(this.map);
-
+      /*
       //se clicco sulla mappa posso aggiungere un pin nell coordinate selezionate
       this.map.on("click", async (e) => {
         const longitude = e.latlng.lng;
@@ -158,6 +213,32 @@ export default {
           address: address,
         });
       });*/
+    },
+
+    toggleLayer(layer, hideOrEvent = false) {
+      const hide = hideOrEvent instanceof Event ? false : hideOrEvent;
+
+      this.show[layer] = !this.show[layer];
+      if (hide) this.show[layer] = false;
+
+      const exclusiveGroups = {
+        postalCodeBoundaries: ["neighborhoods", "zones", "ztl"],
+        neighborhoods: ["postalCodeBoundaries", "zones", "ztl"],
+        zones: ["postalCodeBoundaries", "neighborhoods", "ztl"],
+        ztl: [
+          "neighborhoods",
+          "zones",
+          "postalCodeBoundaries",
+          "neighborhoods",
+        ],
+      };
+
+      if (this.show[layer]) {
+        this.drawLayer(layer);
+        if (exclusiveGroups[layer])
+          for (const otherLayer of exclusiveGroups[layer])
+            this.toggleLayer(otherLayer, true);
+      } else this.clearLayer(layer);
     },
 
     async drawLayer(layer) {
@@ -270,6 +351,51 @@ export default {
       this.layers[layer] = [];
     },
 
+    /*registerNewMeasurement(data) {
+      if (!this.data.sensorLocations?.size) return;
+
+      const sensor = this.data.sensorLocations.get(data.name);
+      if (!sensor) return;
+
+      this.highlightSensor(sensor);
+
+      for (const measurementType of Object.keys(this.measurements)) {
+        const intensity = this.getIntensity(
+          data[measurementType],
+          measurementType
+        );
+
+        const latLng = [sensor.lat, sensor.lng, intensity.value];
+        this.measurements[measurementType].heatLatLng.unshift(latLng);
+        if (
+          this.measurements[measurementType].heatLatLng.length >
+          this.maxHeatLatLng
+        )
+          this.measurements[measurementType].heatLatLng = this.measurements[
+            measurementType
+          ].heatLatLng.slice(0, this.maxHeatLatLng);
+      }
+      this.updateHeatmap();
+    },*/
+
+    highlightSensor(sensor) {
+      sensor.marker?.setOpacity(0.75);
+      setTimeout(() => {
+        sensor.marker?.setOpacity(1);
+      }, 250);
+    },
+
+    getDisplayName(key) {
+      const displayNames = {
+        sensorLocations: "Sensors",
+        postalCodeBoundaries: "CAPs",
+        neighborhoods: "Neighborhoods",
+        zones: "Zones",
+        ztl: "ZTL",
+      };
+      return displayNames[key] || key;
+    },
+
     getOrangeColorPalette() {
       return {
         veryLightPeachyOrange: "#ffc499",
@@ -293,6 +419,7 @@ export default {
         darkBrownishOrange: "#c25d00",
       };
     },
+
     getLayerConfig(layer, colors) {
       const configs = {
         // Postal Code Boundaries of the Municipality of Bologna
@@ -358,6 +485,37 @@ export default {
       };
 
       return configs[layer];
+    },
+
+    onGridChange() {
+      const mapContainer = document.querySelector(".map-container");
+      if (!mapContainer) return;
+      mapContainer.classList.remove(
+        "grid-simple",
+        "grid-dark",
+        "grid-fine",
+        "grid-coordinate",
+        "grid-crosshair",
+        "grid-dashed",
+        "grid-dots",
+        "grid-animated"
+      );
+      if (this.gridType !== "none")
+        mapContainer.classList.add(`grid-${this.gridType}`);
+    },
+
+    updateHeatmap() {
+      this.heatLayer.setLatLngs(
+        this.measurements[this.selectedMeasurement].heatLatLng
+      );
+    },
+
+    async refreshSensorData() {
+      this.data.sensorLocations = null;
+      const data = await this.fetchSensorData();
+      if (!data) throw "Data not provided";
+      this.data.sensorLocations = data;
+      this.drawLayer("sensorLocations");
     },
 
     async loadData(filename) {

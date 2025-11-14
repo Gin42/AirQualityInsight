@@ -18,9 +18,9 @@ export const store = createStore({
     },
   },
   mutations: {
-    setCenter(state, lng, lat) {
-      state.center.lng = lng;
-      state.center.lat = lat;
+    setCenter(state, { currentLng, currentLat }) {
+      state.center.lng = currentLng;
+      state.center.lat = currentLat;
     },
   },
   modules: {

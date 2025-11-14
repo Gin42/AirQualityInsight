@@ -20,7 +20,6 @@ export default {
     };
   },
   methods: {
-    ...mapActions("data", ["initializeData"]),
     createInfoIcon(title) {
       return `<i class="fas fa-info-circle" title="${title}"></i>`;
     },

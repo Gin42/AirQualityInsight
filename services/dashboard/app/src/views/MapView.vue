@@ -10,8 +10,7 @@ export default {
       minMeasurements: (state) => state.minMeasurements,
       maxMeasurements: (state) => state.maxMeasurements,
     }),
-    ...mapGetters("data", ["getMeasurementsTypes", "getThreshold"]),
-    ...mapActions("sensors", ["fetchSensors"]),
+    ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
   },
   data() {
     return {
@@ -25,13 +24,12 @@ export default {
       address: null,
     };
   },
-  created() {
-    /*this.fetchSensors().then(() => {
-      this.$emit("sensors-loaded", this.getSensors());
-    });*/
-  },
+  created() {},
   methods: {
-    /*refreshSensors() {
+    ...mapActions("sensors", ["fetchSensors"]),
+    /*...mapActions("statistics", ["getIntensity"]),*/
+
+    refreshSensors() {
       this.$refs.mapComponent?.refreshSensorData();
       this.addInfo("Refreshed sensors");
     },
@@ -39,7 +37,7 @@ export default {
       if (this.activeSensors) this.addInfo("Stopped sensors data reception");
       else this.addInfo("Started sensors data reception");
       this.activeSensors = !this.activeSensors;
-    },
+    } /*
     handleMarkerClick(marker) {
       if (!marker) return;
       this.centerMapOnSensor(marker);
@@ -98,7 +96,7 @@ export default {
       } catch (error) {
         console.error("Unable to send sensor to API:", error);
       }
-    },*/
+    },*/,
   },
 };
 </script>
@@ -169,7 +167,13 @@ export default {
         </button>
       </div>
     </div>
-    <MapComponent ref="mapComponent" /><!--
+    <MapComponent
+      ref="mapComponent"
+      :measurements="getMeasurementsTypes"
+      :min-measurements="minMeasurements"
+      :max-measurements="maxMeasurements"
+      :thresholds="getThresholds"
+    /><!--
     <MapComponent
       ref="mapComponent"
       :measurements="getMeasurementsTypes"

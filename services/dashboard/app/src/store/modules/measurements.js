@@ -13,6 +13,9 @@ const getters = {
   allMeasurements: (state) => {
     return state.measurements;
   },
+  lastMeasurement: (state) => {
+    return state.measurements[state.measurements.length - 1];
+  },
 };
 
 //MUTATIONS
@@ -23,16 +26,20 @@ const mutations = {
       state.measurements = state.measurements.slice(0, rootState.maxMessages);
     }
   },
+  setMeasurement(state, newMeasurement) {
+    state.measurements.push(newMeasurement);
+  },
 };
 
 //ACTIONS
 const actions = {
-  updateMeasurements({ commit }, measurement) {
-    commit("addMeasurement", measurement);
+  updateMeasurements({ commit }, data) {
+    commit("setMeasurement", data);
   },
 };
 
 export default {
+  namespaced: true,
   state,
   getters,
   actions,

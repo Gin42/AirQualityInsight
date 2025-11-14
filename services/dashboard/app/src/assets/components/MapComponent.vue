@@ -7,7 +7,7 @@
         <div class="spinner"></div>
       </div>-->
       <div id="map"></div>
-      <!---<div
+      <div
         v-if="gridType === 'gray'"
         class="map-grid-overlay map-grid-overlay--gray"
       ></div>
@@ -18,11 +18,11 @@
       <div
         v-if="gridType === 'crosshair'"
         class="map-grid-overlay map-grid-overlay--crosshair"
-      ></div>-->
+      ></div>
       <div class="center-marker">
         <div class="icon"></div>
       </div>
-      <!--
+
       <div
         :class="['controls', { pinned: isPinned }]"
         :aria-expanded="isHovered"
@@ -31,25 +31,27 @@
       >
         <div class="tools">
           <h2>Controls</h2>
-          Il dover cliccare il pushpin per fissare il pannello delle impostazioni non è chiara come cosa
+          <!--Il dover cliccare il pushpin per fissare il pannello delle impostazioni non è chiara come cosa-->
           <div
             class="pushpin"
             @click="isPinned = !isPinned"
             title="Pin / Unpin"
           ></div>
         </div>
+
         <pre>
           <span>Markers:</span>
           <span>{{ this.data.sensorLocations?.size }}</span>
         </pre>
+
         <hr />
         <pre>
           <span>Latitude:</span>
-          <span>{{ this.center.lat }}</span>
+          <span>{{ center.lat }}</span>
         </pre>
         <pre>
           <span>Longitude:</span>
-          <span>{{ this.center.lng }}</span>
+          <span>{{ center.lng }}</span>
         </pre>
         <pre>
           <span>Zoom:</span>
@@ -66,6 +68,7 @@
           {{ value ? "Hide" : "Show" }}
           {{ getDisplayName(key) }}
         </button>
+
         <hr />
         <div class="measurements-controls">
           <label><strong>Measurement:</strong></label>
@@ -79,6 +82,7 @@
             </option>
           </select>
         </div>
+
         <p>Limit of measurements:</p>
         <div class="measurements-controls">
           <input
@@ -89,19 +93,21 @@
             :max="this.maxMeasurements"
             step="10"
           />
-          Da trovare un'altra soluzione per questo suggerimento
+          <!--Da trovare un'altra soluzione per questo suggerimento-->
           <span
             class="help"
             title="The higher the limit, the more accurate the measurements."
             >{{ this.maxHeatLatLng }}</span
           >
         </div>
+
         <div class="measurements-controls">
           <p>Current measurements:</p>
           <p>
             {{ this.measurements[this.selectedMeasurement].heatLatLng.length }}
           </p>
         </div>
+
         <button
           @click="clearMeasurements"
           class="btn btn-danger clear-measurements"
@@ -109,6 +115,7 @@
           <i class="fas fa-trash"></i> Clear
         </button>
         <hr />
+
         <div class="grid-controls">
           <label><strong>Grid:</strong></label>
           <select
@@ -124,25 +131,12 @@
           </select>
         </div>
       </div>
-    --></div>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.map-container {
-  background-color: chocolate;
-  height: 100vh; /* Set to full viewport height */
-  width: 100%;
-}
-#map {
-  height: 100%;
-  width: 100%;
-  border-radius: 6px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-/*.map {
+.map {
   height: 100%;
   background-color: #f1e3f3;
   border-radius: 6px;
@@ -497,7 +491,7 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  /* Semi-transparent background 
+  /* Semi-transparent background */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -591,5 +585,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}*/
+}
 </style>
