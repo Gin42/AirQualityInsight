@@ -84,7 +84,7 @@ const mutations = {
   resetSensors(state) {
     state.sensors = new Map();
   },
-  updateLastMeasurement(state, { id }) {
+  updateSensor(state, id) {
     const sensor = state.sensors.get(id);
     if (!sensor) return;
 
@@ -142,6 +142,11 @@ const actions = {
   refreshSensors({ commit, dispatch }) {
     commit("resetSensors");
     dispatch("fetchSensors");
+  },
+  updateLastMeasurement({ commit, getters }, id) {
+    commit("updateSensor", id);
+    console.log("Dw, sono un sensore");
+    console.log(getters.getSensor(id));
   },
 };
 
