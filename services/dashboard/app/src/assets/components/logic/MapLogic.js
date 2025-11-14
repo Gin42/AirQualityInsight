@@ -205,11 +205,11 @@ export default {
         let address = await this.fetchAddressFromAPI(latitude, longitude);
 
         console.log("address: " + address);
-        /*this.$emit("open-form", {
+        this.$emit("open-form", {
           longitude: longitude,
           latitude: latitude,
           address: address,
-        });*/
+        });
       });
     },
 
@@ -370,17 +370,16 @@ export default {
     registerNewMeasurement(data) {
       if (!this.data.sensorLocations?.size) return;
 
-      const sensor = this.data.sensorLocations.get(data.name);
+      const sensor = this.data.sensorLocations.get(data.sensor_id);
       if (!sensor) return;
 
       this.highlightSensor(sensor);
 
       for (const measurementType of Object.keys(this.measurements)) {
-        const intensity = this.getIntensity(
-          data[measurementType],
-          measurementType
-        );
-
+        const intensity = this.getIntensity({
+          concentration: data[measurementType],
+          pollutant: measurementType,
+        });
         const latLng = [sensor.lat, sensor.lng, intensity.value];
         this.measurements[measurementType].heatLatLng.unshift(latLng);
         if (
@@ -392,6 +391,7 @@ export default {
           ].heatLatLng.slice(0, this.maxHeatLatLng);
         }
       }
+
       this.updateHeatmap();
     },
 

@@ -31,6 +31,8 @@ socket.on("kafka-message", (message) => {
     so2: parseFloat(message.so2).toFixed(2),
   };
 
+  console.log("new measurement");
+
   store.dispatch("measurements/updateMeasurements", formattedData);
 
   store.dispatch("sensors/updateLastMeasurement", formattedData.sensor_id);

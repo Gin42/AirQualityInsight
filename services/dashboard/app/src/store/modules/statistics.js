@@ -1,18 +1,16 @@
-import { mapGetters } from "vuex";
-
 const state = {
   data: {},
 };
 
 const getters = {
-  allMeasurementsTypes: (rootState) => {
+  allMeasurementsTypes: (state, getters, rootState) => {
     return rootState.data.getMeasurementsTypes;
   },
 };
 
 const mutations = {
   updateStats(state, { message, rootState }) {
-    let types = state.allMeasurementsTypes;
+    let types = getters.allMeasurementsTypes;
     for (const measurementType of Object.keys(types)) {
       let measurement = types[measurementType].data;
       measurement.unshift(message[measurementType]);
@@ -35,37 +33,39 @@ const mutations = {
 };
 
 const actions = {
-  getIntensity({ getters }, { concentration, pollutant }) {
-    let measurements = getters.allMeasurementsTypes;
+  getIntensity({ rootGetters }, { concentration, pollutant }) {
+    let measurements = rootGetters["data/getMeasurementsTypes"];
     const threshold = measurements[pollutant].thresholds;
     if (!threshold) throw new Error(`Unknown pollutant: ${pollutant}`);
+
+    const thresholds = rootGetters["data/getThresholds"];
 
     if (Array.isArray(threshold.good)) {
       const [minGood, maxGood] = threshold.good;
       const [minFair, maxFair] = threshold.fair;
       const [minModerate, maxModerate] = threshold.moderate;
       const [minPoor, maxPoor] = threshold.poor;
-      const [minVeryPoor, maxVeryPoor] = threshold.poor;
+      const [minVeryPoor, maxVeryPoor] = threshold.very_poor;
 
       if (minGood <= concentration && maxGood >= concentration)
-        return this.thresholds.good;
+        return thresholds.good;
       if (minFair <= concentration && maxFair >= concentration)
-        return this.thresholds.fair;
+        return thresholds.fair;
       if (minModerate <= concentration && maxModerate >= concentration)
-        return this.thresholds.moderate;
+        return thresholds.moderate;
       if (minPoor <= concentration && maxPoor >= concentration)
-        return this.thresholds.poor;
+        return thresholds.poor;
       if (minVeryPoor <= concentration && maxVeryPoor >= concentration)
-        return this.thresholds.very_poor;
-      return this.thresholds.extremely_poor;
+        return thresholds.very_poor;
+      return thresholds.extremely_poor;
     }
 
-    if (concentration <= threshold.good) return this.thresholds.good;
-    if (concentration <= threshold.fair) return this.thresholds.fair;
-    if (concentration <= threshold.moderate) return this.thresholds.moderate;
-    if (concentration <= threshold.poor) return this.thresholds.poor;
-    if (concentration <= threshold.very_poor) return this.thresholds.very_poor;
-    return this.thresholds.extremely_poor;
+    if (concentration <= threshold.good) return thresholds.good;
+    if (concentration <= threshold.fair) return thresholds.fair;
+    if (concentration <= threshold.moderate) return thresholds.moderate;
+    if (concentration <= threshold.poor) return thresholds.poor;
+    if (concentration <= threshold.very_poor) return thresholds.very_poor;
+    return thresholds.extremely_poor;
   },
 };
 

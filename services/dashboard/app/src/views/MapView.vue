@@ -1,10 +1,11 @@
 <script>
 import { mapState, mapGetters, mapActions } from "vuex";
 import MapComponent from "@/assets/components/MapComponent.vue";
+import FormComponent from "@/assets/components/FormComponent.vue";
 
 export default {
   name: "MapView",
-  components: { MapComponent },
+  components: { MapComponent, FormComponent },
   computed: {
     ...mapState({
       minMeasurements: (state) => state.minMeasurements,
@@ -27,21 +28,21 @@ export default {
   created() {},
   methods: {
     ...mapActions("sensors", ["fetchSensors"]),
-    ...mapActions("statistics", ["getIntensity"]),
+    ...mapActions("stats", ["getIntensity"]),
 
     refreshSensors() {
       this.$refs.mapComponent?.refreshSensorData();
-      this.addInfo("Refreshed sensors");
+      //this.addInfo("Refreshed sensors");
     },
     handleActiveSensors() {
-      if (this.activeSensors) this.addInfo("Stopped sensors data reception");
-      else this.addInfo("Started sensors data reception");
+      //if (this.activeSensors) this.addInfo("Stopped sensors data reception");
+      //else this.addInfo("Started sensors data reception");
       this.activeSensors = !this.activeSensors;
-    } /*
+    },
     handleMarkerClick(marker) {
       if (!marker) return;
       this.centerMapOnSensor(marker);
-      this.addInfo(`Selected sensor from map: ${marker.id}`);
+      //this.addInfo(`Selected sensor from map: ${marker.id}`);
     },
     handleSensorsLoaded(sensors) {
       this.sensors.data = sensors;
@@ -57,10 +58,10 @@ export default {
         sensor.lastMeasurementReceivedRaw = null;
         sensor.timeSinceLastMeasurement = "N/A";
       }
-      this.addInfo(`Loaded ${sensors.size} sensors`);
+      //this.addInfo(`Loaded ${sensors.size} sensors`);
     },
     handleMeasurementsCleared(count) {
-      this.addInfo(`Cleared ${count} measurements from map`);
+      //this.addInfo(`Cleared ${count} measurements from map`);
     },
     showForm({ longitude, latitude, address }) {
       this.address = address;
@@ -96,7 +97,7 @@ export default {
       } catch (error) {
         console.error("Unable to send sensor to API:", error);
       }
-    },*/,
+    },
   },
 };
 </script>
@@ -174,15 +175,6 @@ export default {
       :max-measurements="maxMeasurements"
       :thresholds="getThresholds"
       :get-intensity="getIntensity"
-    /><!--
-    <MapComponent
-      ref="mapComponent"
-      :measurements="getMeasurementsTypes"
-      :get-intensity="getIntensity"
-      :min-measurements="minMeasurements"
-      :max-measurements="maxMeasurements"
-      :thresholds="this.getThreshold"
-      :calculate-stats="calculateStats"
       @marker-click="handleMarkerClick"
       @sensors-loaded="handleSensorsLoaded"
       @measurements-cleared="handleMeasurementsCleared"
@@ -195,6 +187,6 @@ export default {
       :initial-latitude="latitude"
       :initial-longitude="longitude"
       :initial-address="address"
-    ></FormComponent>-->
+    ></FormComponent>
   </div>
 </template>
