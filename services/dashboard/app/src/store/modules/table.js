@@ -30,7 +30,7 @@ const mutations = {
 };
 
 const actions = {
-  initializeData({ commit }) {
+  initializeTableData({ commit }) {
     commit("setInfoTable", jsonData.infoTable);
     commit("setMeasurementsTable", jsonData.measurementsTable);
     commit("setStatsTable", jsonData.statsTable);

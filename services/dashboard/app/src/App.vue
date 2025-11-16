@@ -7,9 +7,11 @@ export default {
   name: "App",
   methods: {
     ...mapActions("data", ["initializeData"]),
+    ...mapActions("table", ["initializeTableData"]),
   },
   created() {
     this.initializeData();
+    this.initializeTableData();
   },
   mounted() {},
 }; /*

@@ -77,6 +77,10 @@ const mutations = {
               { stats: null, data: [] },
             ])
           ),
+          distanceFromCenter: calculateDistance(),
+          lastMeasurementReceived: "N/A",
+          lastMeasurementReceivedRaw: null,
+          timeSinceLastMeasurement: "N/A",
         },
       ])
     );
@@ -99,11 +103,6 @@ const mutations = {
   },
 };
 
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-}
-
 //ACTIONS
 const actions = {
   async fetchSensors({ commit, state, rootGetters }) {
@@ -120,7 +119,6 @@ const actions = {
   },
   async addSensor({ dispatch, commit }, data) {
     try {
-      console.log("Adding sensor:", data);
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
         method: "POST",
@@ -139,7 +137,6 @@ const actions = {
       });
       const response = await jsonResponse.json();
       if (!response) throw new Error(response || "API request failed");
-      console.log(response);
       dispatch("refreshSensors");
       commit("setNewSensor", true);
     } catch (error) {
@@ -154,6 +151,29 @@ const actions = {
     commit("updateSensor", id);
   },
 };
+
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}
+
+/**
+ * Function to calculate the distance between two geographic points (Haversine formula)
+ * @see https://en.wikipedia.org/wiki/Haversine_formula
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // Earth radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 export default {
   namespaced: true,

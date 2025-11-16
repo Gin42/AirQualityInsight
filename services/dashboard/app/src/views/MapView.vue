@@ -2,16 +2,19 @@
 import { mapState, mapGetters, mapActions } from "vuex";
 import MapComponent from "@/assets/components/MapComponent.vue";
 import FormComponent from "@/assets/components/FormComponent.vue";
+import TableComponent from "@/assets/components/TableComponent.vue";
 
 export default {
   name: "MapView",
-  components: { MapComponent, FormComponent },
+  components: { MapComponent, FormComponent, TableComponent },
   computed: {
     ...mapState({
       minMeasurements: (state) => state.minMeasurements,
       maxMeasurements: (state) => state.maxMeasurements,
     }),
     ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
+    ...mapGetters("sensors", ["allSensorsCount", "allSensors"]),
+    ...mapGetters("table", ["getSensorsTable"]),
   },
   data() {
     return {
@@ -44,19 +47,6 @@ export default {
       //this.addInfo(`Selected sensor from map: ${marker.id}`);
     },
     handleSensorsLoaded(sensors) {
-      this.sensors.data = sensors;
-      console.log(this.sensors.data);
-      for (const sensor of this.sensors.data.values()) {
-        sensor.distanceFromCenter = this.calculateDistance(
-          this.center.lat,
-          this.center.lng,
-          sensor.lat,
-          sensor.lng
-        ).toFixed(2);
-        sensor.lastMeasurementReceived = "N/A";
-        sensor.lastMeasurementReceivedRaw = null;
-        sensor.timeSinceLastMeasurement = "N/A";
-      }
       //this.addInfo(`Loaded ${sensors.size} sensors`);
     },
     handleMeasurementsCleared(count) {
@@ -70,6 +60,21 @@ export default {
     },
     hideForm() {
       this.isFormVisible = false;
+    },
+    centerMapOnSensor(sensor) {
+      if (!this.$refs.mapComponent) return;
+      if (!sensor.lat) return;
+      if (!sensor.lng) return;
+
+      const mapContainer = document.querySelector(
+        ".dashboard-component.map-component-container"
+      );
+      mapContainer?.scrollIntoView({ behavior: "smooth" });
+      this.$refs.mapComponent?.centerOnLocation(sensor.lat, sensor.lng);
+    },
+    handleSensorRowClick(row) {
+      //this.addInfo(`Selected sensor: ${row.id}`);
+      this.centerMapOnSensor(row);
     },
   },
 };
@@ -160,5 +165,21 @@ export default {
       :initial-longitude="longitude"
       :initial-name="name"
     ></FormComponent>
+  </div>
+  <div class="dashboard-component sensors-component-container">
+    <div class="component-header">
+      <h2>Registered sensors: {{ allSensorsCount }}</h2>
+      <div>
+        <button @click="refreshSensors" class="btn">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+    </div>
+    <TableComponent
+      ref="sensorsComponent"
+      :data="allSensors"
+      :columns="getSensorsTable.columns"
+      @row-click="handleSensorRowClick"
+    />
   </div>
 </template>
