@@ -34,6 +34,7 @@ const state = () => ({
       sortable: true,
     },
   ],
+  newSensor: false,
 });
 
 //GETTERS
@@ -93,6 +94,9 @@ const mutations = {
     sensor.lastMeasurementReceivedRaw = now;
     sensor.timeSinceLastMeasurement = "Just now";
   },
+  setNewSensor(state, value) {
+    state.newSensor = value;
+  },
 };
 
 function formatTimestamp(timestamp) {
@@ -114,8 +118,9 @@ const actions = {
       console.error("Unable to fetch sensors from API:", error);
     }
   },
-  async addSensor({ commit }, data) {
+  async addSensor({ dispatch, commit }, data) {
     try {
+      console.log("Adding sensor:", data);
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
         method: "POST",
@@ -134,7 +139,9 @@ const actions = {
       });
       const response = await jsonResponse.json();
       if (!response) throw new Error(response || "API request failed");
-      refreshSensors();
+      console.log(response);
+      dispatch("refreshSensors");
+      commit("setNewSensor", true);
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }
@@ -143,7 +150,7 @@ const actions = {
     commit("resetSensors");
     dispatch("fetchSensors");
   },
-  updateLastMeasurement({ commit, getters }, id) {
+  updateLastMeasurement({ commit }, id) {
     commit("updateSensor", id);
   },
 };

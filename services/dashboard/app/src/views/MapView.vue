@@ -27,7 +27,6 @@ export default {
   },
   created() {},
   methods: {
-    ...mapActions("sensors", ["fetchSensors"]),
     ...mapActions("stats", ["getIntensity"]),
 
     refreshSensors() {
@@ -63,40 +62,14 @@ export default {
     handleMeasurementsCleared(count) {
       //this.addInfo(`Cleared ${count} measurements from map`);
     },
-    showForm({ longitude, latitude, address }) {
-      this.address = address;
+    showForm({ longitude, latitude, name }) {
+      this.name = name;
       this.longitude = longitude;
       this.latitude = latitude;
       this.isFormVisible = true;
     },
     hideForm() {
       this.isFormVisible = false;
-    },
-    async handleSubmit(formData) {
-      try {
-        const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-        const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json", // Set content type to application/json
-          },
-          body: JSON.stringify({
-            name: formData.name, // String, descriptive name of the sensor
-            location: {
-              type: "Point", // String, indicates it's a point type for GeoJSON
-              coordinates: [formData.longitude, formData.latitude], // Array of numbers representing longitude and latitude
-            },
-            active: formData.active, // Boolean, indicates if the sensor is currently active
-            last_seen: new Date(), // Date, timestamp of the last time the sensor was seen
-          }),
-        });
-        const response = await jsonResponse.json();
-        if (!response) throw new Error(response || "API request failed");
-        this.hideForm();
-        this.refreshSensors();
-      } catch (error) {
-        console.error("Unable to send sensor to API:", error);
-      }
     },
   },
 };
@@ -183,10 +156,9 @@ export default {
     <FormComponent
       v-if="isFormVisible"
       @close-form="hideForm"
-      @submit-form="handleSubmit"
       :initial-latitude="latitude"
       :initial-longitude="longitude"
-      :initial-address="address"
+      :initial-name="name"
     ></FormComponent>
   </div>
 </template>

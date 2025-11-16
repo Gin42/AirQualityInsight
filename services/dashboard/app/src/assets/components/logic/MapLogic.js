@@ -2,10 +2,9 @@ import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import { ref, watch } from "vue";
-import { mapState, mapMutations } from "vuex";
+import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
-import { mapActions, mapGetters } from "vuex";
 import { fetchFromApi } from "@/services/api";
 
 export default {
@@ -14,6 +13,7 @@ export default {
     ...mapState({
       center: (state) => state.center,
       newMeasurement: (state) => state.measurements.measurements,
+      newSensor: (state) => state.sensors.newSensor,
     }),
     ...mapGetters("measurements", ["lastMeasurement"]),
   },
@@ -24,6 +24,15 @@ export default {
         this.registerNewMeasurement(this.lastMeasurement);
       },
       deep: true,
+    },
+    newSensor: {
+      immediate: true,
+      handler() {
+        if (this.newSensor) {
+          this.refreshSensorData();
+          this.setNewSensor(false);
+        }
+      },
     },
   },
   props: {
@@ -96,7 +105,7 @@ export default {
   },
   methods: {
     ...mapMutations(["setCenter"]),
-
+    ...mapMutations("sensors", ["setNewSensor"]),
     ...mapActions("sensors", ["fetchSensors"], { root: true }),
 
     initMap() {
@@ -208,7 +217,7 @@ export default {
         this.$emit("open-form", {
           longitude: longitude,
           latitude: latitude,
-          address: address,
+          name: address,
         });
       });
     },

@@ -4,7 +4,13 @@
       <h1>Create new sensor</h1>
 
       <label for="name">Sensor Name:</label>
-      <input type="text" name="address" v-model="formData.address" required />
+      <input
+        type="text"
+        id="nameField"
+        name="name"
+        v-model="formData.name"
+        required
+      />
 
       <label for="longitudeField">Longitude:</label>
       <input
@@ -29,9 +35,9 @@
       <label for="active" class="switch">Active:</label>
       <input
         type="checkbox"
+        id="checkbox"
         name="active"
         v-model="formData.active"
-        id="checkbox"
       />
       <span class="slider round"></span>
 
@@ -44,7 +50,9 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
+  name: "FormComponent",
   props: {
     initialLongitude: {
       type: Number,
@@ -54,7 +62,7 @@ export default {
       type: Number,
       required: true,
     },
-    initialAddress: {
+    initialName: {
       type: String,
       required: true,
     },
@@ -62,7 +70,7 @@ export default {
   data() {
     return {
       formData: {
-        name: this.initialAddress,
+        name: this.initialName,
         latitude: this.initialLatitude,
         longitude: this.initialLongitude,
         active: true,
@@ -70,15 +78,16 @@ export default {
     };
   },
   methods: {
+    ...mapActions("sensors", ["addSensor"]),
     submitForm() {
-      this.$emit("submit-form", this.formData);
+      this.addSensor(this.formData);
       this.resetForm();
+      this.$emit("close-form");
     },
     resetForm() {
-      this.formData.name = this.initialAddress;
+      this.formData.name = this.initialName;
       this.formData.latitude = this.initialLatitude;
       this.formData.longitude = this.initialLongitude;
-      this.formData.active = false;
     },
   },
   watch: {
@@ -88,8 +97,8 @@ export default {
     initialLongitude(newLng) {
       this.formData.longitude = newLng;
     },
-    initialAddress(newAddress) {
-      this.formData.address = newAddress;
+    initialName(newName) {
+      this.formData.name = newName;
     },
   },
 };
