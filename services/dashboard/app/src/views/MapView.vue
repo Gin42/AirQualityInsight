@@ -28,9 +28,14 @@ export default {
       address: null,
     };
   },
-  created() {},
+  created() {
+    this.timeUpdateInterval = setInterval(() => {
+      this.updateTimeSinceLastMeasurements();
+    }, 1000);
+  },
   methods: {
     ...mapActions("stats", ["getIntensity"]),
+    ...mapActions("sensors", ["updateTimeSinceLastMeasurements"]),
 
     refreshSensors() {
       this.$refs.mapComponent?.refreshSensorData();

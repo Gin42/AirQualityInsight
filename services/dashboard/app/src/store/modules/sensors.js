@@ -9,31 +9,6 @@ import { fetchFromApi } from "@/services/api";
 
 const state = () => ({
   sensors: new Map(),
-  columns: [
-    { key: "sensor_id", label: "Id", visible: false }, //da aggiungere come proprietà al componente
-    { key: "name", label: "Name", center: true, sortable: true },
-    { key: "lat", label: "Latitude", center: true, sortable: true },
-    { key: "lng", label: "Longitude", center: true, sortable: true },
-    { key: "status", label: "Status", center: true, sortable: true },
-    {
-      key: "distanceFromCenter",
-      label: "Distance from center (m)",
-      center: true,
-      sortable: true,
-    },
-    {
-      key: "lastMeasurementReceived",
-      label: "Last measurement received",
-      center: true,
-      sortable: true,
-    },
-    {
-      key: "timeSinceLastMeasurement",
-      label: "Time since last measurement",
-      center: true,
-      sortable: true,
-    },
-  ],
   newSensor: false,
 });
 
@@ -57,7 +32,7 @@ const getters = {
 
 //MUTATIONS
 const mutations = {
-  setSensorsData(state, { sensorsData, measurementsTypes }) {
+  setSensorsData(state, { sensorsData, measurementsTypes, center }) {
     const sensorMap = new Map(
       sensorsData.map((sensor) => [
         sensor.sensor_id,
@@ -77,7 +52,12 @@ const mutations = {
               { stats: null, data: [] },
             ])
           ),
-          distanceFromCenter: calculateDistance(),
+          distanceFromCenter: calculateDistance(
+            center.lat,
+            center.lng,
+            sensor.location.coordinates[1],
+            sensor.location.coordinates[0]
+          ).toFixed(2),
           lastMeasurementReceived: "N/A",
           lastMeasurementReceivedRaw: null,
           timeSinceLastMeasurement: "N/A",
@@ -105,13 +85,17 @@ const mutations = {
 
 //ACTIONS
 const actions = {
-  async fetchSensors({ commit, state, rootGetters }) {
+  async fetchSensors({ commit, state, rootGetters, rootState, getters }) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const sensorsData = await fetchFromApi(`${apiUrl}/api/sensors`);
       const measurementsTypes = rootGetters["data/getMeasurementsTypes"];
-      commit("setSensorsData", { sensorsData, measurementsTypes });
-      console.log(`Loaded ${state.sensors.size} sensors from API`);
+      commit("setSensorsData", {
+        sensorsData,
+        measurementsTypes,
+        center: rootState.center,
+      });
+      console.log(`Loaded ${getters.allSensorsCount} sensors from API`);
       return state.sensors;
     } catch (error) {
       console.error("Unable to fetch sensors from API:", error);
@@ -150,6 +134,15 @@ const actions = {
   updateLastMeasurement({ commit }, id) {
     commit("updateSensor", id);
   },
+  updateTimeSinceLastMeasurements({ state, getters }) {
+    if (getters.allSensorsCount === 0) {
+      return;
+    }
+    for (const sensor of state.sensors.values())
+      sensor.timeSinceLastMeasurement = calculateTimeSince(
+        sensor.lastMeasurementReceivedRaw
+      );
+  },
 };
 
 function formatTimestamp(timestamp) {
@@ -173,6 +166,29 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+function calculateTimeSince(timestamp) {
+  if (!timestamp || timestamp === "N/A") return "N/A";
+
+  const now = new Date();
+  const lastMeasurement = new Date(timestamp);
+  const diffMs = now - lastMeasurement;
+
+  if (diffMs < 0) return "N/A";
+
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  if (diffMinutes > 0)
+    return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""} ago`;
+  if (diffSeconds > 0)
+    return `${diffSeconds} second${diffSeconds > 1 ? "s" : ""} ago`;
+  return "Just now";
 }
 
 export default {

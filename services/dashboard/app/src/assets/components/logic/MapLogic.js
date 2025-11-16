@@ -105,7 +105,7 @@ export default {
   },
   methods: {
     ...mapMutations(["setCenter"]),
-    ...mapMutations("sensors", ["setNewSensor"]),
+    ...mapMutations("sensors", ["setNewSensor", "updateSensor"]),
     ...mapActions("sensors", ["fetchSensors"], { root: true }),
 
     initMap() {
@@ -400,8 +400,8 @@ export default {
           ].heatLatLng.slice(0, this.maxHeatLatLng);
         }
       }
-
       this.updateHeatmap();
+      this.updateSensor(sensor.sensor_id);
     },
 
     highlightSensor(sensor) {
