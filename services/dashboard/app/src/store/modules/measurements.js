@@ -21,9 +21,10 @@ const getters = {
 
 //MUTATIONS
 const mutations = {
-  setMeasurement(state, { sensor_id, timestamp, data, maxMeasurements }) {
+  setMeasurement(state, { sensor_id, name, timestamp, data, maxMeasurements }) {
     state.measurements.unshift({
       sensor_id: sensor_id,
+      name: name,
       timestamp: timestamp,
       data: data,
     });
@@ -36,10 +37,11 @@ const mutations = {
 
 //ACTIONS
 const actions = {
-  updateMeasurements({ commit, rootState }, { sensor_id, data }) {
+  updateMeasurements({ commit, rootState }, { sensor_id, name, data }) {
     const { timestamp, ...dataWithoutTimestamp } = data;
     commit("setMeasurement", {
       sensor_id: sensor_id,
+      name: name,
       timestamp: data.timestamp,
       data: dataWithoutTimestamp,
       maxMeasurements: rootState.maxMeasurements,

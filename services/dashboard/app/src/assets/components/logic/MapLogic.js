@@ -277,8 +277,6 @@ export default {
       });
 
       if ("sensorLocations" === layer) {
-        console.log("UGO");
-        console.log(this.allSensors);
         for (const sensorLocation of this.allSensors) {
           console.log(sensorLocation);
           const marker = L.marker(
@@ -287,8 +285,6 @@ export default {
               icon: pushpinIcon,
             }
           );
-          console.log("marker");
-          console.log(marker);
           marker.bindPopup(sensorLocation.getName());
           marker.addTo(this.map);
           marker.on("click", () => {
@@ -297,7 +293,6 @@ export default {
 
           this.layers[layer].push(marker);
           sensorLocation.setMarker(marker);
-          console.log("UGO");
           console.log(sensorLocation);
         }
         return;

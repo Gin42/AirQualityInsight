@@ -31,6 +31,7 @@ export default {
       this.addInfo(`Selected sensor: ${row.sensor_id}`);
     },
   },
+  created() {},
 };
 </script>
 

@@ -15,6 +15,7 @@ socket.on("kafka-message", (message) => {
   message.timestamp = formatTimestamp(message.timestamp || new Date());
 
   const sensor_id = message.sensor_id;
+  const name = message.name;
 
   const formattedData = {
     timestamp: message.timestamp,
@@ -39,6 +40,7 @@ socket.on("kafka-message", (message) => {
 
   store.dispatch("measurements/updateMeasurements", {
     sensor_id,
+    name,
     data: formattedData,
   });
 
