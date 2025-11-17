@@ -62,17 +62,14 @@ const mutations = {
     state.sensors = null;
   },
 
-  updateSensor(
-    state,
-    { id, data, maxMeasurements, measurementsData, thresholds }
-  ) {
+  updateSensor(state, { id, timestamp, data, maxMeasurements }) {
     const sensor = state.sensors.get(id);
 
     if (!(sensor instanceof Sensor)) {
       return;
     }
 
-    sensor.setMeasurements(data, maxMeasurements, measurementsData, thresholds);
+    sensor.setMeasurements(timestamp, data, maxMeasurements);
   },
 
   setNewSensor(state, value) {
@@ -143,18 +140,13 @@ const actions = {
     dispatch("fetchSensors");
   },
 
-  updateLastMeasurement(
-    { commit, rootState, rootGetters },
-    { sensor_id, data }
-  ) {
+  updateLastMeasurement({ commit, rootState, rootGetters }, { formattedData }) {
     const measurementsData = rootGetters["data/getMeasurementsTypes"];
-    const thresholds = rootGetters["data/getThresholds"];
     commit("updateSensor", {
-      id: sensor_id,
-      data: data,
+      id: formattedData.sensor_id,
+      timestamp: formattedData.timestamp,
+      data: formattedData.data,
       maxMeasurements: rootState.maxMeasurements,
-      measurementsData: measurementsData,
-      thresholds: thresholds,
     });
   },
 

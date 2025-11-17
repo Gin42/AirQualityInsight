@@ -1,6 +1,6 @@
 // src/sensors/Sensor.js
 export default class Sensor {
-  constructor(data, measurementsTypes, center) {
+  constructor(data, center) {
     this.sensor_id = data.sensor_id;
     this.name = data.name;
     this.lat = data.location.coordinates[1];
@@ -8,12 +8,7 @@ export default class Sensor {
     this.active = data.active; //true or false
     this.ip = data.ip;
     this.last_seen = data.last_seen;
-    this.measurements = Object.fromEntries(
-      Object.keys(measurementsTypes).map((type) => [
-        type,
-        { stats: null, data: [] },
-      ])
-    );
+    this.measurements = new Map();
     this.distance_center = this._calculateDistance(
       center.lat,
       center.lng,
@@ -54,43 +49,14 @@ export default class Sensor {
     return this.marker;
   }
 
-  setMeasurements(data, maxMeasurements, measurementsData, thresholds) {
-    const timestamp = data.timestamp;
-    for (const [key, value] of Object.entries(data)) {
-      if (key in this.measurements) {
-        this.measurements[key].data.unshift({
-          timestamp: timestamp,
-          value: parseFloat(value),
-        });
+  setMeasurements(timestamp, data, maxMeasurements) {
+    this.measurements.set(timestamp, { data });
 
-        if (this.measurements[key].data.length > maxMeasurements) {
-          this.measurements[key].data = this.measurements[key].data.slice(
-            0,
-            maxMeasurements
-          );
-        }
-
-        const stats = this._calculateStats(
-          this.measurements[key].data.map((d) => d.value)
-        );
-        const intensity = this._calculateIntensity(
-          stats.mean,
-          key,
-          measurementsData,
-          thresholds
-        );
-
-        this.measurements[key].stats = {
-          intensity,
-          mean: parseFloat(stats.mean).toFixed(2),
-          median: parseFloat(stats.median).toFixed(2),
-          min: parseFloat(stats.min).toFixed(2),
-          max: parseFloat(stats.max).toFixed(2),
-          range: parseFloat(stats.range).toFixed(2),
-          quality: this._getIntensityLabel(intensity),
-        };
-      }
+    if (this.measurements.size > maxMeasurements) {
+      const oldestKey = [...this.measurements.keys()].pop();
+      this.measurements.delete(oldestKey);
     }
+
     const now = new Date();
     this.setLastMeasurementReceived(now);
     this.setLastMeasurementReceivedRaw(now);
@@ -134,59 +100,5 @@ export default class Sensor {
         Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
-  }
-
-  _calculateStats(values) {
-    const sorted = [...values].sort((a, b) => a - b);
-    const mean = values.reduce((a, b) => a + b) / values.length;
-
-    return {
-      mean: mean,
-      median: sorted[Math.floor(sorted.length / 2)],
-      min: Math.min(...values),
-      max: Math.max(...values),
-      range: Math.max(...values) - Math.min(...values),
-    };
-  }
-
-  _calculateIntensity(concentration, pollutant, measurementsData, thresholds) {
-    const threshold = measurementsData[pollutant].thresholds;
-    if (!threshold) throw new Error(`Unknown pollutant: ${pollutant}`);
-
-    if (Array.isArray(threshold.good)) {
-      const [minGood, maxGood] = threshold.good;
-      const [minFair, maxFair] = threshold.fair;
-      const [minModerate, maxModerate] = threshold.moderate;
-      const [minPoor, maxPoor] = threshold.poor;
-      const [minVeryPoor, maxVeryPoor] = threshold.very_poor;
-
-      if (minGood <= concentration && maxGood >= concentration)
-        return thresholds.good;
-      if (minFair <= concentration && maxFair >= concentration)
-        return thresholds.fair;
-      if (minModerate <= concentration && maxModerate >= concentration)
-        return thresholds.moderate;
-      if (minPoor <= concentration && maxPoor >= concentration)
-        return thresholds.poor;
-      if (minVeryPoor <= concentration && maxVeryPoor >= concentration)
-        return thresholds.very_poor;
-      return thresholds.extremely_poor;
-    }
-
-    if (concentration <= threshold.good) return thresholds.good;
-    if (concentration <= threshold.fair) return thresholds.fair;
-    if (concentration <= threshold.moderate) return thresholds.moderate;
-    if (concentration <= threshold.poor) return thresholds.poor;
-    if (concentration <= threshold.very_poor) return thresholds.very_poor;
-    return thresholds.extremely_poor;
-  }
-
-  _getIntensityLabel(intensity) {
-    return `
-        <div class="intensity-label">
-          <i class="threshold-intensity" style="background-color: ${intensity.color}"></i>
-          <span>${intensity.label}</span>
-        </div>
-      `;
   }
 }
