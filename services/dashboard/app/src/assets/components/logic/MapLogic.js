@@ -11,28 +11,25 @@ export default {
   name: "MapComponent",
   computed: {
     ...mapState({
+      sensors: (state) => state.sensors.sensors,
       center: (state) => state.center,
       newMeasurement: (state) => state.measurements.measurements,
       newSensor: (state) => state.sensors.newSensor,
     }),
     ...mapGetters("measurements", ["lastMeasurement"]),
+    ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
   },
   watch: {
-    newMeasurement: {
-      immediate: true,
-      handler() {
-        this.registerNewMeasurement(this.lastMeasurement);
-      },
-      deep: true,
-    },
     newSensor: {
+      // to-do
       immediate: true,
       handler() {
-        if (this.newSensor) {
-          this.refreshSensorData();
+        if (this.newSensor.incoming) {
+          this.drawSensor(this.newSensor.data);
           this.setNewSensor(false);
         }
       },
+      deep: true,
     },
   },
   props: {
@@ -105,8 +102,12 @@ export default {
   },
   methods: {
     ...mapMutations(["setCenter"]),
-    ...mapMutations("sensors", ["setNewSensor", "updateSensor"]),
-    ...mapActions("sensors", ["fetchSensors"], { root: true }),
+    ...mapMutations("sensors", ["setNewSensor"]),
+    ...mapActions("sensors", [
+      "fetchSensors",
+      "updateLastMeasurement",
+      "addSensor",
+    ]),
 
     initMap() {
       // Leaflet's interactive map
@@ -276,18 +277,28 @@ export default {
       });
 
       if ("sensorLocations" === layer) {
-        for (const sensorLocation of this.data[layer].values()) {
-          const marker = L.marker([sensorLocation.lat, sensorLocation.lng], {
-            icon: pushpinIcon,
-          });
-          if (sensorLocation.desc) marker.bindPopup(sensorLocation.desc);
+        console.log("UGO");
+        console.log(this.allSensors);
+        for (const sensorLocation of this.allSensors) {
+          console.log(sensorLocation);
+          const marker = L.marker(
+            [sensorLocation.getLat(), sensorLocation.getLng()],
+            {
+              icon: pushpinIcon,
+            }
+          );
+          console.log("marker");
+          console.log(marker);
+          marker.bindPopup(sensorLocation.getName());
           marker.addTo(this.map);
-          /*marker.on("click", () => {
+          marker.on("click", () => {
             this.$emit("marker-click", sensorLocation);
-          });*/
+          });
 
           this.layers[layer].push(marker);
-          sensorLocation.marker = marker;
+          sensorLocation.setMarker(marker);
+          console.log("UGO");
+          console.log(sensorLocation);
         }
         return;
       }
@@ -376,14 +387,21 @@ export default {
       this.layers[layer] = [];
     },
 
+    /** Dato che al momento passo da kafka per aggiornare le misurazioni dei sensori
+     * questo metodo rimane utile solo per la heat map, e dato che non mi soddisfa
+     * l'attuale setting per quest'ultima, lo commmento con un to-do
+     */
     registerNewMeasurement(data) {
-      if (!this.data.sensorLocations?.size) return;
+      if (this.allSensorsCount === 0) return;
 
-      const sensor = this.data.sensorLocations.get(data.sensor_id);
+      const id = data.sensor_id;
+
+      const sensor = this.getSensor(id);
       if (!sensor) return;
 
       this.highlightSensor(sensor);
-
+      /*
+      this.updateLastMeasurement(id, data);
       for (const measurementType of Object.keys(this.measurements)) {
         const intensity = this.getIntensity({
           concentration: data[measurementType],
@@ -400,15 +418,17 @@ export default {
           ].heatLatLng.slice(0, this.maxHeatLatLng);
         }
       }
-      this.updateHeatmap();
-      this.updateSensor(sensor.sensor_id);
+      this.updateHeatmap();*/
     },
 
     highlightSensor(sensor) {
-      sensor.marker?.setOpacity(0.75);
-      setTimeout(() => {
-        sensor.marker?.setOpacity(1);
-      }, 250);
+      const marker = sensor.getMarker();
+      if (marker != null) {
+        marker.setOpacity(0.2);
+        setTimeout(() => {
+          marker.setOpacity(1);
+        }, 250);
+      }
     },
 
     getDisplayName(key) {
@@ -546,6 +566,7 @@ export default {
     },
 
     clearMeasurements() {
+      //to-do
       const count =
         this.measurements[this.selectedMeasurement].heatLatLng.length;
       for (const measurementType of Object.keys(this.measurements))
@@ -555,11 +576,25 @@ export default {
     },
 
     async refreshSensorData() {
-      this.data.sensorLocations = null;
-      const data = await this.fetchSensors();
-      if (!data) throw "Data not provided";
-      this.data.sensorLocations = data;
+      if (this.allSensorsCount == 0) throw "Data not provided";
       this.drawLayer("sensorLocations");
+    },
+
+    async drawSensor(sensor) {
+      if ("sensorLocations" === layer) {
+        const marker = L.marker([sensor.getLat(), sensor.getLng()], {
+          icon: pushpinIcon,
+        });
+        marker.bindPopup(sensor.getName());
+        marker.addTo(this.map);
+        marker.on("click", () => {
+          this.$emit("marker-click", sensor);
+        });
+
+        this.layers[layer].push(marker);
+        sensor.setMarker(marker);
+        return;
+      }
     },
 
     async loadData(filename) {
@@ -577,24 +612,23 @@ export default {
     },
 
     async populateLayer(layer) {
+      if (layer === "sensorLocations") {
+        return;
+      }
+
       const dataFile = {
-        sensorLocations: null,
         postalCodeBoundaries: "caps.geojson",
         neighborhoods: "neighborhoods.geojson",
         zones: "zones.geojson",
         ztl: "ztl.geojson",
       };
 
-      let data;
-
-      if ("sensorLocations" === layer) {
-        data = await this.fetchSensors();
-        if (!data) throw "Data not provided";
-        this.data[layer] = data;
-      } else {
-        data = await this.loadData(dataFile[layer]);
-        if (!data) throw "Data not provided";
+      try {
+        const data = await this.loadData(dataFile[layer]);
+        if (!data) throw new Error("Data not provided");
         this.data[layer] = data.features;
+      } catch (error) {
+        console.error("Error loading layer data:", error);
       }
     },
   },

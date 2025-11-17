@@ -53,9 +53,9 @@
       { "key": "name", "label": "Name", "sortable": true },
       { "key": "lat", "label": "Latitude", "center": true, "sortable": true },
       { "key": "lng", "label": "Longitude", "center": true, "sortable": true },
-      { "key": "status", "label": "Status", "center": true, "sortable": true },
+      { "key": "active", "label": "Active", "center": true, "sortable": true },
       {
-        "key": "distanceFromCenter",
+        "key": "distance_center",
         "label": "Distance from center (m)",
         "center": true,
         "sortable": true

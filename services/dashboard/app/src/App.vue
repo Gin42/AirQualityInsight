@@ -1,6 +1,5 @@
 <!-- App.vue -->
 <script>
-import { mapGetters } from "vuex";
 import { mapActions } from "vuex";
 
 export default {
@@ -8,10 +7,11 @@ export default {
   methods: {
     ...mapActions("data", ["initializeData"]),
     ...mapActions("table", ["initializeTableData"]),
+    ...mapActions("sensors", ["initializeSensors"]),
+    ...mapActions(["initializeAll"]),
   },
-  created() {
-    this.initializeData();
-    this.initializeTableData();
+  async created() {
+    await this.initializeAll();
   },
   mounted() {},
 }; /*

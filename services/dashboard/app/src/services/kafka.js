@@ -14,9 +14,9 @@ socket.on("kafka-message", (message) => {
 
   message.timestamp = formatTimestamp(message.timestamp || new Date());
 
+  const sensor_id = message.sensor_id;
+
   const formattedData = {
-    sensor_id: message.sensor_id,
-    name: message.name,
     timestamp: message.timestamp,
     temperature: parseFloat(message.temperature).toFixed(2),
     humidity: parseFloat(message.humidity).toFixed(2),
@@ -32,9 +32,16 @@ socket.on("kafka-message", (message) => {
 
   console.log("new measurement");
 
-  store.dispatch("measurements/updateMeasurements", formattedData);
+  store.dispatch("sensors/updateLastMeasurement", {
+    sensor_id,
+    data: formattedData,
+  });
 
-  store.dispatch("sensors/updateLastMeasurement", formattedData.sensor_id);
+  store.dispatch("measurements/updateMeasurements", {
+    sensor_id,
+    data: formattedData,
+  });
+
   /*
   store.dispatch("statistics/updateStats", message);
 

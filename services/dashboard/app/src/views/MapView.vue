@@ -28,11 +28,7 @@ export default {
       address: null,
     };
   },
-  created() {
-    this.timeUpdateInterval = setInterval(() => {
-      this.updateTimeSinceLastMeasurements();
-    }, 1000);
-  },
+  created() {},
   methods: {
     ...mapActions("stats", ["getIntensity"]),
     ...mapActions("sensors", ["updateTimeSinceLastMeasurements"]),
@@ -68,14 +64,17 @@ export default {
     },
     centerMapOnSensor(sensor) {
       if (!this.$refs.mapComponent) return;
-      if (!sensor.lat) return;
-      if (!sensor.lng) return;
+      if (!sensor.getLat()) return;
+      if (!sensor.getLng()) return;
 
       const mapContainer = document.querySelector(
         ".dashboard-component.map-component-container"
       );
       mapContainer?.scrollIntoView({ behavior: "smooth" });
-      this.$refs.mapComponent?.centerOnLocation(sensor.lat, sensor.lng);
+      this.$refs.mapComponent?.centerOnLocation(
+        sensor.getLat(),
+        sensor.getLng()
+      );
     },
     handleSensorRowClick(row) {
       //this.addInfo(`Selected sensor: ${row.id}`);

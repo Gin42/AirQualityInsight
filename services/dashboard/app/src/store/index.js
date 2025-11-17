@@ -16,11 +16,25 @@ export const store = createStore({
       lat: "44.4939000",
       name: "Piazza Maggiore",
     },
+    initialized: false,
+  },
+  getters: {
+    isInitialized: (state) => {
+      return state.initialized;
+    },
   },
   mutations: {
     setCenter(state, { currentLng, currentLat }) {
       state.center.lng = currentLng;
       state.center.lat = currentLat;
+    },
+  },
+  actions: {
+    async initializeAll({ state, dispatch }) {
+      dispatch("data/initializeData");
+      dispatch("table/initializeTableData");
+      dispatch("sensors/initializeSensors");
+      state.initialized = true;
     },
   },
   modules: {

@@ -1,4 +1,10 @@
-//measurement shape: [{....}]
+/**
+ * measurement shape: {
+ *     sensor_id: null,
+ *     timestamp: null
+ *     data: null
+ *    },
+ **/
 const state = () => ({
   measurements: [],
 });
@@ -15,15 +21,29 @@ const getters = {
 
 //MUTATIONS
 const mutations = {
-  setMeasurement(state, newMeasurement) {
-    state.measurements.push(newMeasurement);
+  setMeasurement(state, { sensor_id, timestamp, data, maxMeasurements }) {
+    state.measurements.unshift({
+      sensor_id: sensor_id,
+      timestamp: timestamp,
+      data: data,
+    });
+
+    if (state.measurements.length > maxMeasurements) {
+      state.measurements = state.measurements.slice(0, maxMeasurements);
+    }
   },
 };
 
 //ACTIONS
 const actions = {
-  updateMeasurements({ commit }, data) {
-    commit("setMeasurement", data);
+  updateMeasurements({ commit, rootState }, { sensor_id, data }) {
+    const { timestamp, ...dataWithoutTimestamp } = data;
+    commit("setMeasurement", {
+      sensor_id: sensor_id,
+      timestamp: data.timestamp,
+      data: dataWithoutTimestamp,
+      maxMeasurements: rootState.maxMeasurements,
+    });
   },
 };
 

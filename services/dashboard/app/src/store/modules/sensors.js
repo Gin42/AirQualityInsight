@@ -5,27 +5,34 @@ position: [lat, lng]
 status,
 ip
 }]*/
+import Sensor from "@/sensors/Sensor";
 import { fetchFromApi } from "@/services/api";
 
 const state = () => ({
   sensors: new Map(),
-  newSensor: false,
+  newSensor: {
+    incoming: false,
+    data: null,
+  },
+  timeUpdateInterval: null,
 });
 
 //GETTERS
 const getters = {
   allSensors: (state) => {
-    return Array.from(state.sensors.values());
+    return Array.from(state.sensors.values()); //??? can it return a map?
   },
   allSensorsCount: (state) => {
     return state.sensors.size;
   },
   allActiveSensors: (state) => {
-    return Array.from(state.sensors.values()).filter((sensor) => sensor.active);
+    return Array.from(state.sensors.values()).filter((sensor) =>
+      sensor.getActive()
+    );
   },
   getSensor: (state) => (id) => {
     return Array.from(state.sensors.values()).find(
-      (sensor) => sensor.id === id
+      (sensor) => sensor.getId() === id
     );
   },
 };
@@ -36,56 +43,54 @@ const mutations = {
     const sensorMap = new Map(
       sensorsData.map((sensor) => [
         sensor.sensor_id,
-        {
-          id: sensor.sensor_id,
-          name: sensor.name,
-          lat: sensor.location.coordinates[1], // latitude
-          lng: sensor.location.coordinates[0], // longitude
-          desc: sensor.sensor_id,
-          active: sensor.active,
-          status: sensor.active ? "Active" : "Inactive",
-          ip: sensor.ip,
-          last_seen: sensor.last_seen,
-          measurements: Object.fromEntries(
-            Object.keys(measurementsTypes).map((type) => [
-              type,
-              { stats: null, data: [] },
-            ])
-          ),
-          distanceFromCenter: calculateDistance(
-            center.lat,
-            center.lng,
-            sensor.location.coordinates[1],
-            sensor.location.coordinates[0]
-          ).toFixed(2),
-          lastMeasurementReceived: "N/A",
-          lastMeasurementReceivedRaw: null,
-          timeSinceLastMeasurement: "N/A",
-        },
+        new Sensor(sensor, measurementsTypes, center),
       ])
     );
     state.sensors = sensorMap;
   },
-  resetSensors(state) {
-    state.sensors = new Map();
-  },
-  updateSensor(state, id) {
-    const sensor = state.sensors.get(id);
-    if (!sensor) return;
 
-    const now = new Date();
-    sensor.lastMeasurementReceived = formatTimestamp(now);
-    sensor.lastMeasurementReceivedRaw = now;
-    sensor.timeSinceLastMeasurement = "Just now";
+  addNewSensor(state, { sensorData, measurementsTypes, center }) {
+    const sensor = new Sensor(sensorData, measurementsTypes, center);
+    state.sensors.set(sensorData.sensor_id, sensor);
+    state.newSensor = {
+      incoming: true,
+      data: sensor,
+    };
   },
+
+  resetSensors(state) {
+    state.sensors = null;
+  },
+
+  updateSensor(
+    state,
+    { id, data, maxMeasurements, measurementsData, thresholds }
+  ) {
+    const sensor = state.sensors.get(id);
+
+    if (!(sensor instanceof Sensor)) {
+      return;
+    }
+
+    sensor.setMeasurements(data, maxMeasurements, measurementsData, thresholds);
+  },
+
   setNewSensor(state, value) {
-    state.newSensor = value;
+    state.newSensor.incoming = value;
   },
 };
 
 //ACTIONS
 const actions = {
-  async fetchSensors({ commit, state, rootGetters, rootState, getters }) {
+  async initializeSensors({ state, dispatch }) {
+    dispatch("fetchSensors");
+    state.timeUpdateInterval = setInterval(() => {
+      dispatch("updateTimeSinceLastMeasurements");
+    }, 1000);
+    return;
+  },
+
+  async fetchSensors({ commit, rootGetters, rootState, getters }) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const sensorsData = await fetchFromApi(`${apiUrl}/api/sensors`);
@@ -96,14 +101,16 @@ const actions = {
         center: rootState.center,
       });
       console.log(`Loaded ${getters.allSensorsCount} sensors from API`);
-      return state.sensors;
+      return getters.allSensors;
     } catch (error) {
       console.error("Unable to fetch sensors from API:", error);
     }
   },
-  async addSensor({ dispatch, commit }, data) {
+
+  async addSensor({ commit }, data) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+      const measurementsTypes = rootGetters["data/getMeasurementsTypes"];
       const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
         method: "POST",
         headers: {
@@ -121,52 +128,46 @@ const actions = {
       });
       const response = await jsonResponse.json();
       if (!response) throw new Error(response || "API request failed");
-      dispatch("refreshSensors");
-      commit("setNewSensor", true);
+      commit("addNewSensor", {
+        response,
+        measurementsTypes,
+        center: rootState.center,
+      });
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }
   },
+
   refreshSensors({ commit, dispatch }) {
     commit("resetSensors");
     dispatch("fetchSensors");
   },
-  updateLastMeasurement({ commit }, id) {
-    commit("updateSensor", id);
+
+  updateLastMeasurement(
+    { commit, rootState, rootGetters },
+    { sensor_id, data }
+  ) {
+    const measurementsData = rootGetters["data/getMeasurementsTypes"];
+    const thresholds = rootGetters["data/getThresholds"];
+    commit("updateSensor", {
+      id: sensor_id,
+      data: data,
+      maxMeasurements: rootState.maxMeasurements,
+      measurementsData: measurementsData,
+      thresholds: thresholds,
+    });
   },
-  updateTimeSinceLastMeasurements({ state, getters }) {
+
+  updateTimeSinceLastMeasurements({ getters }) {
     if (getters.allSensorsCount === 0) {
       return;
     }
-    for (const sensor of state.sensors.values())
-      sensor.timeSinceLastMeasurement = calculateTimeSince(
-        sensor.lastMeasurementReceivedRaw
-      );
+    for (const sensor of getters.allSensors) {
+      const time = calculateTimeSince(sensor.getLastMeasurementReceivedRaw());
+      sensor.setTimeSinceLastMeasurement(time);
+    }
   },
 };
-
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-}
-
-/**
- * Function to calculate the distance between two geographic points (Haversine formula)
- * @see https://en.wikipedia.org/wiki/Haversine_formula
- */
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371000; // Earth radius in meters
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
 
 function calculateTimeSince(timestamp) {
   if (!timestamp || timestamp === "N/A") return "N/A";
