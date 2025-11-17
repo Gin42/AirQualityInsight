@@ -13,7 +13,6 @@ socket.on("kafka-message", (message) => {
   /*this.addInfo("Received new measurement");*/
 
   message.timestamp = formatTimestamp(message.timestamp || new Date());
-  //this.$refs.mapComponent?.registerNewMeasurement(message);
 
   const formattedData = {
     sensor_id: message.sensor_id,

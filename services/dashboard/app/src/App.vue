@@ -59,7 +59,16 @@ export default {
       this.collectedMeasurement.columns.push({
         key: key,
         label: [
+          this.measurements[key].label,      this.collectedMeasurement.columns.push({
+        key: key,
+        label: [
           this.measurements[key].label,
+          " ",
+          "(" + this.measurements[key].info.measurementUnit + ")",
+        ].join("<wbr>"),
+        center: true,
+        html: true,
+      });
           " ",
           "(" + this.measurements[key].info.measurementUnit + ")",
         ].join("<wbr>"),
@@ -427,6 +436,7 @@ export default {
     <p>Current route path: {{ $route.fullPath }}</p>
     <nav>
       <RouterLink to="/map"> Go to map </RouterLink>
+      <RouterLink to="/lastMeasurements"> Go to last measurements </RouterLink>
     </nav>
     <div class="dashboard">
       <RouterView></RouterView>

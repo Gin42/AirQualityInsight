@@ -1,11 +1,6 @@
 //measurement shape: [{....}]
 const state = () => ({
   measurements: [],
-  columns: [
-    { key: "sensor_id", label: "Id" },
-    { key: "name", label: "Name" },
-    { key: "timestamp", label: "Timestamp", center: true },
-  ],
 });
 
 //GETTERS
