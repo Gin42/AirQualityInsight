@@ -17,6 +17,11 @@ const getters = {
   lastMeasurement: (state) => {
     return state.measurements[state.measurements.length - 1];
   },
+  getAllOfType: (state) => (measurementType) => {
+    return state.measurements.map((measurement) =>
+      parseFloat(measurement[measurementType])
+    );
+  },
 };
 
 //MUTATIONS

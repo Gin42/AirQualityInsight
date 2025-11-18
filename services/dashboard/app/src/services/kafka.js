@@ -42,8 +42,7 @@ socket.on("kafka-message", (message) => {
     formattedData,
   });
 
-  /*
-  store.dispatch("statistics/updateStats", message);
-
-  store.dispatch("eaqi/updateEAQI");*/
+  store.dispatch("stats/update", {
+    measurementData: formattedData.data,
+  });
 });

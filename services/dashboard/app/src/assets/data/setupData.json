@@ -3,7 +3,7 @@
     "good": {
       "label": "Good",
       "value": 0.15,
-      "color": "#50f0e6",
+      "color": "#00e400",
       "advice": {
         "general": "The air quality is good. Enjoy your usual outdoor activities.",
         "sensitive": "The air quality is good. Enjoy your usual outdoor activities."
@@ -12,7 +12,7 @@
     "fair": {
       "label": "Fair",
       "value": 0.3,
-      "color": "#50ccaa",
+      "color": "#feff00",
       "advice": {
         "general": "Enjoy your usual outdoor activities.",
         "sensitive": "Enjoy your usual outdoor activities."
@@ -21,7 +21,7 @@
     "moderate": {
       "label": "Moderate",
       "value": 0.45,
-      "color": "#f0e641",
+      "color": "#ff7e00",
       "advice": {
         "general": "Enjoy your usual outdoor activities.",
         "sensitive": "Consider reducing intense outdoor activities, if you experience symptoms."
@@ -30,7 +30,7 @@
     "poor": {
       "label": "Poor",
       "value": 0.6,
-      "color": "#ff5050",
+      "color": "#ff0000",
       "advice": {
         "general": "Consider reducing intense activities outdoors, if you experience symptoms such as sore eyes, a cough or sore throat.",
         "sensitive": "Consider reducing physical activities, particularly outdoors, especially if you experience symptoms."
@@ -39,7 +39,7 @@
     "very_poor": {
       "label": "Very poor",
       "value": 0.75,
-      "color": "#960032",
+      "color": "#8f3f97",
       "advice": {
         "general": "Consider reducing intense activities outdoors, if you experience symptoms such as sore eyes, a cough or sore throat.",
         "sensitive": "Reduce physical activities, particularly outdoors, especially if you experience symptoms."
@@ -48,7 +48,7 @@
     "extremely_poor": {
       "label": "Extremely poor",
       "value": 1,
-      "color": "#7d2181",
+      "color": "#7e0023",
       "advice": {
         "general": "Reduce physical activities outdoors.",
         "sensitive": "Avoid physical activities outdoors."

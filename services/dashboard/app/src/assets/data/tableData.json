@@ -33,7 +33,17 @@
   "measurementsTable": {
     "columns": [
       { "key": "name", "label": "Name" },
-      { "key": "timestamp", "label": "Timestamp", "center": true }
+      { "key": "timestamp", "label": "Timestamp", "center": true },
+      { "key": "temperature", "label": "Temperature (°C)", "center": true },
+      { "key": "humidity", "label": "Humidity (%)", "center": true },
+      { "key": "pressure", "label": "Pressure (hPa)", "center": true },
+      { "key": "voc", "label": "Voc (ppm(", "center": true },
+      { "key": "co2", "label": "Co2 (ppm)", "center": true },
+      { "key": "pm25", "label": "Pm25 (µg/m³)", "center": true },
+      { "key": "pm10", "label": "Pm10 (µg/m³)", "center": true },
+      { "key": "no2", "label": "No2 (µg/m³)", "center": true },
+      { "key": "o3", "label": "O3 (µg/m³)", "center": true },
+      { "key": "so2", "label": "So2 (µg/m³)", "center": true }
     ]
   },
   "statsTable": {

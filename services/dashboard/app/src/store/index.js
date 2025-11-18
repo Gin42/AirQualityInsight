@@ -34,6 +34,7 @@ export const store = createStore({
       dispatch("data/initializeData");
       dispatch("table/initializeTableData");
       dispatch("sensors/initializeSensors");
+      dispatch("stats/initializeStats");
       state.initialized = true;
     },
   },

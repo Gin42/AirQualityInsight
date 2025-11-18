@@ -437,6 +437,7 @@ export default {
     <nav>
       <RouterLink to="/map"> Go to map </RouterLink>
       <RouterLink to="/lastMeasurements"> Go to last measurements </RouterLink>
+      <RouterLink to="/stats"> Go to Stats </RouterLink>
     </nav>
     <div class="dashboard">
       <RouterView></RouterView>
