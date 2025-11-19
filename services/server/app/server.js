@@ -563,8 +563,9 @@ app.post("/api/createSensor", async (req, res) => {
     active: req.body.active,
     last_seen: req.body.last_seen,
   };
-  await createSensor(newSensor);
-  res.send(newSensor);
+  const result = await createSensor(newSensor);
+  if (!result) throw new Error(result || "Couldn't create new sensor");
+  res.send(result);
 });
 
 function generateIPAddresses(i) {
