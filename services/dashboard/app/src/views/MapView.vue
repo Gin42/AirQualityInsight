@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapGetters, mapActions } from "vuex";
+import { mapState, mapGetters, mapActions, mapMutations } from "vuex";
 import MapComponent from "@/assets/components/MapComponent.vue";
 import FormComponent from "@/assets/components/FormComponent.vue";
 import TableComponent from "@/assets/components/TableComponent.vue";
@@ -19,9 +19,8 @@ export default {
   data() {
     return {
       map: null,
-      activeSensors: false,
+      activeSensors: true,
       timeUpdateInterval: null,
-      eaqi: null,
       isFormVisible: false,
       latitude: null,
       longitude: null,
@@ -30,20 +29,30 @@ export default {
   },
   created() {},
   methods: {
+    ...mapMutations(["setSocketActive"]),
     ...mapActions("stats", ["getIntensity"]),
     ...mapActions("sensors", ["updateTimeSinceLastMeasurements"]),
 
     refreshSensors() {
+      console.log("refresh");
       this.$refs.mapComponent?.refreshSensorData();
       //this.addInfo("Refreshed sensors");
     },
     handleActiveSensors() {
-      //if (this.activeSensors) this.addInfo("Stopped sensors data reception");
-      //else this.addInfo("Started sensors data reception");
+      if (this.activeSensors) {
+        this.setSocketActive({ value: false });
+        console.log("Stopped sensors data reception");
+        //this.addInfo("Stopped sensors data reception");
+      } else {
+        this.setSocketActive({ value: true });
+        console.log("Started sensors data reception");
+        //this.addInfo("Started sensors data reception");
+      }
       this.activeSensors = !this.activeSensors;
     },
     handleMarkerClick(marker) {
       if (!marker) return;
+      console.log(`Selected sensor from map: ${marker.id}`);
       this.centerMapOnSensor(marker);
       //this.addInfo(`Selected sensor from map: ${marker.id}`);
     },
@@ -51,6 +60,7 @@ export default {
       //this.addInfo(`Loaded ${sensors.size} sensors`);
     },
     handleMeasurementsCleared(count) {
+      console.log("Cleared measurement");
       //this.addInfo(`Cleared ${count} measurements from map`);
     },
     showForm({ longitude, latitude, name }) {
@@ -77,6 +87,7 @@ export default {
       );
     },
     handleSensorRowClick(row) {
+      console.log(`Selected sensor: ${row.id}`);
       //this.addInfo(`Selected sensor: ${row.id}`);
       this.centerMapOnSensor(row);
     },

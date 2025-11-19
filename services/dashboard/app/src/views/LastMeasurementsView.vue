@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapGetters, mapActions } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import TableComponent from "@/assets/components/TableComponent.vue";
 
 export default {
@@ -14,21 +14,12 @@ export default {
     ...mapGetters("sensors", ["getSensor"]),
   },
   methods: {
-    refreshTable() {
-      //this.addInfo("Refreshed measurements table");
-    },
     clearMeasurements() {
+      /** Vogliamo che questo cancelli tutte le misurazioni registrate? O dovrebbe cancellare solo
+       *  quelle di questa tabella?
+       */
+      console.log("Clear measurement");
       //TO DO: this.collectedMeasurement.data = [];
-    },
-    handleMeasurementRowClick(row) {
-      // Center map on the sensor that sent this measurement
-      const sensor = this.getSensor(row.sensor_id);
-      if (!sensor)
-        return this.addWarning(
-          `Sensor ${row.sensor_id} not found in registered sensors`
-        );
-      this.centerMapOnSensor(sensor);
-      this.addInfo(`Selected sensor: ${row.sensor_id}`);
     },
   },
   created() {},
@@ -41,9 +32,6 @@ export default {
     <div class="component-header">
       <h2>Last {{ this.maxMessages }} measurements received</h2>
       <div class="component-header-buttons">
-        <button @click="refreshTable" class="btn">
-          <i class="fas fa-sync-alt"></i> Refresh
-        </button>
         <button @click="clearMeasurements" class="btn btn-danger">
           <i class="fas fa-trash"></i> Clear
         </button>
@@ -53,7 +41,6 @@ export default {
       ref="measurementComponent"
       :data="collectedMeasurement"
       :columns="getMeasurementsTable.columns"
-      @row-click="handleMeasurementRowClick"
     />
   </div>
 </template>

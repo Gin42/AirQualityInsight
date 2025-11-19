@@ -101,6 +101,11 @@
           >
         </div>
 
+        <!--Chiedere utilità del poter cancellare il conto delle misurazioni:
+            deve essere un'operazione che cancella in generale le misurazioni?
+            oppure è fittizia e sta solo segnando quante se ne sono registrate?
+            oppure serve per la heatmap?
+        -->
         <div class="measurements-controls">
           <p>Current measurements:</p>
           <p>

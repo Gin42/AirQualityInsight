@@ -2,7 +2,6 @@ import { createStore } from "vuex";
 import sensors from "./modules/sensors";
 import measurements from "./modules/measurements";
 import stats from "./modules/statistics";
-import eaqi from "./modules/eaqi";
 import data from "./modules/data";
 import table from "./modules/table";
 
@@ -17,24 +16,32 @@ export const store = createStore({
       name: "Piazza Maggiore",
     },
     initialized: false,
+    socketActive: false,
   },
   getters: {
     isInitialized: (state) => {
       return state.initialized;
     },
+    isSocketActive: (state) => {
+      return state.socketActive;
+    },
   },
   mutations: {
+    setSocketActive(state, { value }) {
+      state.socketActive = value;
+    },
     setCenter(state, { currentLng, currentLat }) {
       state.center.lng = currentLng;
       state.center.lat = currentLat;
     },
   },
   actions: {
-    async initializeAll({ state, dispatch }) {
+    async initializeAll({ state, dispatch, commit }) {
       dispatch("data/initializeData");
       dispatch("table/initializeTableData");
       dispatch("sensors/initializeSensors");
       dispatch("stats/initializeStats");
+      commit("setSocketActive", { value: true });
       state.initialized = true;
     },
   },
@@ -42,7 +49,6 @@ export const store = createStore({
     sensors,
     measurements,
     stats,
-    eaqi,
     data,
     table,
   },

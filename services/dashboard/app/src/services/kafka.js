@@ -10,39 +10,39 @@ function formatTimestamp(timestamp) {
 }
 
 socket.on("kafka-message", (message) => {
-  /*this.addInfo("Received new measurement");*/
+  if (store.getters.isSocketActive) {
+    message.timestamp = formatTimestamp(message.timestamp || new Date());
 
-  message.timestamp = formatTimestamp(message.timestamp || new Date());
+    const formattedData = {
+      timestamp: message.timestamp,
+      sensor_id: message.sensor_id,
+      name: message.name,
+      data: {
+        temperature: parseFloat(message.temperature).toFixed(2),
+        humidity: parseFloat(message.humidity).toFixed(2),
+        pressure: parseFloat(message.pressure).toFixed(2),
+        voc: parseFloat(message.voc).toFixed(2),
+        co2: parseFloat(message.co2).toFixed(2),
+        pm25: parseFloat(message.pm25).toFixed(2),
+        pm10: parseFloat(message.pm10).toFixed(2),
+        no2: parseFloat(message.no2).toFixed(2),
+        o3: parseFloat(message.o3).toFixed(2),
+        so2: parseFloat(message.so2).toFixed(2),
+      },
+    };
 
-  const formattedData = {
-    timestamp: message.timestamp,
-    sensor_id: message.sensor_id,
-    name: message.name,
-    data: {
-      temperature: parseFloat(message.temperature).toFixed(2),
-      humidity: parseFloat(message.humidity).toFixed(2),
-      pressure: parseFloat(message.pressure).toFixed(2),
-      voc: parseFloat(message.voc).toFixed(2),
-      co2: parseFloat(message.co2).toFixed(2),
-      pm25: parseFloat(message.pm25).toFixed(2),
-      pm10: parseFloat(message.pm10).toFixed(2),
-      no2: parseFloat(message.no2).toFixed(2),
-      o3: parseFloat(message.o3).toFixed(2),
-      so2: parseFloat(message.so2).toFixed(2),
-    },
-  };
+    console.log("new measurement");
 
-  console.log("new measurement");
+    store.dispatch("sensors/updateLastMeasurement", {
+      formattedData,
+    });
 
-  store.dispatch("sensors/updateLastMeasurement", {
-    formattedData,
-  });
+    store.dispatch("measurements/updateMeasurements", {
+      formattedData,
+    });
 
-  store.dispatch("measurements/updateMeasurements", {
-    formattedData,
-  });
-
-  store.dispatch("stats/update", {
-    measurementData: formattedData.data,
-  });
+    store.dispatch("stats/update", {
+      measurementData: formattedData.data,
+    });
+  }
 });

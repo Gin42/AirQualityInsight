@@ -12,13 +12,14 @@ const getters = {
   getEaqi: (state) => state.eaqi,
 };
 
-const mutations = {
-  clearStats({ dispatch }) {
-    dispatch("initializeStats");
-  },
-};
+const mutations = {};
 
 const actions = {
+  clearStats({ dispatch }) {
+    dispatch("initializeStats");
+    dispatch("updateEAQI");
+  },
+
   update({ dispatch }, { measurementData }) {
     dispatch("updateStats", { measurementData });
     dispatch("updateEAQI");

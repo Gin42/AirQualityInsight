@@ -1,8 +1,6 @@
 <script>
 import TableComponent from "@/assets/components/TableComponent.vue";
-import { mapState } from "vuex";
-import { mapMutations } from "vuex";
-import { mapGetters } from "vuex";
+import { mapState, mapActions, mapGetters } from "vuex";
 
 export default {
   name: "StatsView",
@@ -15,7 +13,7 @@ export default {
     ...mapGetters("table", ["getStatsTable"]),
   },
   methods: {
-    ...mapMutations("stats", ["clearStats"]),
+    ...mapActions("stats", ["clearStats"]),
   },
 };
 </script>
