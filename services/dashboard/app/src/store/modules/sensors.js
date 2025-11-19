@@ -39,18 +39,18 @@ const getters = {
 
 //MUTATIONS
 const mutations = {
-  setSensorsData(state, { sensorsData, measurementsTypes, center }) {
+  setSensorsData(state, { sensorsData, center }) {
     const sensorMap = new Map(
       sensorsData.map((sensor) => [
         sensor.sensor_id,
-        new Sensor(sensor, measurementsTypes, center),
+        new Sensor(sensor, center),
       ])
     );
     state.sensors = sensorMap;
   },
 
-  addNewSensor(state, { sensorData, measurementsTypes, center }) {
-    const sensor = new Sensor(sensorData, measurementsTypes, center);
+  addNewSensor(state, { sensorData, center }) {
+    const sensor = new Sensor(sensorData, center);
     state.sensors.set(sensorData.sensor_id, sensor);
     state.newSensor = {
       incoming: true,
@@ -104,7 +104,7 @@ const actions = {
     }
   },
 
-  async addSensor({ commit }, data) {
+  async addSensor({ commit, rootGetters, rootState }, data) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const measurementsTypes = rootGetters["data/getMeasurementsTypes"];
@@ -126,8 +126,7 @@ const actions = {
       const response = await jsonResponse.json();
       if (!response) throw new Error(response || "API request failed");
       commit("addNewSensor", {
-        response,
-        measurementsTypes,
+        sensorData: response,
         center: rootState.center,
       });
     } catch (error) {

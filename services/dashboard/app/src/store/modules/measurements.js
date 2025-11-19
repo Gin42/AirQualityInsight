@@ -14,6 +14,9 @@ const getters = {
   allMeasurements: (state) => {
     return state.measurements;
   },
+  allMeasurementsCount: (state) => {
+    return state.measurements.length;
+  },
   lastMeasurement: (state) => {
     return state.measurements[state.measurements.length - 1];
   },

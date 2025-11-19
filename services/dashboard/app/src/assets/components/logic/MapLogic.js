@@ -16,7 +16,7 @@ export default {
       newMeasurement: (state) => state.measurements.measurements,
       newSensor: (state) => state.sensors.newSensor,
     }),
-    ...mapGetters("measurements", ["lastMeasurement"]),
+    ...mapGetters("measurements", ["lastMeasurement", "allMeasurementsCount"]),
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
   },
   watch: {
@@ -25,7 +25,7 @@ export default {
       immediate: true,
       handler() {
         if (this.newSensor.incoming) {
-          this.drawSensor(this.newSensor.data);
+          this.drawSensor(this.newSensor.data, "sensorLocations");
           this.setNewSensor(false);
         }
       },
@@ -278,7 +278,6 @@ export default {
 
       if ("sensorLocations" === layer) {
         for (const sensorLocation of this.allSensors) {
-          console.log(sensorLocation);
           const marker = L.marker(
             [sensorLocation.getLat(), sensorLocation.getLng()],
             {
@@ -293,7 +292,6 @@ export default {
 
           this.layers[layer].push(marker);
           sensorLocation.setMarker(marker);
-          console.log(sensorLocation);
         }
         return;
       }
@@ -575,7 +573,13 @@ export default {
       this.drawLayer("sensorLocations");
     },
 
-    async drawSensor(sensor) {
+    async drawSensor(sensor, layer) {
+      const pushpinIcon = L.icon({
+        iconUrl: pushpinSvg,
+        iconSize: [24, 24],
+        iconAnchor: [12, 20],
+        popupAnchor: [0, -20],
+      });
       if ("sensorLocations" === layer) {
         const marker = L.marker([sensor.getLat(), sensor.getLng()], {
           icon: pushpinIcon,

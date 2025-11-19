@@ -41,7 +41,7 @@
 
         <pre>
           <span>Markers:</span>
-          <span>{{ this.data.sensorLocations?.size }}</span>
+          <span>{{ allSensorsCount }}</span>
         </pre>
 
         <hr />
@@ -104,7 +104,7 @@
         <div class="measurements-controls">
           <p>Current measurements:</p>
           <p>
-            {{ this.measurements[this.selectedMeasurement].heatLatLng.length }}
+            {{ allMeasurementsCount }}
           </p>
         </div>
 
