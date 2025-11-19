@@ -88,7 +88,7 @@
           <input
             id="parameter-slider"
             type="range"
-            v-model="this.maxHeatLatLng"
+            v-model="sliderValue"
             :min="this.minMeasurements"
             :max="this.maxMeasurements"
             step="10"
@@ -97,7 +97,7 @@
           <span
             class="help"
             title="The higher the limit, the more accurate the measurements."
-            >{{ this.maxHeatLatLng }}</span
+            >{{ currentMeasurements }}</span
           >
         </div>
 

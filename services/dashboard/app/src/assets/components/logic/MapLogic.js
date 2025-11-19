@@ -15,9 +15,18 @@ export default {
       center: (state) => state.center,
       newMeasurement: (state) => state.measurements.measurements,
       newSensor: (state) => state.sensors.newSensor,
+      currentMeasurements: (state) => state.currentMeasurements,
     }),
     ...mapGetters("measurements", ["lastMeasurement", "allMeasurementsCount"]),
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
+    sliderValue: {
+      get() {
+        return this.currentMeasurements;
+      },
+      set(value) {
+        this.setCurrentMeasurements(value);
+      },
+    },
   },
   watch: {
     newSensor: {
@@ -72,7 +81,6 @@ export default {
       heatLayer: null,
       loading: ref(false),
       selectedMeasurement: "pm25",
-      maxHeatLatLng: 250,
       error: false,
       show: {
         sensorLocations: true,
@@ -101,7 +109,7 @@ export default {
     };
   },
   methods: {
-    ...mapMutations(["setCenter"]),
+    ...mapMutations(["setCenter", "setCurrentMeasurements"]),
     ...mapMutations("sensors", ["setNewSensor"]),
     ...mapActions("sensors", [
       "fetchSensors",
@@ -404,11 +412,11 @@ export default {
         this.measurements[measurementType].heatLatLng.unshift(latLng);
         if (
           this.measurements[measurementType].heatLatLng.length >
-          this.maxHeatLatLng
+          currentMeasurement
         ) {
           this.measurements[measurementType].heatLatLng = this.measurements[
             measurementType
-          ].heatLatLng.slice(0, this.maxHeatLatLng);
+          ].heatLatLng.slice(0, currentMeasurement);
         }
       }
       this.updateHeatmap();*/

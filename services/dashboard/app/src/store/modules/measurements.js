@@ -49,7 +49,7 @@ const actions = {
   updateMeasurements({ commit, rootState }, { formattedData }) {
     commit("setMeasurement", {
       formattedData,
-      maxMeasurements: rootState.maxMeasurements,
+      maxMeasurements: rootState.currentMeasurements,
     });
   },
 };

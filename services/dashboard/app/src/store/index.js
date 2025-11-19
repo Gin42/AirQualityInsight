@@ -10,6 +10,7 @@ export const store = createStore({
     maxMessages: 50,
     minMeasurements: 50,
     maxMeasurements: 1000,
+    currentMeasurements: 250,
     center: {
       lng: "11.3426000",
       lat: "44.4939000",
@@ -27,6 +28,9 @@ export const store = createStore({
     },
   },
   mutations: {
+    setCurrentMeasurements(state, value) {
+      state.currentMeasurements = value;
+    },
     setSocketActive(state, { value }) {
       state.socketActive = value;
     },
