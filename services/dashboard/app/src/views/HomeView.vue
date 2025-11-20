@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapActions, mapGetters } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import TableComponent from "../assets/components/TableComponent.vue";
 import tableData from "../assets/data/tableData.json";
 

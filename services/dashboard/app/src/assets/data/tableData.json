@@ -59,7 +59,6 @@
   },
   "sensorsTable": {
     "columns": [
-      { "key": "sensor_id", "label": "Id", "sortable": true },
       { "key": "name", "label": "Name", "sortable": true },
       { "key": "lat", "label": "Latitude", "center": true, "sortable": true },
       { "key": "lng", "label": "Longitude", "center": true, "sortable": true },

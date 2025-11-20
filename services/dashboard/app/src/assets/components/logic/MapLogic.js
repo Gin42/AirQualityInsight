@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
@@ -218,8 +218,9 @@ export default {
 
       //se clicco sulla mappa posso aggiungere un pin nell coordinate selezionate
       this.map.on("click", async (e) => {
-        const longitude = e.latlng.lng;
-        const latitude = e.latlng.lat;
+        const longitude = Number(e.latlng.lng.toFixed(7));
+        const latitude = Number(e.latlng.lat.toFixed(7));
+
         let address = await this.fetchAddressFromAPI(latitude, longitude);
 
         console.log("address: " + address);

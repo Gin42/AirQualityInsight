@@ -73,9 +73,8 @@ const connectWithRetry = async () => {
 
 const createSensor = async (sensorData) => {
   try {
+    sensorData.sensor_id = new mongoose.Types.ObjectId();
     const result = await new Sensor(sensorData).save();
-    result.sensor_id = result._id;
-    result = await result.save();
     return result;
   } catch (err) {
     console.error("Error saving sensor:", err);
