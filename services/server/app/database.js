@@ -1,5 +1,6 @@
 const DEBUG = false;
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const sensorSchema = new mongoose.Schema({
   sensor_id: {
@@ -54,6 +55,24 @@ const measurementSchema = new mongoose.Schema({
 });
 const Measurement = mongoose.model("Measurement", measurementSchema);
 
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+
+userSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+const User = mongoose.model("User", userSchema);
+
 const connectWithRetry = async () => {
   const MONGODB_URI =
     process.env.MONGODB_URI || "mongodb://mongodb:27017/sensordata";
@@ -85,6 +104,44 @@ const createSensor = async (sensorData) => {
       );
     }
     return;
+  }
+};
+
+const registerUser = async (userData) => {
+  try {
+    const result = await new User(userData).save();
+    return result;
+  } catch (err) {
+    console.error("Error registering user:", err);
+    if (err.code === 11000) {
+      // Duplicate key error (i.e., username already exists)
+      return { error: "Username already exists" };
+    }
+    if (err.errInfo && err.errInfo.details) {
+      console.error(
+        "Validation details:",
+        JSON.stringify(err.errInfo.details, null, 2)
+      );
+    }
+    return { error: "Registration failed" }; // General error message
+  }
+};
+
+const loginUser = async (credentials) => {
+  console.log("in");
+  try {
+    const user = await User.findOne({ username: credentials.username });
+    if (!user) {
+      return { error: "User not found" };
+    }
+    const isMatch = await user.comparePassword(credentials.password);
+    if (!isMatch) {
+      return { error: "Incorrect password" };
+    }
+    return { message: "Login successful", user: { username: user.username } };
+  } catch (err) {
+    console.error("Error during login:", err);
+    return { error: "Login process failed" };
   }
 };
 
@@ -123,7 +180,10 @@ const saveMeasurement = async (measurement) => {
 module.exports = {
   Sensor,
   Measurement,
+  User,
   connectWithRetry,
   saveMeasurement,
   createSensor,
+  registerUser,
+  loginUser,
 };

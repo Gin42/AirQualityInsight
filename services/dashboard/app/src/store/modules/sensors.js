@@ -108,7 +108,7 @@ const actions = {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const measurementsTypes = rootGetters["data/getMeasurementsTypes"];
-      const jsonResponse = await fetch(`${apiUrl}/api/createSensor`, {
+      const jsonResponse = await fetchFromApi(`${apiUrl}/api/createSensor`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

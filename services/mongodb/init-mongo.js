@@ -136,6 +136,25 @@ db.createCollection("measurements", {
   },
 });
 
+db.createCollection("users", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["username", "password"],
+      properties: {
+        username: {
+          bsonType: "string",
+          description: "Unique username",
+        },
+        password: {
+          bsonType: "string",
+          description: "User password",
+        },
+      },
+    },
+  },
+});
+
 function generateIPAddresses(i) {
   return [
     Math.floor(i / 256 ** 3) % 256,

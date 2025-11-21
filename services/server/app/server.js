@@ -3,8 +3,11 @@ const {
   connectWithRetry,
   Sensor,
   Measurement,
+  User,
   saveMeasurement,
   createSensor,
+  registerUser,
+  loginUser,
 } = require("./database.js");
 const { Kafka } = require("kafkajs");
 const socketIo = require("socket.io");
@@ -566,6 +569,18 @@ app.post("/api/createSensor", async (req, res) => {
   const result = await createSensor(newSensor);
   if (!result) throw new Error(result || "Couldn't create new sensor");
   res.send(result);
+});
+
+app.post("/api/auth/register", async (req, res) => {
+  const result = await registerUser(req.body);
+  if (!result) throw new Error(result || "Couldn't register new user");
+  res.send(result);
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  const result = await loginUser(req.body);
+  if (!result) throw new Error(result || "Couldn't login user");
+  res.send(result.user);
 });
 
 function generateIPAddresses(i) {

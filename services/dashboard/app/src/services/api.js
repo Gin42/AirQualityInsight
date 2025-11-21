@@ -1,5 +1,5 @@
-export async function fetchFromApi(url) {
-  const jsonResponse = await fetch(url);
+export async function fetchFromApi(url, options = {}) {
+  const jsonResponse = await fetch(url, options); // Pass options to fetch
 
   if (!jsonResponse.ok) {
     throw new Error(`HTTP error! status: ${jsonResponse.status}`);

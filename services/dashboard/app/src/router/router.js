@@ -5,6 +5,7 @@ import NotFoundView from "../views/NotFoundView.vue";
 import MapView from "../views/MapView.vue";
 import StatsView from "../views/StatsView.vue";
 import LastMeasurementsView from "../views/LastMeasurementsView.vue";
+import AuthView from "@/views/AuthView.vue";
 
 const routes = [
   { path: "/", component: HomeView },
@@ -12,6 +13,7 @@ const routes = [
   { path: "/map", component: MapView },
   { path: "/stats", component: StatsView },
   { path: "/lastMeasurements", component: LastMeasurementsView },
+  { path: "/auth", component: AuthView },
 ];
 
 export const router = createRouter({

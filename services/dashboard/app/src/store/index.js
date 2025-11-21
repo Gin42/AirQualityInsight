@@ -4,6 +4,7 @@ import measurements from "./modules/measurements";
 import stats from "./modules/statistics";
 import data from "./modules/data";
 import table from "./modules/table";
+import user from "./modules/user";
 
 export const store = createStore({
   state: {
@@ -55,5 +56,6 @@ export const store = createStore({
     stats,
     data,
     table,
+    user,
   },
 });
