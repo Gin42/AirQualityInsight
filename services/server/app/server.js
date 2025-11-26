@@ -8,6 +8,9 @@ const {
   createSensor,
   registerUser,
   loginUser,
+  logoutUser,
+  checkAuth,
+  refreshToken,
 } = require("./database.js");
 const { Kafka } = require("kafkajs");
 const socketIo = require("socket.io");
@@ -571,16 +574,59 @@ app.post("/api/createSensor", async (req, res) => {
   res.send(result);
 });
 
+/**
+ * User functions
+ */
 app.post("/api/auth/register", async (req, res) => {
-  const result = await registerUser(req.body);
+  const data = {
+    username: req.username,
+    password: req.password,
+    token: generateToken(username),
+    active: true,
+  };
+  const result = await registerUser(data);
   if (!result) throw new Error(result || "Couldn't register new user");
   res.send(result);
 });
 
 app.post("/api/auth/login", async (req, res) => {
-  const result = await loginUser(req.body);
+  const data = {
+    username: req.username,
+    password: req.password,
+    token: generateToken(username),
+    active: true,
+  };
+  const result = await loginUser(data);
   if (!result) throw new Error(result || "Couldn't login user");
   res.send(result.user);
+});
+
+app.get("/api/auth/logout", async (req, res) => {
+  const result = await logoutUser();
+  if (!result) throw new Error(result || "Couldn't logout user");
+  res.send(result);
+});
+
+app.post("/api/auth/check", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+  try {
+    const result = await checkAuth(token);
+    res.send(result);
+  } catch (error) {
+    console.error("Auth check error:", error);
+    res.status(500).json({
+      message: error.message || "An error occurred while checking auth.",
+    });
+  }
+});
+
+app.get("/api/auth/refresh-token", async (req, res) => {
+  const result = await refreshToken(token);
+  if (!result) throw new Error(result || "Couldn't refresh token");
+  res.send(token);
 });
 
 function generateIPAddresses(i) {
@@ -590,6 +636,31 @@ function generateIPAddresses(i) {
     Math.floor(i / 256) % 256,
     i % 256,
   ].join(".");
+}
+
+function generateToken(username) {
+  const jwt = require("jsonwebtoken");
+
+  const secretKey = process.env.JWT_SECRET;
+
+  const token = jwt.sign(
+    {
+      sub: username,
+      name: username,
+      role: "admin",
+    },
+    secretKey,
+    { expiresIn: "3h" }
+  );
+
+  console.log("Generated Token:", token);
+  return token;
+}
+
+function decodeToken(token) {
+  const decoded = jwt.verify(token, secret);
+  console.log(decoded);
+  return decoded;
 }
 
 server.listen(port, async () => {

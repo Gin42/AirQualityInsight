@@ -58,6 +58,8 @@ const Measurement = mongoose.model("Measurement", measurementSchema);
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  authToken: { type: String, required: true },
+  refreshToken: { type: String, required: true },
 });
 
 userSchema.pre("save", async function (next) {
@@ -107,44 +109,6 @@ const createSensor = async (sensorData) => {
   }
 };
 
-const registerUser = async (userData) => {
-  try {
-    const result = await new User(userData).save();
-    return result;
-  } catch (err) {
-    console.error("Error registering user:", err);
-    if (err.code === 11000) {
-      // Duplicate key error (i.e., username already exists)
-      return { error: "Username already exists" };
-    }
-    if (err.errInfo && err.errInfo.details) {
-      console.error(
-        "Validation details:",
-        JSON.stringify(err.errInfo.details, null, 2)
-      );
-    }
-    return { error: "Registration failed" }; // General error message
-  }
-};
-
-const loginUser = async (credentials) => {
-  console.log("in");
-  try {
-    const user = await User.findOne({ username: credentials.username });
-    if (!user) {
-      return { error: "User not found" };
-    }
-    const isMatch = await user.comparePassword(credentials.password);
-    if (!isMatch) {
-      return { error: "Incorrect password" };
-    }
-    return { message: "Login successful", user: { username: user.username } };
-  } catch (err) {
-    console.error("Error during login:", err);
-    return { error: "Login process failed" };
-  }
-};
-
 const saveMeasurement = async (measurement) => {
   const processedMeasurement = {
     ...measurement,
@@ -177,6 +141,141 @@ const saveMeasurement = async (measurement) => {
   }
 };
 
+/**
+ * User operations
+ */
+
+/**
+ * Registering a user means creating a new User that has the following proprieties:
+ * - username (unique);
+ * - password (encripted);
+ * - authToken (JWT token with small duration)
+ * - refreshToken (JWT token to keep user session alive)
+ *
+ * Tipi di errore: username duplicato, password ha meno di 8 caratteri (da gestire anche frontend)
+ */
+const registerUser = async (userData) => {
+  try {
+    const result = await new User(userData).save();
+    return result;
+  } catch (err) {
+    console.error("Error registering user:", err);
+    if (err.code === 11000) {
+      return { error: "Username already exists" };
+    }
+    if (err.errInfo && err.errInfo.details) {
+      console.error(
+        "Validation details:",
+        JSON.stringify(err.errInfo.details, null, 2)
+      );
+    }
+    return { error: "Registration failed" };
+  }
+};
+
+/**
+ * Logging a user means retrieving User using its username and password
+ * Tipi di errore: username non esistente, password incorretta
+ */
+const loginUser = async (credentials) => {
+  try {
+    const user = User.findOne({ username: credentials.username });
+    if (!user) {
+      return { error: "User not found" };
+    }
+    const isMatch = user.comparePassword(credentials.password);
+    if (!isMatch) {
+      return { error: "Incorrect password" };
+    }
+    user.authToken = credentials.authToken;
+    user.refreshToken = credentials.refreshToken;
+    user.save();
+    return {
+      message: "Login successful",
+      user: { username: user.username, authToken: user.authToken },
+    };
+  } catch (err) {
+    console.error("Error during login:", err);
+    return;
+  }
+};
+
+const logoutUser = async () => {
+  try {
+    const user = User.findOne({ active: true });
+    if (!user) {
+      return { error: "User not found" };
+    }
+    user.active = false;
+    user.save();
+    return true;
+  } catch (err) {
+    console.error("Error during logout:", err);
+    return false;
+  }
+};
+
+const checkAuth = async (token) => {
+  try {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res
+          .status(401)
+          .json({ message: "Token is invalid or expired." });
+      }
+      const user = User.findOne({ token: token });
+      if (!user) {
+        return { message: "User not found." };
+      } else if (user.active === false) {
+      }
+      return user;
+    });
+  } catch (err) {
+    console.error("Error during check:", err);
+    return false;
+  }
+};
+
+const refreshToken = async (token) => {
+  try {
+    const user = User.findOne({ active: true });
+    if (!user) {
+      return { error: "User not found" };
+    }
+    user.token = token;
+    user.save();
+    return true;
+  } catch (error) {
+    console.error("Error during refresh:", err);
+    return false;
+  }
+};
+
+const generateRefreshToken = (username) => {
+  const jwt = require("jsonwebtoken");
+
+  const secretKey = process.env.JWT_SECRET;
+
+  const token = jwt.sign(
+    {
+      sub: username,
+      name: username,
+      role: "admin",
+    },
+    secretKey,
+    { expiresIn: "3d" }
+  );
+
+  console.log("Generated Token:", token);
+  return token;
+};
+
+const decodeToken = (token) => {
+  const decoded = jwt.verify(token, secret);
+  console.log(decoded);
+  return decoded;
+};
+
 module.exports = {
   Sensor,
   Measurement,
@@ -186,4 +285,6 @@ module.exports = {
   createSensor,
   registerUser,
   loginUser,
+  logoutUser,
+  checkAuth,
 };

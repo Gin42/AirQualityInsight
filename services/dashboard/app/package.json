@@ -17,6 +17,8 @@
         "bologna"
     ],
     "dependencies": {
+        "jsonwebtoken": "^9.0.2",
+        "jwt-builder": "^1.1.0",
         "leaflet": "^1.9.4",
         "leaflet.heat": "^0.2.0",
         "socket.io-client": "^4.8.1",

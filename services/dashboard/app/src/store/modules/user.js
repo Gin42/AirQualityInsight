@@ -13,7 +13,7 @@ const mutations = {
       id: authData._id,
     };
     state.token = authData.token;
-    localStorage.setItem("authToken", authData.token);
+    localStorage.setItem("authToken", state.token);
   },
   resetAuth(state) {
     state.user = null;
@@ -43,8 +43,11 @@ const actions = {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const response = await fetchFromApi(`${apiUrl}/api/auth/logout`);
-      commit("resetAuth");
-      return response;
+      if (response) {
+        commit("resetAuth");
+      } else {
+        console.error("Unable to logout");
+      }
     } catch (error) {
       console.error("Unable to logout", error);
     }
@@ -57,7 +60,10 @@ const actions = {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(userData),
+        body: {
+          username: userData.username,
+          password: userData.password,
+        },
       });
       commit("setAuth", response);
       return response;
@@ -76,9 +82,7 @@ const actions = {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (response.data.invalid) {
-          dispatch("refreshToken");
-        }
+        dispatch("refreshToken");
       } catch (error) {
         console.error("Auth check failed:", error);
         dispatch("resetAuth");
@@ -98,7 +102,6 @@ const actions = {
     }
   },
 };
-
 export default {
   namespaced: true,
   state,

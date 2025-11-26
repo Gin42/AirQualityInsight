@@ -148,7 +148,16 @@ db.createCollection("users", {
         },
         password: {
           bsonType: "string",
+          minLength: 8,
           description: "User password",
+        },
+        authToken: {
+          bsonType: "string",
+          description: "A JWT token to manage auth",
+        },
+        refreshToken: {
+          bsonType: "string",
+          description: "A JWT token to manage sessions",
         },
       },
     },
@@ -215,5 +224,6 @@ db.sensors.createIndex({ sensor_id: 1 }, { unique: true });
 db.sensors.createIndex({ location: "2dsphere" });
 db.measurements.createIndex({ sensor_id: 1, timestamp: -1 });
 db.measurements.createIndex({ timestamp: -1 });
+db.users.createIndex({ username: 1 }, { unique: true });
 
 printSection("Initialization complete");
