@@ -1,16 +1,8 @@
 // server.js
 const {
   connectWithRetry,
-  Sensor,
   Measurement,
-  User,
   saveMeasurement,
-  createSensor,
-  registerUser,
-  loginUser,
-  logoutUser,
-  checkAuth,
-  refreshToken,
 } = require("./database.js");
 const { Kafka } = require("kafkajs");
 const socketIo = require("socket.io");
@@ -64,7 +56,13 @@ io.on("connection", (socket) => {
   });
 });
 
+const authRoutes = require("./routes/authRoutes.js");
+const sensorRoutes = require("./routes/sensorRoutes");
+
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+app.use("/api/sensor", sensorRoutes);
 
 // Logging Middleware
 app.use((req, res, next) => {
@@ -533,21 +531,6 @@ app.get("/api/measurements", async (req, res) => {
   }
 });
 
-app.get("/api/sensors", async (req, res) => {
-  const { sensorId } = req.query;
-  const query = {};
-
-  if (sensorId) query.sensor_id = sensorId;
-
-  try {
-    await connectWithRetry();
-    const sensors = await Sensor.find(query); //limita qui
-    res.json(sensors);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 app.get("/api/latest", async (req, res) => {
   try {
     connectWithRetry();
@@ -557,111 +540,6 @@ app.get("/api/latest", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-app.post("/api/createSensor", async (req, res) => {
-  let count = await Sensor.countDocuments();
-  count = count + 1;
-  const newSensor = {
-    sensor_id: "",
-    name: req.body.name,
-    location: req.body.location,
-    ip: generateIPAddresses(count),
-    active: req.body.active,
-    last_seen: req.body.last_seen,
-  };
-  const result = await createSensor(newSensor);
-  if (!result) throw new Error(result || "Couldn't create new sensor");
-  res.send(result);
-});
-
-/**
- * User functions
- */
-app.post("/api/auth/register", async (req, res) => {
-  const data = {
-    username: req.username,
-    password: req.password,
-    token: generateToken(username),
-    active: true,
-  };
-  const result = await registerUser(data);
-  if (!result) throw new Error(result || "Couldn't register new user");
-  res.send(result);
-});
-
-app.post("/api/auth/login", async (req, res) => {
-  const data = {
-    username: req.username,
-    password: req.password,
-    token: generateToken(username),
-    active: true,
-  };
-  const result = await loginUser(data);
-  if (!result) throw new Error(result || "Couldn't login user");
-  res.send(result.user);
-});
-
-app.get("/api/auth/logout", async (req, res) => {
-  const result = await logoutUser();
-  if (!result) throw new Error(result || "Couldn't logout user");
-  res.send(result);
-});
-
-app.post("/api/auth/check", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ message: "No token provided." });
-  }
-  try {
-    const result = await checkAuth(token);
-    res.send(result);
-  } catch (error) {
-    console.error("Auth check error:", error);
-    res.status(500).json({
-      message: error.message || "An error occurred while checking auth.",
-    });
-  }
-});
-
-app.get("/api/auth/refresh-token", async (req, res) => {
-  const result = await refreshToken(token);
-  if (!result) throw new Error(result || "Couldn't refresh token");
-  res.send(token);
-});
-
-function generateIPAddresses(i) {
-  return [
-    Math.floor(i / 256 ** 3) % 256,
-    Math.floor(i / 256 ** 2) % 256,
-    Math.floor(i / 256) % 256,
-    i % 256,
-  ].join(".");
-}
-
-function generateToken(username) {
-  const jwt = require("jsonwebtoken");
-
-  const secretKey = process.env.JWT_SECRET;
-
-  const token = jwt.sign(
-    {
-      sub: username,
-      name: username,
-      role: "admin",
-    },
-    secretKey,
-    { expiresIn: "3h" }
-  );
-
-  console.log("Generated Token:", token);
-  return token;
-}
-
-function decodeToken(token) {
-  const decoded = jwt.verify(token, secret);
-  console.log(decoded);
-  return decoded;
-}
 
 server.listen(port, async () => {
   console.log(`Server with WoT Gateway running on http://localhost:${port}`);
