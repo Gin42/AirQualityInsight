@@ -1,19 +1,5 @@
 <template>
-  <p>{{ this.user ? this.user.username : "Guest" }}</p>
-  <p>{{ this.user ? this.user.password : "" }}</p>
-
-  <div class="login-container">
-    <form @submit.prevent="handleLogin">
-      <input v-model="username" type="text" placeholder="Username" required />
-      <input
-        v-model="password"
-        type="password"
-        placeholder="Password"
-        required
-      />
-      <button type="submit">Login</button>
-    </form>
-  </div>
+  <p>{{ this.username ? this.username : "Guest" }}</p>
 
   <div class="register-container">
     <form @submit.prevent="handleRegister">
@@ -54,24 +40,10 @@ export default {
         password: this.password,
       })
         .then((response) => {
-          console.log(response);
           console.log("Registration OK");
         })
         .catch((error) => {
           console.error("Registration failed:", error);
-        });
-    },
-    handleLogin() {
-      this.login({
-        username: this.username,
-        password: this.password,
-      })
-        .then((response) => {
-          console.log(response);
-          console.log("Login OK");
-        })
-        .catch((error) => {
-          console.error("Login failed:", error);
         });
     },
   },

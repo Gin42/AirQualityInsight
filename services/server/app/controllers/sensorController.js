@@ -28,7 +28,7 @@ const getSensor = async (req, res) => {
   if (sensorId) query.sensor_id = sensorId;
 
   try {
-    await connectWithRetry();
+    await sensorService.connectWithRetry();
     const sensors = await sensorService.getSensorData(query);
     res.json(sensors);
   } catch (error) {

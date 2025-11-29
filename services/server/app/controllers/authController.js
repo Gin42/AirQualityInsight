@@ -1,58 +1,140 @@
 const authService = require("../services/authService");
+const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
+  console.log("UGO");
   try {
-    const data = {
-      username: req.username,
-      password: req.password,
-      authToken: generateAuthToken(username),
-      refreshToken: authService.generateRefreshToken(username),
+    const credentials = {
+      username: req.body.username,
+      password: req.body.password,
     };
-    const result = await authService.registerUser(data);
-    res.status(201).json(result);
+    const result = await authService.registerUser(credentials);
+    console.log(result);
+    console.log("OGU");
+    if (result.error) throw new Error(result.error);
+
+    const authToken = authService.generateAuthToken(result.username);
+    const refreshToken = authService.generateRefreshToken(result.username);
+
+    // Set access token in HTTP-only cookie
+    res.cookie("authToken", authToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3 * 24 * 24 * 60 * 1000, // 3 days
+    });
+
+    res.json({
+      message: "User registration successful",
+      username: result.user.username,
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("Registration error:", error); // Log the error for server-side tracking
+    res.status(400).json({ error: error.message }); // Use status codes
   }
 };
 
 const login = async (req, res) => {
-  const data = {
-    username: req.username,
-    password: req.password,
-    authToken: generateAuthToken(username),
-    refreshToken: authService.generateRefreshToken(username),
-  };
-  const result = await authService.loginUser(data);
-  if (!result) throw new Error(result || "Couldn't login user");
-  res.json(result);
+  try {
+    const credentials = {
+      username: req.body.username,
+      password: req.body.password,
+    };
+    const result = await authService.loginUser(credentials);
+
+    if (result.error) throw new Error(result.error);
+
+    const authToken = authService.generateAuthToken(result.username);
+    const refreshToken = authService.generateRefreshToken(result.username);
+
+    // Set access token in HTTP-only cookie
+    res.cookie("authToken", authToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3 * 24 * 24 * 60 * 1000, // 3 days
+    });
+
+    res.json({ message: "User login succesful", username: result });
+  } catch {
+    res.json({ error: error.message });
+  }
 };
 
-const logout = async (req, res) => {
-  const result = await authService.logoutUser();
-  if (!result) throw new Error(result || "Couldn't logout user");
-  res.json(result);
+const logout = (req, res) => {
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+  return res.status(200).json({ message: "Successfully logged out" });
 };
 
 const checkAuthToken = async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ message: "No token provided." });
+  const authToken = req.cookies.authToken;
+
+  if (!authToken) {
+    return res.status(401).json({ error: "No auth token provided" });
   }
+
   try {
-    const result = await checkAuth(token);
-    res.send(result);
+    const authDecoded = jwt.verify(authToken, process.env.ACCESS_TOKEN_SECREt);
+    // il token è ancora valido
+    return authDecoded;
   } catch (error) {
-    console.error("Auth check error:", error);
-    res.status(500).json({
-      message: error.message || "An error occurred while checking auth.",
-    });
+    //il token non è valido
+    if (error.name === "TokenExpiredError") {
+      return refreshAuthToken(req, res);
+    }
+
+    return res.status(401).json({ error: "Invalid auth token" });
   }
 };
 
 const refreshAuthToken = async (req, res) => {
-  const result = await refreshToken(token);
-  if (!result) throw new Error(result || "Couldn't refresh token");
-  res.send(token);
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(401).json({ error: "No refresh token provided" });
+  }
+
+  try {
+    const decodedRefresh = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    const newAccessToken = authService.generateAuthToken(decoded.name);
+
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.json({ message: "Access token refreshed" });
+  } catch (err) {
+    logout(req, res);
+    return res.status(401).json({ error: "Invalid or expired refresh token" });
+  }
 };
 
 module.exports = {

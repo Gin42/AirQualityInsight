@@ -3,7 +3,7 @@ const express = require("express");
 const sensorController = require("../controllers/sensorController");
 const router = express.Router();
 
-router.get("/", sensorController.allSensors);
+router.get("/", sensorController.getSensor);
 router.post("/addSensor", sensorController.addSensor);
 
 /** TO-DO:

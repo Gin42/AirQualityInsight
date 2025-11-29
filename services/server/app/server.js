@@ -4,6 +4,9 @@ const {
   Measurement,
   saveMeasurement,
 } = require("./database.js");
+
+const Sensor = require("./models/sensorModel.js");
+
 const { Kafka } = require("kafkajs");
 const socketIo = require("socket.io");
 const http = require("http");

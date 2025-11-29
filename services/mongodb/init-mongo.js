@@ -151,14 +151,6 @@ db.createCollection("users", {
           minLength: 8,
           description: "User password",
         },
-        authToken: {
-          bsonType: "string",
-          description: "A JWT token to manage auth",
-        },
-        refreshToken: {
-          bsonType: "string",
-          description: "A JWT token to manage sessions",
-        },
       },
     },
   },

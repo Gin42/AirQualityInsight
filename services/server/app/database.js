@@ -1,6 +1,5 @@
 const DEBUG = false;
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 
 const measurementSchema = new mongoose.Schema({
   sensor_id: String,

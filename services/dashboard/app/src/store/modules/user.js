@@ -1,28 +1,37 @@
 import { fetchFromApi } from "@/services/api";
 
 const state = () => ({
-  user: null,
-  token: localStorage.getItem("authToken") || null,
+  username: null,
 });
 
 const mutations = {
-  setAuth(state, authData) {
-    state.user = {
-      username: authData.username,
-      password: authData.password,
-      id: authData._id,
-    };
-    state.token = authData.token;
-    localStorage.setItem("authToken", state.token);
+  setAuth(state, username) {
+    state.username = username;
   },
   resetAuth(state) {
-    state.user = null;
-    state.token = null;
-    localStorage.removeItem("authToken");
+    state.username = null;
   },
 };
 
 const actions = {
+  async register({ commit }, userData) {
+    try {
+      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+      const response = await fetchFromApi(`${apiUrl}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+        credentials: "include",
+      });
+      commit("setAuth", response.username);
+      return response;
+    } catch (error) {
+      console.error("Unable to login", error);
+    }
+  },
+
   async login({ commit }, userData) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
@@ -32,17 +41,21 @@ const actions = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
+        credentials: "include",
       });
-      commit("setAuth", response);
+      commit("setAuth", response.username);
       return response;
     } catch (error) {
       console.error("Unable to login", error);
     }
   },
+
   async logout({ commit }) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-      const response = await fetchFromApi(`${apiUrl}/api/auth/logout`);
+      const response = await fetchFromApi(`${apiUrl}/api/auth/logout`, {
+        credentials: "include",
+      });
       if (response) {
         commit("resetAuth");
       } else {
@@ -52,56 +65,26 @@ const actions = {
       console.error("Unable to logout", error);
     }
   },
-  async register({ commit }, userData) {
+
+  async checkAuth({ state, dispatch }) {
     try {
-      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-      const response = await fetchFromApi(`${apiUrl}/api/auth/register`, {
+      const response = await fetchFromApi(`${apiUrl}/api/auth/checkAuthToken`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: {
-          username: userData.username,
-          password: userData.password,
-        },
+        credentials: "include",
       });
-      commit("setAuth", response);
-      return response;
-    } catch (error) {
-      console.error("Unable to login", error);
-    }
-  },
-  async checkAuth({ state, dispatch }) {
-    const token = state.token;
-    if (token) {
-      try {
-        const response = await fetchFromApi(`${apiUrl}/api/auth/check`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        dispatch("refreshToken");
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        dispatch("resetAuth");
+      if (response === null) {
+        dispatch("logout");
       }
-    }
-  },
-
-  async refreshToken({ state }) {
-    try {
-      const response = await fetchFromApi(`${apiUrl}/api/auth/refresh-token`);
-      const newToken = response.data.token;
-      state.token = newToken;
-      localStorage.setItem("authToken", newToken);
     } catch (error) {
-      console.error("Token refresh failed:", error);
+      console.error("Auth check failed:", error);
       dispatch("resetAuth");
     }
   },
 };
+
 export default {
   namespaced: true,
   state,

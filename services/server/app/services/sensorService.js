@@ -1,5 +1,23 @@
 // sensorService.js
 const Sensor = require("../models/sensorModel");
+const mongoose = require("mongoose");
+
+const connectWithRetry = async () => {
+  const MONGODB_URI =
+    process.env.MONGODB_URI || "mongodb://mongodb:27017/sensordata";
+
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      connectTimeoutMS: 10000, // Give up initial connection after 10s
+    });
+    console.log("MongoDB connected successfully");
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    console.log("Retrying in 5 seconds...");
+    setTimeout(connectWithRetry, 5000);
+  }
+};
 
 const countSensors = () => {
   return Sensor.countDocuments();
@@ -40,4 +58,5 @@ module.exports = {
   getSensorData,
   countSensors,
   generateIPAddresses,
+  connectWithRetry,
 };
