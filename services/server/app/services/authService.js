@@ -21,7 +21,7 @@ const registerUser = async (userData) => {
 
 const loginUser = async (credentials) => {
   try {
-    const user = await findOne({
+    const user = await User.findOne({
       username: credentials.username,
     });
     if (!user) {

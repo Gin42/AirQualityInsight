@@ -2,15 +2,12 @@ const authService = require("../services/authService");
 const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
-  console.log("UGO");
   try {
     const credentials = {
       username: req.body.username,
       password: req.body.password,
     };
     const result = await authService.registerUser(credentials);
-    console.log(result);
-    console.log("OGU");
     if (result.error) throw new Error(result.error);
 
     const authToken = authService.generateAuthToken(result.username);
@@ -47,6 +44,8 @@ const login = async (req, res) => {
       username: req.body.username,
       password: req.body.password,
     };
+    console.log("UGO");
+    console.log(credentials);
     const result = await authService.loginUser(credentials);
 
     if (result.error) throw new Error(result.error);
