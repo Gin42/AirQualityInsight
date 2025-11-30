@@ -98,7 +98,7 @@ export default {
 <template>
   <div class="how-to-use-it">
     <h2>How to use it</h2>
-    <ul>
+    <ul class="how-to-list">
       <li>
         The map displays a collection of sensors indicated by red pushpins.
       </li>
@@ -141,7 +141,7 @@ export default {
     <div class="component-header">
       <h2>Map</h2>
       <div class="component-header-buttons">
-        <button @click="refreshSensors" class="btn">
+        <button @click="refreshSensors" class="btn tertiary-color">
           <i class="fas fa-sync-alt"></i> Refresh
         </button>
         <button
@@ -198,3 +198,22 @@ export default {
     />
   </div>
 </template>
+
+<style lang="scss">
+.how-to-use-it {
+  display: flex;
+  flex-direction: column;
+}
+
+ul.how-to-list {
+  flex-direction: column;
+  list-style-type: disc;
+}
+
+.map-component-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+</style>

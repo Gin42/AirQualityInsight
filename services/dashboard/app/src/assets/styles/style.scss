@@ -1,0 +1,146 @@
+@use "_colors";
+
+.bg-color {
+  background-color: var(--background-color);
+}
+
+.primary-color {
+  background-color: var(--primary-color);
+
+  &:hover {
+    background-color: var(--primary-hover);
+  }
+}
+
+.secondary-color {
+  background-color: var(--secondary-color);
+
+  &:hover {
+    background-color: var(--secondary-hover);
+  }
+}
+
+.tertiary-color {
+  background-color: var(--tertiary-color);
+
+  &:hover {
+    background-color: var(--tertiary-hover);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background-color);
+  margin: 0;
+  height: 100%;
+
+  font-family: "Arial", sans-serif;
+  letter-spacing: 1px;
+  color: var(--text-color);
+}
+
+#app {
+  width: auto;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 1rem;
+  &-component {
+    overflow: hidden;
+  }
+}
+
+button {
+  border: none;
+  text-align: center;
+  border-radius: 8px;
+  padding: 0;
+}
+
+ul {
+  display: flex;
+}
+
+/* TO CHECK*/
+
+.results {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 0.25rem;
+}
+
+.error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.success {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: #155724;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.stat-item {
+  background: #e9ecef;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--light-blue);
+}
+
+.hidden {
+  display: none !important;
+}
+
+#loading {
+  text-align: center;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.spinner {
+  border: 0.25rem solid #f3f3f3;
+  border-top: 0.25rem solid var(--light-blue);
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

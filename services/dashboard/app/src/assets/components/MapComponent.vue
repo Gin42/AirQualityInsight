@@ -141,8 +141,24 @@
 </template>
 
 <style scoped lang="scss">
+#map {
+  height: 500px;
+}
+.pushpin-icon {
+  background: none !important;
+  border: none !important;
+}
+.leaflet-current-layer {
+  background-color: white;
+  padding: 0.75rem;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer !important;
+}
+
 .map {
-  height: 100%;
+  height: 50rem; /* MOMENTANEO */
   background-color: #f1e3f3;
   border-radius: 6px;
   display: flex;
@@ -359,6 +375,57 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+  }
+
+  pre {
+    margin: 0;
+    padding: 1rem 0.5rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border-radius: 0.25rem;
+    background-color: #f4f4f4;
+    border: solid 1px #ddd;
+    font-family: "Fira Code", "Monaco", "Consolas", monospace;
+    color: #333;
+    line-height: 1.5;
+    counter-reset: line-number;
+  }
+
+  pre .line {
+    counter-increment: line-number;
+    position: relative;
+    padding-left: 3rem;
+  }
+
+  pre .line::before {
+    content: counter(line-number);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2rem;
+    text-align: right;
+    color: #718096;
+    font-size: 12px;
+    padding-right: 1rem;
+    border-right: 1px solid #4a5568;
+  }
+
+  .copy-btn {
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    z-index: 1;
+  }
+
+  .copy-btn:hover {
+    opacity: 1;
   }
 
   hr {

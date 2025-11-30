@@ -1,120 +1,123 @@
-<script setup>
-import router from "@/router";
-import { ref } from "vue";
-let open = ref(false);
+<script>
+import { mapState } from "vuex";
+export default {
+  name: "LoginForm",
+  computed: {
+    ...mapState({
+      user: (state) => state.user.user,
+    }),
+  },
+};
 </script>
 
 <template>
-  <div :class="['topnav', open ? 'open' : 'close']" ref="topNav">
-    <div class="menu-button interact">
-      <a @click.prevent="open = !open">
-        <i class="fa fa-bars fa-xl" v-show="!open"></i>
-        <i class="fa-solid fa-xmark fa-xl" v-show="open"></i>
-      </a>
-    </div>
-    <ul class="links" v-if="open">
-      <li class="list-item interact">
-        <router-link href="#home">
-          <i class="fa-solid fa-house icon fa-xl"></i>
-          <p>Home</p>
-        </router-link>
+  <nav class="primary-color">
+    <p class="website-name">AirQualityInsight</p>
+    <ul class="nav-list">
+      <li class="nav-route">
+        <RouterLink to="/"> Home </RouterLink>
       </li>
-      <li class="list-item interact">
-        <router-link href="#map">
-          <i class="fa-solid fa-map icon fa-xl"></i>
-          <p>Map</p>
-        </router-link>
+      <li class="nav-route">
+        <RouterLink to="/map"> Map </RouterLink>
       </li>
-      <li class="list-item interact">
-        <router-link href="#stats"
-          ><i class="fa-solid fa-chart-line icon fa-xl"></i>
-          <p>Statistics</p>
-        </router-link>
+      <li class="nav-route">
+        <RouterLink to="/lastMeasurements"> Last measurements </RouterLink>
       </li>
-      <li class="list-item interact">
-        <router-link href="#liveEAQI"
-          ><i class="fa-solid fa-tower-broadcast icon fa-xl"></i>
-          <p>Live EAQI</p>
-        </router-link>
-      </li>
-      <li class="list-item interact">
-        <router-link href="#last"
-          ><i class="fa-solid fa-ruler icon fa-xl"></i>
-          <p>Last measurement</p>
-        </router-link>
+      <li class="nav-route">
+        <RouterLink to="/stats"> Statistics </RouterLink>
       </li>
     </ul>
-  </div>
-  <!-- "Hamburger menu" / "Bar icon" to toggle the navigation links -->
+    <div class="buttons">
+      <button class="auth-button tertiary-color">
+        <RouterLink to="/sign-up"> Sign-up </RouterLink>
+      </button>
+      <button class="auth-button tertiary-color">
+        <RouterLink to="/login"> Login </RouterLink>
+      </button>
+    </div>
+    <p>{{ this.user ? this.user.username : "Guest" }}</p>
+  </nav>
 </template>
 
-<style>
-.topnav {
-  overflow: hidden;
-  background-color: #8fb8ed;
-  position: fixed;
-  width: -webkit-fill-available;
-  height: 3rem;
+<style lang="scss">
+nav {
   display: flex;
   flex-direction: row;
+  height: 4rem;
+  overflow: hidden;
+  justify-content: space-between;
   align-items: center;
-  justify-content: flex-start;
-  padding: 1rem;
+  padding: 0 2rem;
 }
 
-.topnav .menu-button {
-  border-radius: 50%;
-  width: 1.5em;
-  aspect-ratio: 1 / 1;
+nav.primary-color:hover {
+  background-color: var(--primary-color);
+}
+
+.website-name {
+  font-size: 2em;
+  font-weight: bold;
+  cursor: default;
+}
+
+ul.nav-list {
+  flex-direction: row;
+  list-style-type: none;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  gap: 4rem;
+}
+
+ul.nav-list li {
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 1rem;
 }
 
-.topnav .links {
-  display: block;
-  position: fixed;
-  width: max-content;
-  height: -webkit-fill-available;
-  background: #8fb8ed;
-  top: 3rem;
-  left: 0;
-  list-style: none;
+ul.nav-list li:hover {
+  background-color: var(--primary-hover);
+}
+
+li.nav-route a {
   display: flex;
-  flex-direction: column;
-  z-index: 2;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1.3em;
+  font-style: normal;
+  text-decoration: none;
+  color: var(--secondary-text-color);
 }
 
-.topnav .list-item {
-  padding: 0.7rem 1rem;
+.auth-button {
+  border: none;
+  text-align: center;
+  border-radius: 8px;
+  padding: 0;
 }
 
-.topnav .interact:hover {
-  background-color: #88afe1;
-  cursor: pointer;
+.auth-button a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1.2em;
+  font-style: normal;
+  text-decoration: none;
+  color: var(--secondary-text-color);
+  letter-spacing: inherit;
+  padding: 0.75rem 1.5rem;
 }
 
-.topnav .list-item > a {
+div.buttons {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  text-decoration: none;
-}
-
-i.icon {
-  padding-right: 1rem;
-  color: black;
-}
-
-p {
-  color: black;
-}
-
-.hide {
-  display: none;
-}
-
-.show {
-  display: block;
+  gap: 2rem;
 }
 </style>

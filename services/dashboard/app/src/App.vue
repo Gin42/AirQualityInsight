@@ -1,9 +1,11 @@
 <!-- App.vue -->
 <script>
 import { mapActions } from "vuex";
+import TopNavComponent from "./assets/components/TopNavComponent.vue";
 
 export default {
   name: "App",
+  components: { TopNavComponent },
   methods: {
     ...mapActions("data", ["initializeData"]),
     ...mapActions("table", ["initializeTableData"]),
@@ -431,18 +433,9 @@ export default {
 </script>
 
 <template>
-  <div class="app">
-    <h1>AirQualityInsight - Dashboard</h1>
-    <p>Current route path: {{ $route.fullPath }}</p>
-    <nav>
-      <RouterLink to="/map"> Go to map </RouterLink>
-      <RouterLink to="/lastMeasurements"> Go to last measurements </RouterLink>
-      <RouterLink to="/stats"> Go to Stats </RouterLink>
-      <RouterLink to="/auth"> Go to Auth </RouterLink>
-    </nav>
-    <div class="dashboard">
-      <RouterView></RouterView>
-    </div>
+  <TopNavComponent></TopNavComponent>
+  <div class="dashboard">
+    <RouterView></RouterView>
   </div>
   <!--
         <div class="how-to-use-it">
@@ -649,42 +642,7 @@ export default {
         />-->
 </template>
 
-<style src="./assets/style.scss"></style>
 <style lang="scss">
-body {
-  font-family: "Arial", sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: var(--background-color);
-}
-
-.app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.dashboard {
-  display: grid;
-  grid-template-areas:
-    "info"
-    "map"
-    "measurements"
-    "stats"
-    "log"
-    "sensors";
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-
-  &-component {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    overflow: hidden;
-  }
-}
-
 .info-component-container {
   grid-area: info;
   display: flex;

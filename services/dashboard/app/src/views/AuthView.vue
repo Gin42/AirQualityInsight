@@ -1,51 +1,33 @@
 <template>
-  <p>{{ this.username ? this.username : "Guest" }}</p>
-
-  <div class="register-container">
-    <form @submit.prevent="handleRegister">
-      <input v-model="username" type="text" placeholder="Username" required />
-      <input
-        v-model="password"
-        type="password"
-        placeholder="Password"
-        required
-      />
-      <button type="submit">Register</button>
-    </form>
+  <div div class="form-container">
+    <component :is="formType" />
   </div>
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import SignUpForm from "../assets/components/SignUpComponent.vue";
+import LoginForm from "../assets/components/LoginComponent.vue";
 
 export default {
-  name: "AuthView",
+  props: {
+    type: {
+      type: String,
+      required: true,
+    },
+  },
   computed: {
-    ...mapState({
-      user: (state) => state.user.user,
-    }),
-  },
-  data() {
-    return {
-      username: "",
-      password: "",
-    };
-  },
-  methods: {
-    ...mapActions("user", ["register", "login"]),
-
-    handleRegister() {
-      this.register({
-        username: this.username,
-        password: this.password,
-      })
-        .then((response) => {
-          console.log("Registration OK");
-        })
-        .catch((error) => {
-          console.error("Registration failed:", error);
-        });
+    formType() {
+      return this.type === "sign-up" ? SignUpForm : LoginForm;
     },
   },
 };
 </script>
+
+<style lang="scss">
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.5em;
+}
+</style>

@@ -1,18 +1,17 @@
+// _colors.scss
+
+// Export variables
 :root {
   --primary-color: #8fb8ed;
-  --primary-hover: #3590f3;
+  --primary-hover: #82b1ee;
   --secondary-color: #c2bbf0;
-  --secondary-hover: #a49bde;
-  --tertiary-color: #62bfed;
+  --secondary-hover: #a49be2;
+  --tertiary-color: #3590f3;
+  --tertiary-hover: #2282eb;
   --background-color: #f1e3f3;
+  --text-color: #1e1e1e;
+  --secondary-text-color: #1d1b20;
   --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-
-  --danger-color: #f44336;
-  --danger-hover: #d32f2f;
-  --info-color: #2196f3;
-  --warning-color: #ff9800;
-  --error-color: #f44336;
-  --border-color: #eee;
 
   --AQI-good: #9dfd91;
   --AQI-fair: #fec808;
@@ -21,24 +20,3 @@
   --AQI-very-poor: #890997;
   --AQI-extremely-poor: #640015;
 }
-
-.primary-background {
-  background: var(--background-color);
-}
-/*.primary-background-dark {
-  background: var(--primary-theme-color-dark);
-}
-.primary-background-disabled {
-  background: var(--primary-theme-color-light);
-}*/
-
-.secondary-background {
-  background: var(--secondary-color);
-}
-/*
-.secondary-background-dark {
-  background: var(--secondary-theme-color-dark);
-}
-.secondary-background-disabled {
-  background: var(--secondary-theme-color-light);
-}*/

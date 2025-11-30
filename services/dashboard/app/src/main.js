@@ -1,5 +1,5 @@
 // main.js
-import "./assets/main.css";
+import "./assets/styles/style.scss"; //forse da eliminare
 
 import { createApp } from "vue";
 import { store } from "./store";

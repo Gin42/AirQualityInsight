@@ -641,19 +641,23 @@ export default {
     },
   },
   async mounted() {
-    this.initMap();
+    try {
+      this.initMap();
 
-    const layers = [
-      "sensorLocations",
-      "postalCodeBoundaries",
-      "neighborhoods",
-      "zones",
-      "ztl",
-    ];
+      const layers = [
+        "sensorLocations",
+        "postalCodeBoundaries",
+        "neighborhoods",
+        "zones",
+        "ztl",
+      ];
 
-    for (const layer of layers) {
-      await this.populateLayer(layer);
-      if (this.show[layer]) this.drawLayer(layer);
+      for (const layer of layers) {
+        await this.populateLayer(layer);
+        if (this.show[layer]) this.drawLayer(layer);
+      }
+    } catch (error) {
+      console.error("Error initializing map:", error);
     }
   },
 };

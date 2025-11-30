@@ -33,6 +33,7 @@ const actions = {
   },
 
   async login({ commit }, userData) {
+    console.log("UGO");
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const response = await fetchFromApi(`${apiUrl}/api/auth/login`, {
