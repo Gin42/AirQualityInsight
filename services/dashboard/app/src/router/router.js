@@ -1,5 +1,5 @@
 import { createWebHistory, createRouter } from "vue-router";
-
+import { useStore } from "vuex";
 import HomeView from "../views/HomeView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
 import MapView from "../views/MapView.vue";
@@ -25,7 +25,19 @@ const routes = [
   },
 ];
 
-export const router = createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+router.beforeEach(async (to, from, next) => {
+  const store = useStore();
+  await checkAuthValidity(store);
+  next();
+});
+
+async function checkAuthValidity(store) {
+  await store.dispatch("user/checkAuth");
+}
+
+export { router };

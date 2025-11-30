@@ -118,9 +118,9 @@ const refreshAuthToken = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    const newAccessToken = authService.generateAuthToken(decodedRefresh.name);
+    const newAuthToken = authService.generateAuthToken(decodedRefresh.name);
 
-    res.cookie("accessToken", newAccessToken, {
+    res.cookie("authToken", newAuthToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
