@@ -14,6 +14,8 @@ const http = require("http");
 const cors = require("cors");
 const express = require("express");
 
+const cookieParser = require("cookie-parser");
+
 const app = express();
 const server = http.createServer(app);
 
@@ -27,6 +29,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(cookieParser());
 
 const port = process.env.PORT || 3000;
 

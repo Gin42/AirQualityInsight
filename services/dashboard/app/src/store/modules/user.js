@@ -67,21 +67,26 @@ const actions = {
     }
   },
 
-  async checkAuth({ state, dispatch }) {
+  async checkAuth({ state, dispatch, commit }) {
     try {
+      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const response = await fetchFromApi(`${apiUrl}/api/auth/checkAuthToken`, {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
       });
-      if (response === null) {
+      console.log("HELLO");
+      console.log(response);
+      if (response.error) {
         dispatch("logout");
+      } else if (state.username == null) {
+        commit("setAuth", response); //deve prendere il name
       }
     } catch (error) {
       console.error("Auth check failed:", error);
-      dispatch("resetAuth");
+      commit("resetAuth");
     }
   },
 };

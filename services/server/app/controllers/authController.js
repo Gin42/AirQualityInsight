@@ -28,10 +28,7 @@ const register = async (req, res) => {
       maxAge: 3 * 24 * 24 * 60 * 1000, // 3 days
     });
 
-    res.json({
-      message: "User registration successful",
-      username: result.user.username,
-    });
+    res.json(result.user.username);
   } catch (error) {
     console.error("Registration error:", error); // Log the error for server-side tracking
     res.status(400).json({ error: error.message }); // Use status codes
@@ -44,8 +41,6 @@ const login = async (req, res) => {
       username: req.body.username,
       password: req.body.password,
     };
-    console.log("UGO");
-    console.log(credentials);
     const result = await authService.loginUser(credentials);
 
     if (result.error) throw new Error(result.error);
@@ -58,17 +53,17 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 1 * 24 * 24 * 60 * 1000, // 1 day
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 3 * 24 * 24 * 60 * 1000, // 3 days
+      maxAge: 4 * 24 * 24 * 60 * 1000, // 4 days
     });
 
-    res.json({ message: "User login succesful", username: result });
+    res.json(result);
   } catch {
     res.json({ error: error.message });
   }
@@ -94,11 +89,13 @@ const checkAuthToken = async (req, res) => {
   }
 
   try {
-    const authDecoded = jwt.verify(authToken, process.env.ACCESS_TOKEN_SECREt);
+    const authDecoded = jwt.verify(authToken, process.env.ACCESS_TOKEN_SECRET);
     // il token è ancora valido
-    return authDecoded;
+    return res.json(authDecoded.name);
   } catch (error) {
     //il token non è valido
+    console.log("HEY");
+    console.log(error);
     if (error.name === "TokenExpiredError") {
       return refreshAuthToken(req, res);
     }
@@ -108,6 +105,7 @@ const checkAuthToken = async (req, res) => {
 };
 
 const refreshAuthToken = async (req, res) => {
+  console.log("OGU");
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
@@ -120,7 +118,7 @@ const refreshAuthToken = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    const newAccessToken = authService.generateAuthToken(decoded.name);
+    const newAccessToken = authService.generateAuthToken(decodedRefresh.name);
 
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
@@ -129,7 +127,7 @@ const refreshAuthToken = async (req, res) => {
       maxAge: 15 * 60 * 1000,
     });
 
-    res.json({ message: "Access token refreshed" });
+    res.json({ message: "Access token refreshed", name: decodedRefresh.name });
   } catch (err) {
     logout(req, res);
     return res.status(401).json({ error: "Invalid or expired refresh token" });

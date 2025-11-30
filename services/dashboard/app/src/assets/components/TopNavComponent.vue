@@ -4,7 +4,7 @@ export default {
   name: "LoginForm",
   computed: {
     ...mapState({
-      user: (state) => state.user.user,
+      username: (state) => state.user.username,
     }),
   },
 };
@@ -35,7 +35,7 @@ export default {
         <RouterLink to="/login"> Login </RouterLink>
       </button>
     </div>
-    <p>{{ this.user ? this.user.username : "Guest" }}</p>
+    <p>{{ this.username ? this.username : "Guest" }}</p>
   </nav>
 </template>
 

@@ -7,13 +7,12 @@ export default {
   name: "App",
   components: { TopNavComponent },
   methods: {
-    ...mapActions("data", ["initializeData"]),
-    ...mapActions("table", ["initializeTableData"]),
-    ...mapActions("sensors", ["initializeSensors"]),
+    ...mapActions("user", ["checkAuth"]),
     ...mapActions(["initializeAll"]),
   },
   async created() {
     await this.initializeAll();
+    await this.checkAuth();
   },
   mounted() {},
 }; /*
