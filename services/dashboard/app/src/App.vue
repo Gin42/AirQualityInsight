@@ -9,8 +9,20 @@ export default {
   methods: {
     ...mapActions("user", ["checkAuth"]),
     ...mapActions(["initializeAll"]),
+    setCookies() {
+      this.$cookies.set("refreshToken", "", {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      this.$cookies.set("authToken", "", {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+    },
   },
   async created() {
+    this.setCookies();
     await this.initializeAll();
     await this.checkAuth();
   },

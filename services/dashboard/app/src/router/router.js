@@ -13,16 +13,7 @@ const routes = [
   { path: "/map", component: MapView },
   { path: "/stats", component: StatsView },
   { path: "/lastMeasurements", component: LastMeasurementsView },
-  {
-    path: "/sign-up",
-    component: AuthView,
-    props: { type: "sign-up" },
-  },
-  {
-    path: "/login",
-    component: AuthView,
-    props: { type: "login" },
-  },
+  { path: "/login", component: AuthView },
 ];
 
 const router = createRouter({

@@ -29,6 +29,7 @@ services:
     volumes:
       - ./services/mongodb/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
       - ./services/mongodb/sensor_locations.json:/docker-entrypoint-initdb.d/sensor_locations.json
+      - ./services/mongodb/account.json:/docker-entrypoint-initdb.d/account.json
       - mongodb_data:/data/db
     networks:
       - sensors-network
@@ -43,7 +44,14 @@ services:
     env_file:
       - .env.kafka
     healthcheck:
-      test: ["CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      test:
+        [
+          "CMD",
+          "/opt/kafka/bin/kafka-topics.sh",
+          "--bootstrap-server",
+          "localhost:9092",
+          "--list",
+        ]
       interval: 30s
       timeout: 15s
       retries: 10

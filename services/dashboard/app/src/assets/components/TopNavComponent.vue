@@ -1,11 +1,15 @@
 <script>
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 export default {
   name: "LoginForm",
   computed: {
-    ...mapState({
-      username: (state) => state.user.username,
-    }),
+    ...mapState("user", ["username"]),
+  },
+  methods: {
+    ...mapActions("user", ["logout"]),
+    logoutAction() {
+      this.logout();
+    },
   },
 };
 </script>
@@ -28,11 +32,15 @@ export default {
       </li>
     </ul>
     <div class="buttons">
-      <button class="auth-button tertiary-color">
-        <RouterLink to="/sign-up"> Sign-up </RouterLink>
-      </button>
-      <button class="auth-button tertiary-color">
+      <button v-if="!username" class="auth-button tertiary-color">
         <RouterLink to="/login"> Login </RouterLink>
+      </button>
+      <button
+        v-if="username"
+        class="auth-button tertiary-color"
+        @click="logoutAction"
+      >
+        Logout
       </button>
     </div>
     <p>{{ this.username ? this.username : "Guest" }}</p>

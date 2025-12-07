@@ -1,3 +1,7 @@
+//TEST: SecretPassword12
+
+const fs = require("fs");
+
 function printSection(title) {
   print("=".repeat(50));
   print(title);
@@ -148,7 +152,6 @@ db.createCollection("users", {
         },
         password: {
           bsonType: "string",
-          minLength: 8,
           description: "User password",
         },
       },
@@ -169,12 +172,11 @@ function toSensorId(n, digits = 5) {
   return "SENSOR" + n.toString().padStart(digits, "0");
 }
 
-const fs = require("fs");
-
 if (reset) {
   printSection("Cleaning existing data");
   db.sensors.deleteMany({});
   db.measurements.deleteMany({});
+  db.users.deleteMany({});
 
   try {
     print("Loading sensor data...");
@@ -184,7 +186,6 @@ if (reset) {
         "utf8"
       )
     );
-    console.log(data.elements);
     const sensors = data.elements;
     print(`Found ${sensors.length} sensors in JSON`);
 
@@ -200,12 +201,26 @@ if (reset) {
         ip: generateIPAddresses(i),
         active: true,
       };
-      console.log(entry);
       db.sensors.insertOne(entry);
     }
     print(`Inserted ${sensors.length} sensors`);
   } catch (error) {
     print(`Error loading sensors: ${error.message}`);
+  }
+
+  try {
+    print("Loading account data...");
+    const accountData = JSON.parse(
+      fs.readFileSync("/docker-entrypoint-initdb.d/account.json", "utf8")
+    );
+    const userArray = accountData.user; // Renamed to avoid conflict
+    for (let singleUser of userArray) {
+      // Changed loop variable name
+      db.users.insertOne(singleUser); // Ensure 'users' is used
+    }
+    print(`Inserted ${user.length} users`);
+  } catch (error) {
+    print(`Error loading accounts: ${error.message}`);
   }
 }
 

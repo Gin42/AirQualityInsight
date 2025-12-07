@@ -14,26 +14,9 @@ const mutations = {
 };
 
 const actions = {
-  async register({ commit }, userData) {
-    try {
-      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-      const response = await fetchFromApi(`${apiUrl}/api/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-        credentials: "include",
-      });
-      commit("setAuth", response.username);
-      return response;
-    } catch (error) {
-      console.error("Unable to login", error);
-    }
-  },
-
   async login({ commit }, userData) {
-    console.log("UGO");
+    console.log("PAYLOAD");
+    console.log(userData);
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const response = await fetchFromApi(`${apiUrl}/api/auth/login`, {
@@ -77,10 +60,10 @@ const actions = {
         },
         credentials: "include",
       });
-      console.log("HELLO");
-      console.log(response);
       if (response.error) {
-        dispatch("logout");
+        if (response.logout) {
+          dispatch("logout");
+        }
       } else if (state.username == null) {
         commit("setAuth", response); //deve prendere il name
       }

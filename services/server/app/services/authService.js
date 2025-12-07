@@ -1,24 +1,5 @@
 const User = require("../models/authModel");
 
-const registerUser = async (userData) => {
-  try {
-    const result = await new User(userData).save();
-    return { message: "Registration successful", user: result };
-  } catch (err) {
-    console.error("Error registering user:", err);
-    if (err.code === 11000) {
-      return { error: "Username already exists" };
-    }
-    if (err.errInfo && err.errInfo.details) {
-      console.error(
-        "Validation details:",
-        JSON.stringify(err.errInfo.details, null, 2)
-      );
-    }
-    return { error: "Registration failed" };
-  }
-};
-
 const loginUser = async (credentials) => {
   try {
     const user = await User.findOne({
@@ -39,6 +20,22 @@ const loginUser = async (credentials) => {
   } catch (err) {
     console.error("Error during login:", err);
     return;
+  }
+};
+
+const connectWithRetry = async () => {
+  const MONGODB_URI = process.env.MONGODB_URI || "mongodb://mongodb:27017/user";
+
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      connectTimeoutMS: 10000, // Give up initial connection after 10s
+    });
+    console.log("MongoDB connected successfully");
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    console.log("Retrying in 5 seconds...");
+    setTimeout(connectWithRetry, 5000);
   }
 };
 
@@ -81,6 +78,6 @@ function generateRefreshToken(username) {
 module.exports = {
   generateAuthToken,
   generateRefreshToken,
-  registerUser,
   loginUser,
+  connectWithRetry,
 };

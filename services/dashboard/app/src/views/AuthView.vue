@@ -1,24 +1,16 @@
 <template>
-  <div div class="form-container">
-    <component :is="formType" />
+  <div class="form-container">
+    <LoginComponent></LoginComponent>
   </div>
 </template>
 
 <script>
-import SignUpForm from "../assets/components/SignUpComponent.vue";
-import LoginForm from "../assets/components/LoginComponent.vue";
+import LoginComponent from "@/assets/components/LoginComponent.vue";
 
 export default {
-  props: {
-    type: {
-      type: String,
-      required: true,
-    },
-  },
-  computed: {
-    formType() {
-      return this.type === "sign-up" ? SignUpForm : LoginForm;
-    },
+  name: "AuthView",
+  components: {
+    LoginComponent,
   },
 };
 </script>

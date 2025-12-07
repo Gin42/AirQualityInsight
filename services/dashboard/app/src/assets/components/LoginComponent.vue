@@ -22,9 +22,9 @@
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import { mapActions } from "vuex";
 export default {
-  name: "LoginForm",
+  name: "LoginComponent",
 
   data() {
     return {
@@ -34,7 +34,7 @@ export default {
   },
 
   methods: {
-    ...mapActions("user", ["login", "login"]),
+    ...mapActions("user", ["login"]),
 
     handleLogin() {
       this.login({

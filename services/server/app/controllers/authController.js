@@ -1,39 +1,6 @@
 const authService = require("../services/authService");
+const User = require("../models/authModel");
 const jwt = require("jsonwebtoken");
-
-const register = async (req, res) => {
-  try {
-    const credentials = {
-      username: req.body.username,
-      password: req.body.password,
-    };
-    const result = await authService.registerUser(credentials);
-    if (result.error) throw new Error(result.error);
-
-    const authToken = authService.generateAuthToken(result.username);
-    const refreshToken = authService.generateRefreshToken(result.username);
-
-    // Set access token in HTTP-only cookie
-    res.cookie("authToken", authToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 3 * 24 * 24 * 60 * 1000, // 3 days
-    });
-
-    res.json(result.user.username);
-  } catch (error) {
-    console.error("Registration error:", error); // Log the error for server-side tracking
-    res.status(400).json({ error: error.message }); // Use status codes
-  }
-};
 
 const login = async (req, res) => {
   try {
@@ -41,6 +8,7 @@ const login = async (req, res) => {
       username: req.body.username,
       password: req.body.password,
     };
+
     const result = await authService.loginUser(credentials);
 
     if (result.error) throw new Error(result.error);
@@ -53,39 +21,48 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 1 * 24 * 24 * 60 * 1000, // 1 day
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 4 * 24 * 24 * 60 * 1000, // 4 days
     });
 
     res.json(result);
-  } catch {
+  } catch (error) {
     res.json({ error: error.message });
   }
 };
 
 const logout = (req, res) => {
-  res.clearCookie("authToken", {
+  res.cookie("authToken", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // Optional, set for long expiration
   });
-  res.clearCookie("refreshToken", {
+
+  res.cookie("refreshToken", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // Optional, set for long expiration
   });
+
   return res.status(200).json({ message: "Successfully logged out" });
 };
 
 const checkAuthToken = async (req, res) => {
+  const allUsers = await User.find();
+  console.log(allUsers);
+
   const authToken = req.cookies.authToken;
 
-  if (!authToken) {
-    return res.status(401).json({ error: "No auth token provided" });
+  console.log(authToken);
+
+  if (!authToken || authToken === null) {
+    return res.json({ error: "No auth token provided" });
   }
 
   try {
@@ -94,13 +71,11 @@ const checkAuthToken = async (req, res) => {
     return res.json(authDecoded.name);
   } catch (error) {
     //il token non è valido
-    console.log("HEY");
-    console.log(error);
     if (error.name === "TokenExpiredError") {
       return refreshAuthToken(req, res);
     }
 
-    return res.status(401).json({ error: "Invalid auth token" });
+    return res.json({ error: "Invalid auth token" });
   }
 };
 
@@ -109,7 +84,7 @@ const refreshAuthToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
-    return res.status(401).json({ error: "No refresh token provided" });
+    return res.json({ error: "No refresh token provided" });
   }
 
   try {
@@ -124,20 +99,31 @@ const refreshAuthToken = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
     });
 
     res.json({ message: "Access token refreshed", name: decodedRefresh.name });
   } catch (err) {
     logout(req, res);
-    return res.status(401).json({ error: "Invalid or expired refresh token" });
+    return res.json({
+      error: "Invalid or expired refresh token",
+      logout: true,
+    });
+  }
+};
+
+const initializeAccount = async (req, res) => {
+  try {
+    await authService.connectWithRetry();
+    const userData = await authService.getAccount();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
 module.exports = {
-  register,
   login,
   logout,
   checkAuthToken,
   refreshAuthToken,
+  initializeAccount,
 };
