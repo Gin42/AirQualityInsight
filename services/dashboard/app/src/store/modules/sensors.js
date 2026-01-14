@@ -107,27 +107,24 @@ const actions = {
   async addSensor({ commit, rootGetters, rootState }, data) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+      console.log("PAPERE");
       const measurementsTypes = rootGetters["data/getMeasurementsTypes"];
-      const jsonResponse = await fetchFromApi(
-        `${apiUrl}/api/sensor/addSensor`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const response = await fetchFromApi(`${apiUrl}/api/sensor/addSensor`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          location: {
+            type: "Point",
+            coordinates: [data.longitude, data.latitude],
           },
-          body: JSON.stringify({
-            name: data.name,
-            location: {
-              type: "Point",
-              coordinates: [data.longitude, data.latitude],
-            },
-            active: data.active,
-            last_seen: new Date(),
-          }),
-        }
-      );
-      const response = await jsonResponse.json();
-      if (!response) throw new Error(response || "API request failed");
+          active: data.active,
+          last_seen: new Date(),
+        }),
+      });
+      console.log(response);
       commit("addNewSensor", {
         sensorData: response,
         center: rootState.center,

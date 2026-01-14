@@ -1,40 +1,4 @@
 services:
-  sensor:
-    image: python:3.9-slim
-    container_name: air-quality-map-sensor
-    depends_on:
-      mongodb:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-    env_file:
-      - .env
-    environment:
-      TZ: Europe/Rome
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    volumes:
-      - ./services/sensor/app:/app
-    networks:
-      - sensors-network
-    working_dir: /app
-    command: sh -c "pip install --no-cache-dir -r requirements.txt && python sensor_simulation.py"
-
-  mongodb:
-    image: mongo:latest
-    container_name: air-quality-map-mongodb
-    ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_DATABASE: sensordata
-    volumes:
-      - ./services/mongodb/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
-      - ./services/mongodb/sensor_locations.json:/docker-entrypoint-initdb.d/sensor_locations.json
-      - ./services/mongodb/account.json:/docker-entrypoint-initdb.d/account.json
-      - mongodb_data:/data/db
-    networks:
-      - sensors-network
-      - app-network
-
   kafka:
     image: apache/kafka:latest
     hostname: kafka
@@ -49,13 +13,72 @@ services:
           "CMD",
           "/opt/kafka/bin/kafka-topics.sh",
           "--bootstrap-server",
-          "localhost:9092",
+          "kafka:9092",
           "--list",
         ]
       interval: 30s
       timeout: 15s
       retries: 10
       start_period: 30s
+    networks:
+      - sensors-network
+      - app-network
+
+  sensor:
+    image: python:3.9-slim
+    container_name: air-quality-map-sensor
+    depends_on:
+      mongodb:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      TZ: Europe/Rome
+      KAFKA_BROKER: kafka:9092
+    volumes:
+      - ./services/sensor/app:/app
+    networks:
+      - sensors-network
+    working_dir: /app
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python sensor_simulation.py"
+
+  server:
+    image: node:18-alpine
+    container_name: air-quality-map-server
+    ports:
+      - 3000:3000
+    depends_on:
+      mongodb:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      CORS_ORIGIN: http://localhost:5173
+      KAFKA_BROKER: kafka:9092
+    volumes:
+      - ./services/server/app:/usr/src/app
+    networks:
+      - app-network
+    working_dir: /usr/src/app
+    command: sh -c "npm i && npm run dev"
+
+  mongodb:
+    image: mongo:latest
+    container_name: air-quality-map-mongodb
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: sensordata
+    volumes:
+      - ./services/mongodb/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+      - ./services/mongodb/sensor_locations.json:/docker-entrypoint-initdb.d/sensor_locations.json
+      - ./services/mongodb/account.json:/docker-entrypoint-initdb.d/account.json
+      - mongodb_data:/data/db
     networks:
       - sensors-network
       - app-network
@@ -77,28 +100,6 @@ services:
       VITE_SOCKET_SERVER_URL: http://localhost:3000
     volumes:
       - ./services/dashboard/app:/usr/src/app
-    networks:
-      - app-network
-    working_dir: /usr/src/app
-    command: sh -c "npm i && npm run dev"
-
-  server:
-    image: node:18-alpine
-    container_name: air-quality-map-server
-    ports:
-      - 3000:3000
-    depends_on:
-      mongodb:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: development
-      CORS_ORIGIN: http://localhost:5173
-    volumes:
-      - ./services/server/app:/usr/src/app
     networks:
       - app-network
     working_dir: /usr/src/app

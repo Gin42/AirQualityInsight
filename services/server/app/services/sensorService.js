@@ -1,5 +1,6 @@
 // sensorService.js
 const Sensor = require("../models/sensorModel");
+const server = require("../server");
 const mongoose = require("mongoose");
 
 const connectWithRetry = async () => {
@@ -27,6 +28,7 @@ const addSensorData = async (sensorData) => {
   try {
     sensorData.sensor_id = new mongoose.Types.ObjectId();
     const sensor = await new Sensor(sensorData);
+    console.log("UGO");
     return await sensor.save();
   } catch (err) {
     console.error("Error saving sensor:", err);

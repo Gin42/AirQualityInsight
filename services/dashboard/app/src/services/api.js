@@ -5,6 +5,8 @@ export async function fetchFromApi(url, options = {}) {
     throw new Error(`HTTP error! status: ${jsonResponse.status}`);
   }
 
+  console.log(jsonResponse);
+
   const response = await jsonResponse.json();
 
   if (!response || Object.keys(response).length === 0) {

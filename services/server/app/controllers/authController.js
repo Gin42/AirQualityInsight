@@ -55,11 +55,7 @@ const logout = (req, res) => {
 
 const checkAuthToken = async (req, res) => {
   const allUsers = await User.find();
-  console.log(allUsers);
-
   const authToken = req.cookies.authToken;
-
-  console.log(authToken);
 
   if (!authToken || authToken === null) {
     return res.json({ error: "No auth token provided" });
@@ -80,7 +76,6 @@ const checkAuthToken = async (req, res) => {
 };
 
 const refreshAuthToken = async (req, res) => {
-  console.log("OGU");
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
