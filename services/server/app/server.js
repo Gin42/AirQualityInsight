@@ -5,7 +5,7 @@ const {
   saveMeasurement,
 } = require("./database.js");
 
-const Sensor = require("./models/sensorModel.js");
+const Sensor = require("./sensors/sensorModel.js");
 
 const { Kafka } = require("kafkajs");
 const socketIo = require("socket.io");
@@ -81,8 +81,8 @@ io.on("connection", (socket) => {
   });
 });
 
-const authRoutes = require("./routes/authRoutes.js");
-const sensorRoutes = require("./routes/sensorRoutes");
+const authRoutes = require("./user/authRoutes.js");
+const sensorRoutes = require("./sensors/sensorRoutes");
 
 app.use(express.json());
 

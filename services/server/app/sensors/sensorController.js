@@ -1,4 +1,4 @@
-const sensorService = require("../services/sensorService");
+const sensorService = require("./sensorService");
 
 const addSensor = async (req, res) => {
   try {

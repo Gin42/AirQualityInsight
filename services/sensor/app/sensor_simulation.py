@@ -123,9 +123,8 @@ def start_consumer_thread():
 
 def send_ack(producer, init_id):
     ack= {
-        "initi_id": init_id,
+        "init_id": init_id,
         "sensor_instance": socket.gethostname(),
-        "timestamp": datetime.now(datetime.timezone.utc).isoformat()
     }
     producer.send(
         ACK_TOPIC,

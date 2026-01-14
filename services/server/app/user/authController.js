@@ -1,5 +1,5 @@
-const authService = require("../services/authService");
-const User = require("../models/authModel");
+const authService = require("./authService");
+const User = require("./authModel");
 const jwt = require("jsonwebtoken");
 
 const login = async (req, res) => {

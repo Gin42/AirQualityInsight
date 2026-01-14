@@ -1,4 +1,4 @@
-const User = require("../models/authModel");
+const User = require("./authModel");
 
 const loginUser = async (credentials) => {
   try {
