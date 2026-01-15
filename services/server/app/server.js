@@ -1,13 +1,17 @@
 // server.js
+const { connectWithRetry, Measurement } = require("./database.js");
+
 const {
-  connectWithRetry,
-  Measurement,
-  saveMeasurement,
-} = require("./database.js");
+  ensureTopics,
+  createProducer,
+  initializeSensors,
+  retryUntilAck,
+} = require("./kafka/producer.js");
+
+const { runConsumer, runAckConsumer } = require("./kafka/consumer.js");
 
 const Sensor = require("./sensors/sensorModel.js");
 
-const { Kafka } = require("kafkajs");
 const socketIo = require("socket.io");
 const http = require("http");
 
@@ -15,8 +19,6 @@ const cors = require("cors");
 const express = require("express");
 
 const cookieParser = require("cookie-parser");
-
-const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 const server = http.createServer(app);
@@ -35,36 +37,6 @@ app.use(
 app.use(cookieParser());
 
 const port = process.env.PORT || 3000;
-
-const kafka_broker = process.env.KAFKA_BROKER || "kafka:9092";
-const measurements_topic = process.env.MEASUREMENT_TOPIC || "measurements";
-const sensors_topic = process.env.SENSORS_TOPIC || "sensors";
-const ack_topic = process.env.ACK_TOPIC || "ack_topic";
-const Sensors_actions = {
-  INIT: "INIT",
-  CREATE: "CREATE",
-  DELETE: "DELETE",
-  MODIFY: "MODIFY",
-};
-
-const kafka = new Kafka({
-  clientId: "node-consumer",
-  brokers: [kafka_broker],
-});
-
-const consumer = kafka.consumer({
-  groupId: "message-consumer-group",
-  sessionTimeout: 45000,
-  heartbeatInterval: 15000,
-});
-
-const ackConsumer = kafka.consumer({
-  groupId: "sensor-ack-group",
-});
-let currentInitId = null;
-const initAcks = new Set();
-
-const producer = kafka.producer();
 
 // WoT Gateway state
 let registeredSensors = new Map();
@@ -515,151 +487,26 @@ app.get("/api/latest", async (req, res) => {
   }
 });
 
-const ensureTopics = async () => {
-  const admin = kafka.admin();
-  await admin.connect();
-
-  await admin.createTopics({
-    topics: [
-      { topic: measurements_topic, numPartitions: 1, replicationFactor: 1 },
-      { topic: sensors_topic, numPartitions: 1, replicationFactor: 1 },
-      { topic: ack_topic, numPartitions: 1, replicationFactor: 1 },
-    ],
-    waitForLeaders: true,
-  });
-
-  await admin.disconnect();
-};
-
-const runConsumer = async () => {
+async function startServer() {
   try {
-    await consumer.connect();
-    await consumer.subscribe({
-      topic: measurements_topic,
-      fromBeginning: false,
+    await connectWithRetry();
+    await initializeWoTGateway();
+
+    await ensureTopics();
+    await createProducer();
+    await runAckConsumer();
+
+    await retryUntilAck((maxRetries = 10), (sensorAction = initializeSensors));
+
+    server.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}`);
     });
 
-    await consumer.run({
-      eachMessage: async ({ topic, partition, message }) => {
-        try {
-          if (topic === measurements_topic) {
-            const measurement = JSON.parse(message.value.toString());
-            console.log("Received message:", measurement);
-            await saveMeasurement(measurement);
-
-            latestMeasurements.set(measurement.sensor_id, measurement);
-
-            const thing = registeredSensors.get(measurement.sensor_id);
-            if (thing) {
-              thing.lastContact = new Date();
-              thing.status = "active";
-            }
-
-            io.emit("kafka-message", measurement);
-          } else {
-            console.log(`Ignoring message from topic: ${topic}`);
-          }
-        } catch (error) {
-          console.error(`Error during message elaboration: ${error.message}`);
-        }
-      },
-    });
-  } catch (error) {
-    console.error(`Error on Kafka consumer: ${error.message}`);
-  }
-};
-
-const runAckConsumer = async () => {
-  await ackConsumer.connect();
-  await ackConsumer.subscribe({
-    topic: ack_topic,
-    fromBeginning: true,
-  });
-
-  await ackConsumer.run({
-    eachMessage: async ({ message }) => {
-      const key = message.key?.toString();
-      const ack = JSON.parse(message.value.toString());
-      if (key == "INIT_ACK" && ack.init_id === currentInitId) {
-        initAcks.add(ack.sensor_instance);
-        console.log("INIT_ACK received from:", ack.sensor_instance);
-      }
-    },
-  });
-};
-
-const retryUntilAck = async () => {
-  const MAX_RETRIES = 10;
-  let attempts = 0;
-
-  while (attempts < MAX_RETRIES) {
-    attempts++;
-    await initializeSensors();
-    await new Promise((r) => setTimeout(r, 10000));
-
-    if (initAcks.size > 0) {
-      console.log("INIT ack by sensors:", [...initAcks]);
-      return;
-    }
-    console.log("No ACKs yet, retrying INIT...");
-  }
-
-  console.warn("INIT not acknowledged after retries");
-};
-
-const createProducer = async (retries = 10, delay = 5000) => {
-  for (let i = 1; i <= retries; i++) {
-    try {
-      await producer.connect();
-      console.log(`Kafka producer connected to ${kafka_broker} (attempt ${i})`);
-      return producer;
-    } catch (err) {
-      console.warn(
-        `Kafka connection attempt ${i} failed. Retrying in ${delay / 1000}s...`
-      );
-      await new Promise((r) => setTimeout(r, delay));
-    }
-  }
-  throw new Error(`Could not connect to Kafka after ${retries} attempts`);
-};
-
-const initializeSensors = async () => {
-  try {
-    const sensors = await Sensor.find({});
-
-    currentInitId = uuidv4();
-    initAcks.clear();
-
-    await producer.send({
-      topic: sensors_topic,
-      messages: [
-        {
-          key: Sensors_actions.INIT,
-          value: JSON.stringify({
-            init_id: currentInitId,
-            sensors: sensors,
-          }),
-        },
-      ],
-    });
-
-    console.log(`Message sent to sensor topic, id: ${currentInitId}`);
+    await runConsumer();
   } catch (err) {
-    console.error("Error sending Kafka message:", err.message);
+    console.error("Fatal startup error:", err);
+    process.exit(1);
   }
-};
+}
 
-server.listen(port, async () => {
-  console.log(`Server with WoT Gateway running on http://localhost:${port}`);
-
-  await connectWithRetry();
-  await initializeWoTGateway();
-
-  await ensureTopics();
-
-  await createProducer();
-  await runAckConsumer();
-  await retryUntilAck();
-
-  await runConsumer();
-});
+startServer();
