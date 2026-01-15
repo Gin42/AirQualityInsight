@@ -1,7 +1,7 @@
-const Sensor = require("../sensors/sensorModel.js");
 const { Kafka } = require("kafkajs");
 const { v4: uuidv4 } = require("uuid");
 const { registerAckWaiter } = require("./consumer.js");
+const Sensor = require("../sensors/sensorModel.js");
 
 const kafka_broker = process.env.KAFKA_BROKER || "kafka:9092";
 const sensors_topic = process.env.SENSORS_TOPIC || ""; //producer
@@ -56,7 +56,7 @@ const createProducer = async (retries = 10, delay = 5000) => {
 
 const initializeSensors = async (messageId) => {
   try {
-    const sensors = await Sensor.find({}); //può prenderli da Sensor service
+    const sensors = await Sensor.find({});
 
     await producer.send({
       topic: sensors_topic,
@@ -73,6 +73,29 @@ const initializeSensors = async (messageId) => {
 
     console.log(
       `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.INIT}`
+    );
+  } catch (err) {
+    console.error("Error sending Kafka message:", err.message);
+  }
+};
+
+const addSensor = async (messageId, newSensor) => {
+  try {
+    await producer.send({
+      topic: sensors_topic,
+      messages: [
+        {
+          key: Sensors_actions.CREATE,
+          value: JSON.stringify({
+            message_id: messageId,
+            sensor: newSensor,
+          }),
+        },
+      ],
+    });
+
+    console.log(
+      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.CREATE}`
     );
   } catch (err) {
     console.error("Error sending Kafka message:", err.message);
@@ -99,24 +122,24 @@ const waitForAck = (messageId, timeoutMs = 10000) => {
   });
 };
 
-const retryUntilAck = async (maxRetries = 10, sensorAction) => {
+const retryUntilAck = async (maxRetries = 10, action, payload = null) => {
   const messageId = uuidv4();
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`ACTION attempt ${attempt}, id=${messageId}`);
-
-      await sensorAction(messageId);
+      if (payload) {
+        await action(messageId, payload);
+      } else {
+        await action(messageId);
+      }
       await waitForAck(messageId);
-
-      console.log(`ACK received for ACTION ${messageId}`);
       return;
     } catch (err) {
       console.warn(err.message);
     }
   }
 
-  throw new Error(`INIT failed after ${maxRetries} retries`);
+  throw new Error(`Action failed after ${maxRetries} retries`);
 };
 
 module.exports = {
@@ -124,4 +147,6 @@ module.exports = {
   createProducer,
   initializeSensors,
   retryUntilAck,
+  waitForAck,
+  addSensor,
 };

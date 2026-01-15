@@ -1,5 +1,9 @@
 const { saveMeasurement } = require("../database.js");
 const { Kafka } = require("kafkajs");
+const {
+  registeredSensors,
+  latestMeasurements,
+} = require("../wot/wotGateway.js");
 
 const kafka_broker = process.env.KAFKA_BROKER || "kafka:9092";
 const measurements_topic = process.env.MEASUREMENT_TOPIC || "measurements";
@@ -21,11 +25,8 @@ const ackConsumer = kafka.consumer({
 });
 const ackWaiters = new Map();
 
-let registeredSensors = new Map();
-let latestMeasurements = new Map();
-
 //Consumer for measurements
-const runConsumer = async () => {
+const runConsumer = async (io) => {
   try {
     await consumer.connect();
     await consumer.subscribe({
@@ -49,7 +50,7 @@ const runConsumer = async () => {
               thing.status = "active";
             }
 
-            console.log("kafka-message", measurement); //io.emit deleted, to check
+            io.emit("kafka-message", measurement);
           } else {
             console.log(`Ignoring message from topic: ${topic}`);
           }

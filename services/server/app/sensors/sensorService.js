@@ -1,7 +1,7 @@
 // sensorService.js
 const Sensor = require("./sensorModel");
-const server = require("../server");
 const mongoose = require("mongoose");
+const { addSensor, retryUntilAck, waitForAck } = require("../kafka/producer");
 
 const connectWithRetry = async () => {
   const MONGODB_URI =
@@ -26,19 +26,23 @@ const countSensors = () => {
 
 const addSensorData = async (sensorData) => {
   try {
-    sensorData.sensor_id = new mongoose.Types.ObjectId();
-    const sensor = await new Sensor(sensorData);
-    console.log("UGO");
-    return await sensor.save();
+    sensorData.sensor_id = `SENSOR${Date.now()}`;
+    const sensor = new Sensor(sensorData);
+    const savedSensor = await sensor.save();
+
+    await retryUntilAck(10, addSensor, {
+      sensor_id: savedSensor.sensor_id,
+      name: savedSensor.name,
+      location: savedSensor.location,
+      ip: savedSensor.ip,
+      active: savedSensor.active,
+      last_seen: savedSensor.last_seen,
+    });
+
+    return savedSensor;
   } catch (err) {
-    console.error("Error saving sensor:", err);
-    if (err.errInfo && err.errInfo.details) {
-      console.error(
-        "Validation details:",
-        JSON.stringify(err.errInfo.details, null, 2)
-      );
-    }
-    return;
+    console.error("Error adding sensor:", err);
+    throw err;
   }
 };
 
