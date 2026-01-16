@@ -17,6 +17,7 @@
         "bologna"
     ],
     "dependencies": {
+        "epic-spinners": "^2.0.0",
         "jsonwebtoken": "^9.0.2",
         "jwt-builder": "^1.1.0",
         "leaflet": "^1.9.4",

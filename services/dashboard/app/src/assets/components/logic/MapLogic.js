@@ -7,6 +7,8 @@ import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
 import { fetchFromApi } from "@/services/api";
 
+import { TrinityRingsSpinner } from "epic-spinners";
+
 export default {
   name: "MapComponent",
   computed: {
@@ -75,6 +77,10 @@ export default {
       required: true,
     },
   },
+  components: {
+    TrinityRingsSpinner,
+  },
+
   data() {
     return {
       zoom: ref(13),
@@ -107,6 +113,7 @@ export default {
       gridType: "none",
       isHovered: ref(false),
       isPinned: ref(false),
+      loading: ref(true),
     };
   },
   methods: {
@@ -646,6 +653,8 @@ export default {
       while (!this.isSocketConnected || !this.isServerReady) {
         await new Promise((r) => setTimeout(r, 100));
       }
+
+      this.loading = false;
 
       this.initMap();
 

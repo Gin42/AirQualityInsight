@@ -5,6 +5,7 @@ import { computed, ref } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
+import { loadConfigFromFile } from "vite";
 
 export default {
   name: "MapComponent",
@@ -79,6 +80,7 @@ export default {
       gridType: "none",
       isHovered: ref(false),
       isPinned: ref(false),
+      loading: ref(true),
     };
   },
   methods: {

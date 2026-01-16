@@ -3,9 +3,14 @@
 <template>
   <div class="map">
     <div class="map-container">
-      <!--<div v-if="loading" class="loading-overlay">
-        <div class="spinner"></div>
-      </div>-->
+      <div v-if="loading">
+        <trinity-rings-spinner
+          :animation-duration="1500"
+          :size="66"
+          color="#ff1d5e"
+        />
+      </div>
+
       <div id="map"></div>
       <div
         v-if="gridType === 'gray'"
