@@ -33,13 +33,14 @@ export default {
   },
   watch: {
     newSensor: {
-      // to-do
-      immediate: true,
-      handler() {
-        if (this.newSensor.incoming) {
-          this.drawSensor(this.newSensor.data, "sensorLocations");
-          this.setNewSensor(false);
-        }
+      handler(newSensor) {
+        console.log("map:", this.map);
+        console.log(newSensor);
+        console.log("DRAWING TIME");
+        if (!newSensor) return;
+
+        this.drawSensor(newSensor, "sensorLocations");
+        this.clearNewSensor();
       },
       deep: true,
     },
@@ -118,7 +119,7 @@ export default {
   },
   methods: {
     ...mapMutations(["setCenter", "setCurrentMeasurements"]),
-    ...mapMutations("sensors", ["setNewSensor"]),
+    ...mapMutations("sensors", ["clearNewSensor"]),
     ...mapActions("sensors", [
       "fetchSensors",
       "updateLastMeasurement",
@@ -591,6 +592,7 @@ export default {
     },
 
     async drawSensor(sensor, layer) {
+      if (sensor.getMarker()) return;
       const pushpinIcon = L.icon({
         iconUrl: pushpinSvg,
         iconSize: [24, 24],
@@ -655,6 +657,8 @@ export default {
       }
 
       this.loading = false;
+
+      console.log("Map mounted, newSensor =", this.newSensor);
 
       this.initMap();
 

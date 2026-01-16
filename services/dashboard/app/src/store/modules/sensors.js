@@ -10,10 +10,7 @@ import { fetchFromApi } from "@/services/api";
 
 const state = () => ({
   sensors: new Map(),
-  newSensor: {
-    incoming: false,
-    data: null,
-  },
+  newSensor: null,
   timeUpdateInterval: null,
 });
 
@@ -30,11 +27,7 @@ const getters = {
       sensor.getActive()
     );
   },
-  getSensor: (state) => (id) => {
-    return Array.from(state.sensors.values()).find(
-      (sensor) => sensor.getId() === id
-    );
-  },
+  getSensor: (state) => (id) => state.sensors.get(id),
 };
 
 //MUTATIONS
@@ -51,11 +44,13 @@ const mutations = {
 
   addNewSensor(state, { sensorData, center }) {
     const sensor = new Sensor(sensorData, center);
+
+    console.log("Vuex addNewSensor", sensor);
+
+    state.sensors = new Map(state.sensors);
     state.sensors.set(sensorData.sensor_id, sensor);
-    state.newSensor = {
-      incoming: true,
-      data: sensor,
-    };
+
+    state.newSensor = sensor;
   },
 
   resetSensors(state) {
@@ -72,8 +67,8 @@ const mutations = {
     sensor.setMeasurements(timestamp, data, maxMeasurements);
   },
 
-  setNewSensor(state, value) {
-    state.newSensor.incoming = value;
+  clearNewSensor(state) {
+    state.newSensor = null;
   },
 };
 
@@ -107,16 +102,15 @@ const actions = {
     }
   },
 
-  async addSensor({ commit, rootGetters, rootState }, data) {
+  async addSensor({ commit, rootState }, data) {
+    console.log("FOO");
+
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-      console.log("PAPERE");
-      const measurementsTypes = rootGetters["data/getMeasurementsTypes"];
+
       const response = await fetchFromApi(`${apiUrl}/api/sensor/addSensor`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.name,
           location: {
@@ -127,7 +121,9 @@ const actions = {
           last_seen: new Date(),
         }),
       });
-      console.log(response);
+
+      console.log("UGO: ", response);
+
       commit("addNewSensor", {
         sensorData: response,
         center: rootState.center,
