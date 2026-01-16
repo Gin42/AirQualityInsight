@@ -2,15 +2,42 @@ import { io } from "socket.io-client";
 import { store } from "../store";
 
 const serverUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-const socket = io(serverUrl);
 
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-}
+export const socket = io(serverUrl, {
+  autoConnect: false,
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  timeout: 5000,
+});
+
+socket.on("connect", () => {
+  console.log("Connected to server");
+  store.commit("socket/setConnected", true);
+});
+
+socket.on("disconnect", () => {
+  console.log("Disconnected from server");
+  store.commit("socket/setConnected", false);
+  store.commit("socket/setServerReady", false);
+});
+
+socket.on("server:ready", () => {
+  console.log("Server fully ready");
+  store.commit("socket/setServerReady", true);
+});
+
+socket.on("server:not-ready", () => {
+  console.log("Server not ready yet");
+  store.commit("socket/setServerReady", false);
+});
 
 socket.on("kafka-message", (message) => {
-  if (store.getters.isSocketActive) {
+  if (
+    store.getters["socket/isSocketConnected"] &&
+    store.getters["socket/isServerReady"]
+  ) {
     message.timestamp = formatTimestamp(message.timestamp || new Date());
 
     const formattedData = {
@@ -46,3 +73,8 @@ socket.on("kafka-message", (message) => {
     });
   }
 });
+
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}

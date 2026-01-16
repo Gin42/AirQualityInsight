@@ -49,6 +49,11 @@ services:
     container_name: air-quality-map-server
     ports:
       - 3000:3000
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     depends_on:
       mongodb:
         condition: service_started
@@ -92,6 +97,8 @@ services:
       mongodb:
         condition: service_started
       kafka:
+        condition: service_healthy
+      server:
         condition: service_healthy
     env_file:
       - .env

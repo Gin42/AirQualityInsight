@@ -34,8 +34,11 @@ const getSensor = async (req, res) => {
   if (sensorId) query.sensor_id = sensorId;
 
   try {
+    console.log("UGO, mi collego al database");
     await sensorService.connectWithRetry();
+    console.log("FOO, ora cerco nel database");
     const sensors = await sensorService.getSensorData(query);
+    console.log("BAR, ecco i sensori", sensors);
     res.json(sensors);
   } catch (error) {
     res.status(500).json({ error: error.message });

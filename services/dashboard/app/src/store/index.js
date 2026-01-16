@@ -5,6 +5,7 @@ import stats from "./modules/statistics";
 import data from "./modules/data";
 import table from "./modules/table";
 import user from "./modules/user";
+import socket from "./modules/socket";
 
 export const store = createStore({
   state: {
@@ -18,38 +19,45 @@ export const store = createStore({
       name: "Piazza Maggiore",
     },
     initialized: false,
-    socketActive: false,
   },
   getters: {
     isInitialized: (state) => {
       return state.initialized;
-    },
-    isSocketActive: (state) => {
-      return state.socketActive;
     },
   },
   mutations: {
     setCurrentMeasurements(state, value) {
       state.currentMeasurements = value;
     },
-    setSocketActive(state, { value }) {
-      state.socketActive = value;
-    },
     setCenter(state, { currentLng, currentLat }) {
       state.center.lng = currentLng;
       state.center.lat = currentLat;
     },
-  },
-  actions: {
-    async initializeAll({ state, dispatch, commit }) {
-      dispatch("data/initializeData");
-      dispatch("table/initializeTableData");
-      dispatch("sensors/initializeSensors");
-      dispatch("stats/initializeStats");
-      commit("setSocketActive", { value: true });
-      state.initialized = true;
+    setInitialized(state, value) {
+      state.initialized = value;
     },
   },
+  actions: {
+    async initializeAll({ dispatch, commit, getters }) {
+      console.log("Waiting for backend readiness...");
+
+      while (
+        !store.getters["socket/isSocketConnected"] ||
+        !store.getters["socket/isServerReady"]
+      ) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+
+      console.log("Backend ready — initializing app");
+      await dispatch("data/initializeData");
+      await dispatch("table/initializeTableData");
+      await dispatch("sensors/initializeSensors");
+      await dispatch("stats/initializeStats");
+
+      commit("setInitialized", true);
+    },
+  },
+
   modules: {
     sensors,
     measurements,
@@ -57,5 +65,6 @@ export const store = createStore({
     data,
     table,
     user,
+    socket,
   },
 });

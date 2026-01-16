@@ -32,6 +32,8 @@ const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 const io = socketIo(server, { cors: { origin: corsOrigin } });
 
+let serverReady = false;
+
 app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -49,7 +51,7 @@ app.use((req, res, next) => {
 // Health
 app.get("/health", (req, res) => {
   res.json({
-    status: "healthy",
+    status: serverReady,
     uptime: process.uptime(),
     wot_things: registeredSensors.size,
     active_measurements: latestMeasurements.size,
@@ -91,6 +93,12 @@ app.get("/api/latest", async (req, res) => {
 
 // WebSocket connections handler
 io.on("connection", (socket) => {
+  if (serverReady) {
+    socket.emit("server:ready");
+  } else {
+    socket.emit("server:not-ready");
+  }
+
   console.log("New client connected");
 
   socket.emit("wot-directory", Array.from(registeredSensors.values()));
@@ -109,6 +117,9 @@ async function startServer() {
     await runAckConsumer();
     await retryUntilAck(10, initializeSensors);
     await runConsumer(io);
+
+    serverReady = true;
+    io.emit("server:ready");
 
     server.listen(port, () =>
       console.log(`Server running on http://localhost:${port}`)

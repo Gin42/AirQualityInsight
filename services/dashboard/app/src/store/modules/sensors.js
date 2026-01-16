@@ -59,7 +59,7 @@ const mutations = {
   },
 
   resetSensors(state) {
-    state.sensors = null;
+    state.sensors = new Map();
   },
 
   updateSensor(state, { id, timestamp, data, maxMeasurements }) {
@@ -100,7 +100,10 @@ const actions = {
       console.log(`Loaded ${getters.allSensorsCount} sensors from API`);
       return getters.allSensors;
     } catch (error) {
-      console.error("Unable to fetch sensors from API:", error);
+      console.error(
+        "Unable to fetch sensors from API:",
+        error
+      ); /* E' qui che tira l'errore allo start*/
     }
   },
 

@@ -22,11 +22,11 @@ export default {
     },
   },
   async created() {
-    this.setCookies();
+    //this.setCookies();
+    console.log("sto per domandare l'inizializzazione");
     await this.initializeAll();
     await this.checkAuth();
   },
-  mounted() {},
 }; /*
     /*return {
       socket: null,

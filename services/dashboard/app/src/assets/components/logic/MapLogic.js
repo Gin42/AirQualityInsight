@@ -19,6 +19,7 @@ export default {
     }),
     ...mapGetters("measurements", ["lastMeasurement", "allMeasurementsCount"]),
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
+    ...mapGetters("socket", ["isSocketConnected", "isServerReady"]),
     sliderValue: {
       get() {
         return this.currentMeasurements;
@@ -642,19 +643,31 @@ export default {
   },
   async mounted() {
     try {
+      while (!this.isSocketConnected || !this.isServerReady) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+
       this.initMap();
 
+      /**
+       * TODO: c'è un qualche problema di race condition per cui se sensorLocation è il primo
+       * ad essere esaminato non riesce a caricare correttamente i sensori.
+       * Al momento posso semplicemente spostarlo in fondo all'array, ma dato che vorrei cancellare
+       * i vari tipi di layers, devo capire se poi da ancora errore
+       */
       const layers = [
-        "sensorLocations",
         "postalCodeBoundaries",
         "neighborhoods",
         "zones",
         "ztl",
+        "sensorLocations",
       ];
 
       for (const layer of layers) {
         await this.populateLayer(layer);
-        if (this.show[layer]) this.drawLayer(layer);
+        if (this.show[layer]) {
+          this.drawLayer(layer);
+        }
       }
     } catch (error) {
       console.error("Error initializing map:", error);
