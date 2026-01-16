@@ -5,19 +5,33 @@ position: [lat, lng]
 status,
 ip
 }]*/
+/**
+ * lastChange:
+ * type: add, delete, modify
+ * id: sensor_id
+ */
 import Sensor from "@/sensors/Sensor";
 import { fetchFromApi } from "@/services/api";
 
+export const SensorOperations = {
+  ADD: "add",
+  DELETE: "delete",
+  MODIFY: "modify",
+};
+
 const state = () => ({
   sensors: new Map(),
-  newSensor: null,
+  lastChange: {
+    type: null,
+    id: null,
+  },
   timeUpdateInterval: null,
 });
 
 //GETTERS
 const getters = {
   allSensors: (state) => {
-    return Array.from(state.sensors.values()); //??? can it return a map?
+    return Array.from(state.sensors.values());
   },
   allSensorsCount: (state) => {
     return state.sensors.size;
@@ -44,13 +58,19 @@ const mutations = {
 
   addNewSensor(state, { sensorData, center }) {
     const sensor = new Sensor(sensorData, center);
-
-    console.log("Vuex addNewSensor", sensor);
-
-    state.sensors = new Map(state.sensors);
     state.sensors.set(sensorData.sensor_id, sensor);
 
-    state.newSensor = sensor;
+    state.lastChange.type = SensorOperations.ADD;
+    state.lastChange.id = sensorData.sensor_id;
+  },
+
+  deleteSensorData(state, { sensorId }) {
+    state.sensors.delete(sensorId);
+  },
+
+  setLastChangeDelete(state, { sensorId }) {
+    state.lastChange.type = SensorOperations.DELETE;
+    state.lastChange.id = sensorId;
   },
 
   resetSensors(state) {
@@ -67,8 +87,9 @@ const mutations = {
     sensor.setMeasurements(timestamp, data, maxMeasurements);
   },
 
-  clearNewSensor(state) {
-    state.newSensor = null;
+  clearLastChange(state) {
+    state.lastChange.type = null;
+    state.lastChange.id = null;
   },
 };
 
@@ -103,8 +124,6 @@ const actions = {
   },
 
   async addSensor({ commit, rootState }, data) {
-    console.log("FOO");
-
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
 
@@ -122,12 +141,28 @@ const actions = {
         }),
       });
 
-      console.log("UGO: ", response);
-
       commit("addNewSensor", {
         sensorData: response,
         center: rootState.center,
       });
+    } catch (error) {
+      console.error("Unable to send sensor to API:", error);
+    }
+  },
+
+  async deleteSensor({ commit }, sensorId) {
+    try {
+      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+
+      const response = await fetchFromApi(`${apiUrl}/api/sensor/${sensorId}`, {
+        method: "DELETE",
+      });
+
+      if (response) {
+        commit("setLastChangeDelete", {
+          sensorId,
+        });
+      }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }

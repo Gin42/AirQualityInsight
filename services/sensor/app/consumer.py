@@ -14,10 +14,15 @@ INIT_RECEIVED = threading.Event()
 consumer = None
 
 on_create_sensor = None
+on_delete_sensor = None
 
 def register_create_handler(handler):
     global on_create_sensor
     on_create_sensor = handler
+
+def register_delete_handler(handler):
+    global on_delete_sensor
+    on_delete_sensor = handler
 
 def create_consumer(max_retries=10, delay=5):
     global consumer
@@ -61,6 +66,10 @@ def run_consumer():
         elif message.key == "CREATE":
             if on_create_sensor:
                 on_create_sensor(payload["sensor"])
+            send_ack(payload["message_id"])
+        elif message.key == "DELETE":
+            if on_delete_sensor:
+                on_delete_sensor(payload["sensor"])
             send_ack(payload["message_id"])
 
 def wait_init(timeout=60):

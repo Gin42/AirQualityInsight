@@ -6,6 +6,7 @@ import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
 import { fetchFromApi } from "@/services/api";
+import { SensorOperations } from "../../../store/modules/sensors";
 
 import { TrinityRingsSpinner } from "epic-spinners";
 
@@ -16,7 +17,7 @@ export default {
       sensors: (state) => state.sensors.sensors,
       center: (state) => state.center,
       newMeasurement: (state) => state.measurements.measurements,
-      newSensor: (state) => state.sensors.newSensor,
+      lastChange: (state) => state.sensors.lastChange,
       currentMeasurements: (state) => state.currentMeasurements,
     }),
     ...mapGetters("measurements", ["lastMeasurement", "allMeasurementsCount"]),
@@ -32,15 +33,25 @@ export default {
     },
   },
   watch: {
-    newSensor: {
-      handler(newSensor) {
-        console.log("map:", this.map);
-        console.log(newSensor);
-        console.log("DRAWING TIME");
-        if (!newSensor) return;
-
-        this.drawSensor(newSensor, "sensorLocations");
-        this.clearNewSensor();
+    lastChange: {
+      handler(lastChange) {
+        console.log("CHANGE TIME: ", lastChange);
+        if (!lastChange) {
+          return;
+        } else if (lastChange.type == SensorOperations.ADD) {
+          console.log("ADD");
+          this.drawSensor(this.getSensor(lastChange.id), "sensorLocations");
+          this.clearLastChange();
+        } else if (lastChange.type == SensorOperations.DELETE) {
+          console.log("DELETE");
+          if (this.getSensor(lastChange.id).getMarker()) {
+            this.getSensor(lastChange.id).getMarker().remove();
+            this.getSensor(lastChange.id).setMarker(null);
+            this.deleteSensorData(lastChange.id);
+          }
+        } else if (lastChange.type == SensorOperations.MODIFY) {
+          console.log("MODIFY");
+        }
       },
       deep: true,
     },
@@ -119,11 +130,12 @@ export default {
   },
   methods: {
     ...mapMutations(["setCenter", "setCurrentMeasurements"]),
-    ...mapMutations("sensors", ["clearNewSensor"]),
+    ...mapMutations("sensors", ["clearLastChange", "deleteSensorData"]),
     ...mapActions("sensors", [
       "fetchSensors",
       "updateLastMeasurement",
       "addSensor",
+      "deleteSensor",
     ]),
 
     initMap() {
@@ -298,12 +310,36 @@ export default {
         for (const sensorLocation of this.allSensors) {
           const marker = L.marker(
             [sensorLocation.getLat(), sensorLocation.getLng()],
-            {
-              icon: pushpinIcon,
-            }
+            { icon: pushpinIcon }
           );
-          marker.bindPopup(sensorLocation.getName());
+
           marker.addTo(this.map);
+
+          marker.bindPopup(`
+      <div class="pin-popup" style="display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-items: center;">
+          <p>${sensorLocation.getName()}</p>
+          <button class="delete-button" data-sensor-id="${sensorLocation.getId()}"
+            style="background-color: crimson;
+            color: whitesmoke;
+            padding: 0.5rem;
+            font-weight: bold;
+            letter-spacing: 0.03em;">
+          DELETE</button>
+      </div>
+    `);
+
+          marker.on("popupopen", (e) => {
+            const popupNode = e.popup.getElement();
+            const btn = popupNode.querySelector(".delete-button");
+            btn.addEventListener("click", () => {
+              const sensorId = btn.dataset.sensorId;
+              this.deleteSensor(sensorId);
+            });
+          });
+
           marker.on("click", () => {
             this.$emit("marker-click", sensorLocation);
           });
@@ -657,8 +693,6 @@ export default {
       }
 
       this.loading = false;
-
-      console.log("Map mounted, newSensor =", this.newSensor);
 
       this.initMap();
 

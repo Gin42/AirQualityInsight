@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get("/", sensorController.getSensor);
 router.post("/addSensor", sensorController.addSensor);
+router.delete("/:id", sensorController.deleteSensor);
 
 /** TO-DO:
  * - deleteSensor

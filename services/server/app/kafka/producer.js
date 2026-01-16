@@ -102,6 +102,30 @@ const addSensor = async (messageId, newSensor) => {
   }
 };
 
+const deleteSensor = async (messageId, sensor) => {
+  console.log("UGO:", sensor);
+  try {
+    await producer.send({
+      topic: sensors_topic,
+      messages: [
+        {
+          key: Sensors_actions.DELETE,
+          value: JSON.stringify({
+            message_id: messageId,
+            sensor: sensor,
+          }),
+        },
+      ],
+    });
+
+    console.log(
+      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.DELETE}`
+    );
+  } catch (err) {
+    console.error("Error sending Kafka message:", err.message);
+  }
+};
+
 const waitForAck = (messageId, timeoutMs = 10000) => {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -149,4 +173,5 @@ module.exports = {
   retryUntilAck,
   waitForAck,
   addSensor,
+  deleteSensor,
 };

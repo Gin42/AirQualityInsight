@@ -663,4 +663,19 @@
   align-items: center;
   justify-content: center;
 }
+
+.pin-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-items: center;
+}
+
+.delete-button {
+  background-color: crimson;
+  color: whitesmoke;
+  padding: 0.5rem;
+  font-weight: bold;
+  letter-spacing: 0.03em;
+}
 </style>

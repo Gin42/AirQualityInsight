@@ -1,7 +1,12 @@
 // sensorService.js
 const Sensor = require("./sensorModel");
 const mongoose = require("mongoose");
-const { addSensor, retryUntilAck, waitForAck } = require("../kafka/producer");
+const {
+  addSensor,
+  retryUntilAck,
+  waitForAck,
+  deleteSensor,
+} = require("../kafka/producer");
 
 const connectWithRetry = async () => {
   const MONGODB_URI =
@@ -27,7 +32,7 @@ const countSensors = () => {
 const addSensorData = async (sensorData) => {
   try {
     sensorData.sensor_id = `SENSOR${Date.now()}`;
-    const sensor = new Sensor(sensorData);
+    const sensor = Sensor(sensorData);
     const savedSensor = await sensor.save();
 
     await retryUntilAck(10, addSensor, {
@@ -42,6 +47,29 @@ const addSensorData = async (sensorData) => {
     return savedSensor;
   } catch (err) {
     console.error("Error adding sensor:", err);
+    throw err;
+  }
+};
+
+const deleteSensorData = async (sensorId) => {
+  try {
+    const deletedSensor = await Sensor.findOneAndDelete({
+      sensor_id: sensorId,
+    });
+
+    console.log("DELETED: ", deletedSensor);
+
+    if (!deletedSensor) {
+      throw new Error(`Sensor ${sensorId} not found`);
+    }
+
+    await retryUntilAck(10, deleteSensor, {
+      sensor_id: sensorId,
+    });
+
+    return deletedSensor;
+  } catch (err) {
+    console.error("Error deleting sensor:", err);
     throw err;
   }
 };
@@ -61,6 +89,7 @@ function generateIPAddresses(i) {
 
 module.exports = {
   addSensorData,
+  deleteSensorData,
   getSensorData,
   countSensors,
   generateIPAddresses,
