@@ -6,12 +6,14 @@ from consumer import (
     wait_init,
     get_sensors,
     register_create_handler,
-    register_delete_handler
+    register_delete_handler,
+    register_update_handler
 )
 from producer import create_producer, send_message, close_producer
 from sensor_runtime import (
     create_sensor_thread, 
-    delete_sensor_thread)
+    delete_sensor_thread,
+    update_sensor_name)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,12 +28,21 @@ def handle_delete(sensor_payload):
         return
     delete_sensor_thread(sensor_id)
 
+def handle_update(sensor_payload):
+    sensor_id = sensor_payload.get("sensor_id")
+    sensor_name = sensor_payload.get("sensor_name")
+    if not sensor_id:
+        logger.error(f"Received UPDATE message without sensor_id: {sensor_payload}")
+        return
+    update_sensor_name(sensor_id, sensor_name)
+
 if __name__ == "__main__":
     try:
         create_producer()
         create_consumer()
         register_create_handler(handle_create)
         register_delete_handler(handle_delete)
+        register_update_handler(handle_update)
         start_consumer_thread()
 
         logger.info("Waiting for INIT...")

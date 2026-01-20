@@ -3,10 +3,16 @@ import { mapState, mapGetters, mapActions, mapMutations } from "vuex";
 import MapComponent from "@/assets/components/MapComponent.vue";
 import FormComponent from "@/assets/components/FormComponent.vue";
 import TableComponent from "@/assets/components/TableComponent.vue";
+import SensorCardComponent from "@/assets/components/SensorCardComponent.vue";
 
 export default {
   name: "MapView",
-  components: { MapComponent, FormComponent, TableComponent },
+  components: {
+    MapComponent,
+    FormComponent,
+    TableComponent,
+    SensorCardComponent,
+  },
   computed: {
     ...mapState({
       minMeasurements: (state) => state.minMeasurements,
@@ -22,9 +28,11 @@ export default {
       activeSensors: true,
       timeUpdateInterval: null,
       isFormVisible: false,
+      isCardVisible: false,
       latitude: null,
       longitude: null,
       address: null,
+      cardSensor: null,
     };
   },
   created() {},
@@ -50,10 +58,11 @@ export default {
       }
       this.activeSensors = !this.activeSensors;
     },
-    handleMarkerClick(marker) {
-      if (!marker) return;
-      console.log(`Selected sensor from map: ${marker.id}`);
-      this.centerMapOnSensor(marker);
+    handleMarkerClick(sensor) {
+      if (!sensor) return;
+      console.log(`Selected sensor from map: ${sensor}`);
+      this.centerMapOnSensor(sensor);
+      this.showCard(sensor);
       //this.addInfo(`Selected sensor from map: ${marker.id}`);
     },
     handleSensorsLoaded(sensors) {
@@ -71,6 +80,14 @@ export default {
     },
     hideForm() {
       this.isFormVisible = false;
+    },
+    showCard(sensor) {
+      console.log("CARD TIME", sensor);
+      this.cardSensor = sensor;
+      this.isCardVisible = true;
+    },
+    hideCard() {
+      this.isCardVisible = false;
     },
     centerMapOnSensor(sensor) {
       if (!this.$refs.mapComponent) return;
@@ -161,18 +178,27 @@ export default {
         </button>
       </div>
     </div>
-    <MapComponent
-      ref="mapComponent"
-      :measurements="getMeasurementsTypes"
-      :min-measurements="minMeasurements"
-      :max-measurements="maxMeasurements"
-      :thresholds="getThresholds"
-      :get-intensity="getIntensity"
-      @marker-click="handleMarkerClick"
-      @sensors-loaded="handleSensorsLoaded"
-      @measurements-cleared="handleMeasurementsCleared"
-      @open-form="showForm"
-    />
+    <div>
+      <MapComponent
+        ref="mapComponent"
+        :measurements="getMeasurementsTypes"
+        :min-measurements="minMeasurements"
+        :max-measurements="maxMeasurements"
+        :thresholds="getThresholds"
+        :get-intensity="getIntensity"
+        @marker-click="handleMarkerClick"
+        @sensors-loaded="handleSensorsLoaded"
+        @measurements-cleared="handleMeasurementsCleared"
+        @open-form="showForm"
+      />
+      <SensorCardComponent
+        v-if="isCardVisible"
+        @close-card="hideCard"
+        :sensor="cardSensor"
+      >
+      </SensorCardComponent>
+    </div>
+
     <FormComponent
       v-if="isFormVisible"
       @close-form="hideForm"

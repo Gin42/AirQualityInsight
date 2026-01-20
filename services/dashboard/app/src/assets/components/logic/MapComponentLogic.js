@@ -55,7 +55,6 @@ export default {
       selectedMeasurement: "pm25",
       maxHeatLatLng: 250,
       error: false,
-      loading: ref(false),
       show: {
         sensorLocations: true,
         postalCodeBoundaries: false,

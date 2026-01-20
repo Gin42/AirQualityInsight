@@ -46,7 +46,7 @@ const createProducer = async (retries = 10, delay = 5000) => {
       return producer;
     } catch (err) {
       console.warn(
-        `Kafka connection attempt ${i} failed. Retrying in ${delay / 1000}s...`
+        `Kafka connection attempt ${i} failed. Retrying in ${delay / 1000}s...`,
       );
       await new Promise((r) => setTimeout(r, delay));
     }
@@ -72,7 +72,7 @@ const initializeSensors = async (messageId) => {
     });
 
     console.log(
-      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.INIT}`
+      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.INIT}`,
     );
   } catch (err) {
     console.error("Error sending Kafka message:", err.message);
@@ -95,7 +95,7 @@ const addSensor = async (messageId, newSensor) => {
     });
 
     console.log(
-      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.CREATE}`
+      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.CREATE}`,
     );
   } catch (err) {
     console.error("Error sending Kafka message:", err.message);
@@ -119,7 +119,30 @@ const deleteSensor = async (messageId, sensor) => {
     });
 
     console.log(
-      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.DELETE}`
+      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.DELETE}`,
+    );
+  } catch (err) {
+    console.error("Error sending Kafka message:", err.message);
+  }
+};
+
+const updateSensor = async (messageId, updatedSensor) => {
+  try {
+    await producer.send({
+      topic: sensors_topic,
+      messages: [
+        {
+          key: Sensors_actions.MODIFY,
+          value: JSON.stringify({
+            message_id: messageId,
+            sensor: updatedSensor,
+          }),
+        },
+      ],
+    });
+
+    console.log(
+      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.MODIFY}`,
     );
   } catch (err) {
     console.error("Error sending Kafka message:", err.message);
@@ -141,7 +164,7 @@ const waitForAck = (messageId, timeoutMs = 10000) => {
       (err) => {
         clearTimeout(timeout);
         reject(err);
-      }
+      },
     );
   });
 };
@@ -174,4 +197,5 @@ module.exports = {
   waitForAck,
   addSensor,
   deleteSensor,
+  updateSensor,
 };

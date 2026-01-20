@@ -51,6 +51,15 @@ export default {
           }
         } else if (lastChange.type == SensorOperations.MODIFY) {
           console.log("MODIFY");
+          const sensor = this.getSensor(lastChange.id);
+          if (!sensor) return;
+
+          const marker = sensor.getMarker();
+          if (marker) {
+            marker.setPopupContent(`<p>${sensor.getName()}</p>`);
+          }
+
+          this.clearLastChange();
         }
       },
       deep: true,
@@ -130,7 +139,11 @@ export default {
   },
   methods: {
     ...mapMutations(["setCenter", "setCurrentMeasurements"]),
-    ...mapMutations("sensors", ["clearLastChange", "deleteSensorData"]),
+    ...mapMutations("sensors", [
+      "clearLastChange",
+      "deleteSensorData",
+      "modifySensorData",
+    ]),
     ...mapActions("sensors", [
       "fetchSensors",
       "updateLastMeasurement",
@@ -143,7 +156,7 @@ export default {
       try {
         this.map = L.map("map").setView(
           [this.center.lat, this.center.lng],
-          this.zoom
+          this.zoom,
         );
       } catch (error) {
         console.error("Failed to initialize map:", error);
@@ -187,7 +200,7 @@ export default {
       });
 
       const coordinatesCopyBtn = document.getElementById(
-        "coordinates-copy-btn"
+        "coordinates-copy-btn",
       );
       if (!coordinatesCopyBtn) return;
 
@@ -257,13 +270,13 @@ export default {
       try {
         const params = "format=json";
         const response = await fetchFromApi(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&${params}`
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&${params}`,
         );
 
         const { road, house_number, city, country } = response.address;
 
         const addressParts = [road, city, house_number, country].filter(
-          Boolean
+          Boolean,
         );
         return addressParts.join(", ");
       } catch (error) {
@@ -310,35 +323,12 @@ export default {
         for (const sensorLocation of this.allSensors) {
           const marker = L.marker(
             [sensorLocation.getLat(), sensorLocation.getLng()],
-            { icon: pushpinIcon }
+            { icon: pushpinIcon },
           );
 
           marker.addTo(this.map);
 
-          marker.bindPopup(`
-      <div class="pin-popup" style="display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-items: center;">
-          <p>${sensorLocation.getName()}</p>
-          <button class="delete-button" data-sensor-id="${sensorLocation.getId()}"
-            style="background-color: crimson;
-            color: whitesmoke;
-            padding: 0.5rem;
-            font-weight: bold;
-            letter-spacing: 0.03em;">
-          DELETE</button>
-      </div>
-    `);
-
-          marker.on("popupopen", (e) => {
-            const popupNode = e.popup.getElement();
-            const btn = popupNode.querySelector(".delete-button");
-            btn.addEventListener("click", () => {
-              const sensorId = btn.dataset.sensorId;
-              this.deleteSensor(sensorId);
-            });
-          });
+          marker.bindPopup(`<p>${sensorLocation.getName()}</p>`);
 
           marker.on("click", () => {
             this.$emit("marker-click", sensorLocation);
@@ -591,7 +581,7 @@ export default {
         "grid-crosshair",
         "grid-dashed",
         "grid-dots",
-        "grid-animated"
+        "grid-animated",
       );
       if (this.gridType !== "none")
         mapContainer.classList.add(`grid-${this.gridType}`);
@@ -599,7 +589,7 @@ export default {
 
     updateHeatmap() {
       this.heatLayer.setLatLngs(
-        this.measurements[this.selectedMeasurement].heatLatLng
+        this.measurements[this.selectedMeasurement].heatLatLng,
       );
     },
 

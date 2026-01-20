@@ -57,3 +57,13 @@ def delete_sensor_thread(sensor_id):
     del threads[sensor_id]
 
     logger.info(f"Sensor thread «{sensor_id}» stopped and removed")
+
+def update_sensor_name(sensor_id, new_name):
+    entry = threads.get(sensor_id)
+
+    if not entry:
+        logger.warning(f"No thread found for sensor {sensor_id}")
+        return
+
+    logger.info(f"Updating name for sensor {sensor_id} to «{new_name}»")
+    entry["sensor"].set_name(new_name)

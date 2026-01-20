@@ -38,7 +38,7 @@ const getters = {
   },
   allActiveSensors: (state) => {
     return Array.from(state.sensors.values()).filter((sensor) =>
-      sensor.getActive()
+      sensor.getActive(),
     );
   },
   getSensor: (state) => (id) => state.sensors.get(id),
@@ -51,7 +51,7 @@ const mutations = {
       sensorsData.map((sensor) => [
         sensor.sensor_id,
         new Sensor(sensor, center),
-      ])
+      ]),
     );
     state.sensors = sensorMap;
   },
@@ -68,8 +68,20 @@ const mutations = {
     state.sensors.delete(sensorId);
   },
 
+  modifySensorData(state, { sensorId, sensorName }) {
+    let sensor = state.sensors.get(sensorId);
+    console.log("HEYLA: ", sensor, sensor.name);
+    sensor.name = sensorName;
+    state.sensors.set(sensorId, sensor);
+  },
+
   setLastChangeDelete(state, { sensorId }) {
     state.lastChange.type = SensorOperations.DELETE;
+    state.lastChange.id = sensorId;
+  },
+
+  setLastChangeModify(state, { sensorId }) {
+    state.lastChange.type = SensorOperations.MODIFY;
     state.lastChange.id = sensorId;
   },
 
@@ -118,7 +130,7 @@ const actions = {
     } catch (error) {
       console.error(
         "Unable to fetch sensors from API:",
-        error
+        error,
       ); /* E' qui che tira l'errore allo start*/
     }
   },
@@ -163,6 +175,31 @@ const actions = {
           sensorId,
         });
       }
+    } catch (error) {
+      console.error("Unable to send sensor to API:", error);
+    }
+  },
+
+  async modifySensor({ commit }, { sensorId, sensorName }) {
+    try {
+      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+
+      const response = await fetchFromApi(
+        `${apiUrl}/api/sensor/${sensorId}?name=${encodeURIComponent(sensorName)}`,
+        {
+          method: "PUT",
+        },
+      );
+
+      if (response) {
+        commit("setLastChangeModify", {
+          sensorId,
+        });
+      }
+      commit("modifySensorData", {
+        sensorId,
+        sensorName,
+      });
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }

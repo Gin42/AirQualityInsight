@@ -24,6 +24,10 @@ def register_delete_handler(handler):
     global on_delete_sensor
     on_delete_sensor = handler
 
+def register_update_handler(handler):
+    global on_update_sensor
+    on_update_sensor = handler
+
 def create_consumer(max_retries=10, delay=5):
     global consumer
     for _ in range(max_retries):
@@ -70,6 +74,10 @@ def run_consumer():
         elif message.key == "DELETE":
             if on_delete_sensor:
                 on_delete_sensor(payload["sensor"])
+            send_ack(payload["message_id"])
+        elif message.key == "MODIFY":
+            if on_update_sensor:
+                on_update_sensor(payload["sensor"])
             send_ack(payload["message_id"])
 
 def wait_init(timeout=60):

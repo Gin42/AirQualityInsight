@@ -6,9 +6,9 @@ const router = express.Router();
 router.get("/", sensorController.getSensor);
 router.post("/addSensor", sensorController.addSensor);
 router.delete("/:id", sensorController.deleteSensor);
+router.put("/:id", sensorController.modifySensor);
 
 /** TO-DO:
- * - deleteSensor
  * - modifySensor
  *
  * - getSensor (id) ???

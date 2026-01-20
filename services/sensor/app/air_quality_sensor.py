@@ -9,6 +9,9 @@ class AirQualitySensor:
         self.config = config
         self.last_reading = None
 
+    def set_name(self, new_name):
+        self.name = new_name
+
     def get_name(self):
         return self.sensor['name']
 

@@ -4,8 +4,8 @@ const mongoose = require("mongoose");
 const {
   addSensor,
   retryUntilAck,
-  waitForAck,
   deleteSensor,
+  updateSensor,
 } = require("../kafka/producer");
 
 const connectWithRetry = async () => {
@@ -74,6 +74,36 @@ const deleteSensorData = async (sensorId) => {
   }
 };
 
+const modifySensorData = async (sensorId, sensorName) => {
+  try {
+    if (await isNameTaken(sensorName, sensorId)) {
+      throw new Error(`Sensor name ${sensorName} already used`);
+    }
+
+    const modifiedSensor = await Sensor.findOneAndUpdate(
+      { sensor_id: sensorId },
+      { $set: { name: sensorName } },
+      { new: true },
+    );
+
+    console.log("UPDATED: ", modifiedSensor);
+
+    if (!modifiedSensor) {
+      throw new Error(`Sensor ${sensorId} not found`);
+    }
+
+    await retryUntilAck(10, updateSensor, {
+      sensor_id: sensorId,
+      sensor_name: sensorName,
+    });
+
+    return modifiedSensor;
+  } catch (err) {
+    console.error("Error updating sensor:", err);
+    throw err;
+  }
+};
+
 const getSensorData = async (query) => {
   return await Sensor.find(query);
 };
@@ -87,10 +117,18 @@ function generateIPAddresses(i) {
   ].join(".");
 }
 
+const isNameTaken = async (name, sensorId) => {
+  return await Sensor.exists({
+    name,
+    sensor_id: { $ne: sensorId },
+  });
+};
+
 module.exports = {
   addSensorData,
   deleteSensorData,
   getSensorData,
+  modifySensorData,
   countSensors,
   generateIPAddresses,
   connectWithRetry,

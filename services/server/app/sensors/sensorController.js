@@ -23,10 +23,26 @@ const addSensor = async (req, res) => {
 };
 
 const deleteSensor = async (req, res) => {
-  console.log("HEYO");
   const { id } = req.params;
   try {
     const result = await sensorService.deleteSensorData(id);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const modifySensor = async (req, res) => {
+  console.log("HE-MAN");
+  const { id } = req.params;
+  const { name } = req.query;
+
+  if (!name) {
+    return res.status(400).json({ error: "name query parameter is required" });
+  }
+
+  try {
+    const result = await sensorService.modifySensorData(id, name);
     res.status(201).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -51,4 +67,4 @@ const getSensor = async (req, res) => {
   }
 };
 
-module.exports = { addSensor, getSensor, deleteSensor };
+module.exports = { addSensor, getSensor, deleteSensor, modifySensor };
