@@ -4,6 +4,8 @@ import MapComponent from "@/assets/components/MapComponent.vue";
 import FormComponent from "@/assets/components/FormComponent.vue";
 import TableComponent from "@/assets/components/TableComponent.vue";
 import SensorCardComponent from "@/assets/components/SensorCardComponent.vue";
+import MapButtonComponent from "@/assets/components/MapButtonComponent.vue";
+import SettingsComponent from "@/assets/components/SettingsComponent.vue";
 
 export default {
   name: "MapView",
@@ -12,6 +14,8 @@ export default {
     FormComponent,
     TableComponent,
     SensorCardComponent,
+    MapButtonComponent,
+    SettingsComponent,
   },
   computed: {
     ...mapState({
@@ -29,6 +33,7 @@ export default {
       timeUpdateInterval: null,
       isFormVisible: false,
       isCardVisible: false,
+      isSettingsVisible: false,
       latitude: null,
       longitude: null,
       address: null,
@@ -89,18 +94,26 @@ export default {
     hideCard() {
       this.isCardVisible = false;
     },
+
+    showSettings() {
+      console.log("Settings TIME");
+      this.isSettingsVisible = true;
+    },
+    hideSettings() {
+      this.isSettingsVisible = false;
+    },
     centerMapOnSensor(sensor) {
       if (!this.$refs.mapComponent) return;
       if (!sensor.getLat()) return;
       if (!sensor.getLng()) return;
 
       const mapContainer = document.querySelector(
-        ".dashboard-component.map-component-container"
+        ".dashboard-component.map-component-container",
       );
       mapContainer?.scrollIntoView({ behavior: "smooth" });
       this.$refs.mapComponent?.centerOnLocation(
         sensor.getLat(),
-        sensor.getLng()
+        sensor.getLng(),
       );
     },
     handleSensorRowClick(row) {
@@ -113,92 +126,52 @@ export default {
 </script>
 
 <template>
-  <div class="how-to-use-it">
-    <h2>How to use it</h2>
-    <ul class="how-to-list">
-      <li>
-        The map displays a collection of sensors indicated by red pushpins.
-      </li>
-      <li>Clicking on a sensor will show its name.</li>
-      <li>
-        Collected live measurements are displayed in a table below the map, and
-        clicking on a row will navigate to the corresponding sensor on the map.
-      </li>
-      <li>
-        The map shows collected measurements as a heatmap based on the selected
-        measurement type.
-      </li>
-      <li>You can choose from available options in the control panel.</li>
-      <li>
-        The control panel opens by clicking the red pushpin in the top right
-        corner of the map.
-      </li>
-      <li>
-        Opening the panel provides information such as the number of registered
-        sensors and collected measurements.
-      </li>
-      <li>
-        You can select the measurement type to display and any layers to
-        overlay.
-      </li>
-      <li>
-        Data collection can be stopped and resumed at any time using the buttons
-        in the top right corner of the map.
-      </li>
-      <li>
-        Collected measurements have a limit between
-        {{ minMeasurements }} and {{ maxMeasurements }}, after which new
-        recordings replace the oldest ones following a FIFO (first in, first
-        out) system.
-      </li>
-    </ul>
-  </div>
-
+  <!-- Main element: should contain settings, map and sensor info if selected -->
   <div class="dashboard-component map-component-container">
-    <div class="component-header">
-      <h2>Map</h2>
-      <div class="component-header-buttons">
-        <button @click="refreshSensors" class="btn tertiary-color">
-          <i class="fas fa-sync-alt"></i> Refresh
-        </button>
-        <button
-          @click="handleActiveSensors"
-          :class="['btn', { 'btn-danger': this.activeSensors }]"
-        >
-          <i
-            :class="[
-              'fas',
-              {
-                'fa-stop': this.activeSensors,
-                'fa-play': !this.activeSensors,
-              },
-            ]"
-          ></i>
-          {{ this.activeSensors ? "Stop" : "Start" }}
-        </button>
-      </div>
-    </div>
-    <div>
-      <MapComponent
-        ref="mapComponent"
-        :measurements="getMeasurementsTypes"
-        :min-measurements="minMeasurements"
-        :max-measurements="maxMeasurements"
-        :thresholds="getThresholds"
-        :get-intensity="getIntensity"
-        @marker-click="handleMarkerClick"
-        @sensors-loaded="handleSensorsLoaded"
-        @measurements-cleared="handleMeasurementsCleared"
-        @open-form="showForm"
-      />
-      <SensorCardComponent
-        v-if="isCardVisible"
-        @close-card="hideCard"
-        :sensor="cardSensor"
-      >
-      </SensorCardComponent>
+    <div class="component-header-buttons">
+      <!-- Refresh and stop buttons -->
+      <button @click="refreshSensors" class="btn tertiary-color">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+      <button @click="handleActiveSensors" class="btn tertiary-color">
+        <i
+          :class="[
+            'fas',
+            {
+              'fa-stop': this.activeSensors,
+              'fa-play': !this.activeSensors,
+            },
+          ]"
+        ></i>
+        {{ this.activeSensors ? "Stop" : "Start" }}
+      </button>
     </div>
 
+    <MapComponent
+      ref="mapComponent"
+      :measurements="getMeasurementsTypes"
+      :min-measurements="minMeasurements"
+      :max-measurements="maxMeasurements"
+      :thresholds="getThresholds"
+      :get-intensity="getIntensity"
+      @marker-click="handleMarkerClick"
+      @sensors-loaded="handleSensorsLoaded"
+      @measurements-cleared="handleMeasurementsCleared"
+      @open-form="showForm"
+    />
+    <SensorCardComponent
+      v-if="isCardVisible"
+      @close-card="hideCard"
+      :sensor="cardSensor"
+    >
+    </SensorCardComponent>
+    <MapButtonComponent @open-settings="showSettings"></MapButtonComponent>
+    <SettingsComponent
+      v-if="isSettingsVisible"
+      @close-settings="hideSettings"
+    ></SettingsComponent>
+
+    <!-- Add sensor Form -->
     <FormComponent
       v-if="isFormVisible"
       @close-form="hideForm"
@@ -207,6 +180,8 @@ export default {
       :initial-name="name"
     ></FormComponent>
   </div>
+
+  <!-- Registered sensors list -->
   <div class="dashboard-component sensors-component-container">
     <div class="component-header">
       <h2>Registered sensors: {{ allSensorsCount }}</h2>
@@ -226,20 +201,34 @@ export default {
 </template>
 
 <style lang="scss">
-.how-to-use-it {
+.component-header-buttons {
   display: flex;
   flex-direction: column;
+  grid-area: 1 / 3 / 2 / 4;
+  z-index: 1;
+  gap: 0.5rem;
+  align-items: end;
 }
 
-ul.how-to-list {
-  flex-direction: column;
-  list-style-type: disc;
+.btn {
+  color: white;
+  padding: 0.5rem;
+  font-size: 1em;
+  height: fit-content;
+  width: fit-content;
+  gap: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .map-component-container {
   height: 100%;
   width: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
 }
 </style>

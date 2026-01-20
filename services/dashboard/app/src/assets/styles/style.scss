@@ -65,6 +65,10 @@ button {
   padding: 0;
 }
 
+button::hover {
+  cursor: pointer;
+}
+
 ul {
   display: flex;
 }

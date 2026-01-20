@@ -27,120 +27,6 @@
       <div class="center-marker">
         <div class="icon"></div>
       </div>
-
-      <div
-        :class="['controls', { pinned: isPinned }]"
-        :aria-expanded="isHovered"
-        @mouseover="isHovered = true"
-        @mouseleave="isHovered = false"
-      >
-        <div class="tools">
-          <h2>Controls</h2>
-          <!--Il dover cliccare il pushpin per fissare il pannello delle impostazioni non è chiara come cosa-->
-          <div
-            class="pushpin"
-            @click="isPinned = !isPinned"
-            title="Pin / Unpin"
-          ></div>
-        </div>
-
-        <pre>
-          <span>Markers:</span>
-          <span>{{ allSensorsCount }}</span>
-        </pre>
-
-        <hr />
-        <pre>
-          <span>Latitude:</span>
-          <span>{{ center.lat }}</span>
-        </pre>
-        <pre>
-          <span>Longitude:</span>
-          <span>{{ center.lng }}</span>
-        </pre>
-        <pre>
-          <span>Zoom:</span>
-          <span>{{ this.zoom }}</span>
-        </pre>
-        <button class="copy-btn" id="coordinates-copy-btn">Copy</button>
-        <button
-          v-for="(value, key) in show"
-          :key="key"
-          class="toggle-btn"
-          @click="toggleLayer(key)"
-          :class="{ active: value }"
-        >
-          {{ value ? "Hide" : "Show" }}
-          {{ getDisplayName(key) }}
-        </button>
-
-        <hr />
-        <div class="measurements-controls">
-          <label><strong>Measurement:</strong></label>
-          <select v-model="selectedMeasurement" @change="updateHeatmap">
-            <option
-              v-for="type in Object.keys(this.measurements)"
-              :key="type"
-              :value="type"
-            >
-              {{ this.measurements[type].label }}
-            </option>
-          </select>
-        </div>
-
-        <p>Limit of measurements:</p>
-        <div class="measurements-controls">
-          <input
-            id="parameter-slider"
-            type="range"
-            v-model="sliderValue"
-            :min="this.minMeasurements"
-            :max="this.maxMeasurements"
-            step="10"
-          />
-          <!--Da trovare un'altra soluzione per questo suggerimento-->
-          <span
-            class="help"
-            title="The higher the limit, the more accurate the measurements."
-            >{{ currentMeasurements }}</span
-          >
-        </div>
-
-        <!--Chiedere utilità del poter cancellare il conto delle misurazioni:
-            deve essere un'operazione che cancella in generale le misurazioni?
-            oppure è fittizia e sta solo segnando quante se ne sono registrate?
-            oppure serve per la heatmap?
-        -->
-        <div class="measurements-controls">
-          <p>Current measurements:</p>
-          <p>
-            {{ allMeasurementsCount }}
-          </p>
-        </div>
-
-        <button
-          @click="clearMeasurements"
-          class="btn btn-danger clear-measurements"
-        >
-          <i class="fas fa-trash"></i> Clear
-        </button>
-        <hr />
-
-        <div class="grid-controls">
-          <label><strong>Grid:</strong></label>
-          <select
-            id="grid-select"
-            v-model="gridType"
-            class="grid-select"
-            @change="onGridChange"
-          >
-            <option value="none">None</option>
-            <option value="gray">Gray</option>
-            <option value="red">Red</option>
-            <option value="crosshair">Crosshair</option>
-          </select>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -170,6 +56,8 @@
   justify-content: center;
   align-items: center;
   position: relative;
+  width: -webkit-fill-available;
+  grid-area: 1 / 1 / 4 / 6;
 
   &-overlay {
     position: absolute;
@@ -217,11 +105,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0.3) 1px,
-        transparent 1px
-      ),
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
     background-size: 30px 30px;
     pointer-events: none;
@@ -249,11 +134,8 @@
   &--gray {
     border-bottom: solid 1px var(--gray-line-color);
     border-right: solid 1px var(--gray-line-color);
-    background-image: linear-gradient(
-        to right,
-        var(--gray-line-color) 1px,
-        transparent 1px
-      ),
+    background-image:
+      linear-gradient(to right, var(--gray-line-color) 1px, transparent 1px),
       linear-gradient(to bottom, var(--gray-line-color) 1px, transparent 1px);
     background-size: 5% 5%;
   }
@@ -261,11 +143,8 @@
   &--red {
     border-bottom: solid 2px var(--red-line-color);
     border-right: solid 2px var(--red-line-color);
-    background-image: linear-gradient(
-        to right,
-        var(--red-line-color) 2px,
-        transparent 2px
-      ),
+    background-image:
+      linear-gradient(to right, var(--red-line-color) 2px, transparent 2px),
       linear-gradient(to bottom, var(--red-line-color) 2px, transparent 2px);
     background-size: 10% 10%;
   }
@@ -468,7 +347,10 @@
 
 .info {
   padding: 0.5rem;
-  font: 14px/16px Arial, Helvetica, sans-serif;
+  font:
+    14px/16px Arial,
+    Helvetica,
+    sans-serif;
   background: white;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
@@ -677,5 +559,9 @@
   padding: 0.5rem;
   font-weight: bold;
   letter-spacing: 0.03em;
+}
+
+trinity-rings-spinner {
+  grid-area: 2 / 3 / 3 / 4;
 }
 </style>

@@ -662,7 +662,7 @@ export default {
 
   .description,
   .measurement-ranges,
-  .how-to-use-it {
+  /*.how-to-use-it {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -670,7 +670,7 @@ export default {
     h2 {
       margin-bottom: 0.5rem;
     }
-  }
+  }*/
 
   .description .project-link {
     display: flex;
@@ -706,12 +706,12 @@ export default {
   }
 }
 
-.map-component-container {
+/*.map-component-container {
   grid-area: map;
   min-height: 80vh;
   display: flex;
   flex-direction: column;
-}
+}*/
 
 .measurements-component-container {
   grid-area: measurements;
@@ -773,12 +773,12 @@ tbody tr:nth-child(even) {
   gap: 0.5rem;
 }
 
-.component-header-buttons {
+/*.component-header-buttons {
   display: flex;
   gap: 0.5rem;
-}
+}*/
 
-.btn {
+/*.btn {
   background-color: #4caf50;
   color: white;
   border: none;
@@ -802,7 +802,7 @@ tbody tr:nth-child(even) {
       background-color: #d32f2f;
     }
   }
-}
+}*/
 
 @media (min-width: 768px) {
   .dashboard {
