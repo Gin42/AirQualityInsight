@@ -65,7 +65,7 @@ const actions = {
           dispatch("logout");
         }
       } else if (state.username == null) {
-        commit("setAuth", response); //deve prendere il name
+        commit("setAuth", response.username); //deve prendere il name
       }
     } catch (error) {
       console.error("Auth check failed:", error);

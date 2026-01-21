@@ -7,21 +7,24 @@ export default {
       isCollapsibleOpen: false,
       showHelpPopup: false,
       tooltipPosition: "left",
+      showCopiedPopup: false,
+      bubbleLeft: 0,
     };
   },
   computed: {
     ...mapState({
-      minMeasurements: (state) => state.minMeasurements,
-      maxMeasurements: (state) => state.maxMeasurements,
-      sensors: (state) => state.sensors.sensors,
-      center: (state) => state.center,
-      newMeasurement: (state) => state.measurements.measurements,
-      lastChange: (state) => state.sensors.lastChange,
-      currentMeasurements: (state) => state.currentMeasurements,
+      minMeasurements: (state) => state.measurements.minMeasurements,
+      maxMeasurements: (state) => state.measurements.maxMeasurements,
+      center: (state) => state.map.center,
+      currentMeasurements: (state) => state.measurements.currentMeasurements,
+      zoom: (state) => state.map.zoom,
+      gridTypeState: (state) => state.map.gridType,
+      selectedMeasurementState: (state) => state.map.selectedMeasurement,
+      currentCoords: (state) => state.map.currentCoords,
     }),
     ...mapGetters("measurements", ["lastMeasurement", "allMeasurementsCount"]),
+    ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
-    ...mapGetters("socket", ["isSocketConnected", "isServerReady"]),
     sliderValue: {
       get() {
         return this.currentMeasurements;
@@ -30,8 +33,26 @@ export default {
         this.setCurrentMeasurements(value);
       },
     },
+    selectedMeasurement: {
+      get() {
+        return this.selectedMeasurementState;
+      },
+      set(value) {
+        this.setSelectedMeasurement(value);
+      },
+    },
+    gridType: {
+      get() {
+        return this.gridTypeState;
+      },
+      set(value) {
+        this.setGridType(value);
+      },
+    },
   },
   methods: {
+    ...mapMutations("measurements", ["setCurrentMeasurements"]),
+    ...mapMutations("map", ["setSelectedMeasurement", "setGridType"]),
     toggleCollapsible() {
       this.isCollapsibleOpen = !this.isCollapsibleOpen;
       console.log(this.isCollapsibleOpen);
@@ -48,6 +69,50 @@ export default {
     hideTooltip() {
       this.showHelpPopup = false;
     },
+    copyCoords() {
+      const coordText = `${this.currentCoords.lat}\t${this.currentCoords.lng}`;
+
+      navigator.clipboard
+        .writeText(coordText)
+        .then(() => {
+          this.showCopiedPopup = true;
+
+          setTimeout(() => {
+            this.showCopiedPopup = false;
+          }, 3000);
+        })
+        .catch((err) => {
+          console.error("Error copying coordinates: ", err);
+          alert("Could not copy coordinates. Try doing it manually.");
+        });
+    },
+    updateBubblePosition() {
+      const min = this.minMeasurements;
+      const max = this.maxMeasurements;
+      const val = this.sliderValue;
+
+      this.bubbleLeft = ((val - min) / (max - min)) * 100;
+    },
+    onGridChange() {
+      const mapContainer = document.querySelector(".map-container");
+      if (!mapContainer) return;
+      mapContainer.classList.remove(
+        "grid-simple",
+        "grid-dark",
+        "grid-fine",
+        "grid-coordinate",
+        "grid-crosshair",
+        "grid-dashed",
+        "grid-dots",
+        "grid-animated",
+      );
+      if (this.gridType !== "none")
+        mapContainer.classList.add(`grid-${this.gridType}`);
+    },
+  },
+  mounted() {
+    this.updateBubblePosition();
+    console.log("Measurements types:", this.getMeasurementsTypes);
   },
 };
 </script>
@@ -60,7 +125,7 @@ export default {
     <!-- Map instructions -->
     <div class="collapsible-header secondary-color" @click="toggleCollapsible">
       <h2>How to use it</h2>
-      <button class="collapsible-button" @click="toggleCollapsible">
+      <button class="collapsible-button">
         <i class="fa-solid fa-angle-down" v-if="!isCollapsibleOpen"></i>
         <i class="fa-solid fa-angle-up" v-if="isCollapsibleOpen"></i>
       </button>
@@ -117,13 +182,26 @@ export default {
         <p>{{ allSensorsCount }}</p>
       </li>
       <li>
-        <p>Latitude:</p>
-        <p>{{ center.lat }}</p>
+        <p>Coordinates:</p>
+        <p>{{ center.lat }} / {{ center.lng }}</p>
+        <div class="copy-wrapper">
+          <button class="copy-button" @click="copyCoords">
+            <i class="fa-regular fa-copy"></i>
+          </button>
+
+          <transition name="fade">
+            <div v-if="showCopiedPopup" class="copied-popup popup">
+              Copied to clipboard
+            </div>
+          </transition>
+        </div>
       </li>
       <li>
-        <p>Longitute:</p>
-        <p>{{ center.lng }}</p>
+        <p>Zoom:</p>
+        <p>{{ zoom }}</p>
       </li>
+
+      <hr />
       <li>
         <div class="measurements-controls">
           <div class="measurements-controls-header">
@@ -137,7 +215,7 @@ export default {
               ></i>
 
               <div
-                class="help-popup"
+                class="help-popup popup"
                 v-if="showHelpPopup"
                 :class="tooltipPosition"
                 ref="helpPopup"
@@ -146,86 +224,66 @@ export default {
               </div>
             </div>
           </div>
-
-          <input
-            id="parameter-slider"
-            type="range"
-            v-model="sliderValue"
-            :min="this.minMeasurements"
-            :max="this.maxMeasurements"
-            step="10"
-          />
+          <div class="slider-containter">
+            <p>{{ minMeasurements }}</p>
+            <div class="slider-wrapper">
+              <div class="slider-bubble" :style="{ left: bubbleLeft + '%' }">
+                {{ sliderValue }}
+              </div>
+              <input
+                id="parameter-slider"
+                type="range"
+                v-model="sliderValue"
+                :min="minMeasurements"
+                :max="maxMeasurements"
+                step="10"
+                @input="updateBubblePosition"
+              />
+            </div>
+            <p>{{ maxMeasurements }}</p>
+          </div>
         </div>
       </li>
-    </ul>
 
-    <!--<pre>
-          <span>Zoom:</span>
-          <span>{{ this.zoom }}</span>
-        </pre>
-    <button class="copy-btn" id="coordinates-copy-btn">Copy</button>
-    <button
-      v-for="(value, key) in show"
-      :key="key"
-      class="toggle-btn"
-      @click="toggleLayer(key)"
-      :class="{ active: value }"
-    >
-      {{ value ? "Hide" : "Show" }}
-      {{ getDisplayName(key) }}
-    </button>
-
-    <hr />
-    <div class="measurements-controls">
-      <label><strong>Measurement:</strong></label>
-      <select v-model="selectedMeasurement" @change="updateHeatmap">
-        <option
-          v-for="type in Object.keys(this.measurements)"
-          :key="type"
-          :value="type"
+      <li>
+        <p>Measurement:</p>
+        <select v-model="selectedMeasurement">
+          <option
+            v-for="(measurement, type) in getMeasurementsTypes"
+            :key="type"
+            :value="type"
+          >
+            {{ measurement.label }}
+          </option>
+        </select>
+      </li>
+      <li class="curr-measurements-li">
+        <p>Current measurements:</p>
+        <p>{{ allMeasurementsCount }}</p>
+        <button
+          @click="clearMeasurements"
+          class="btn btn-danger clear-measurements"
         >
-          {{ this.measurements[type].label }}
-        </option>
-      </select>
-    </div>-->
+          <i class="fas fa-trash"></i> Clear
+        </button>
+      </li>
 
-    <p>Limit of measurements:</p>
-
-    <!--Chiedere utilità del poter cancellare il conto delle misurazioni:
-            deve essere un'operazione che cancella in generale le misurazioni?
-            oppure è fittizia e sta solo segnando quante se ne sono registrate?
-            oppure serve per la heatmap?
-        -->
-    <div class="measurements-controls">
-      <p>Current measurements:</p>
-      <p>
-        {{ allMeasurementsCount }}
-      </p>
-    </div>
-
-    <button
-      @click="clearMeasurements"
-      class="btn btn-danger clear-measurements"
-    >
-      <i class="fas fa-trash"></i> Clear
-    </button>
-    <hr />
-
-    <!--
-    <div class="grid-controls">
-      <label><strong>Grid:</strong></label>
-      <select
-        id="grid-select"
-        v-model="gridType"
-        class="grid-select"
-        @change="onGridChange"
-      >
-        <option value="none">None</option>
-        <option value="gray">Gray</option>
-        <option value="red">Red</option>
-        <option value="crosshair">Crosshair</option>
-      </select>
-    </div>-->
+      <hr />
+      <li>
+        <p>Grid:</p>
+        <select
+          id="grid-select"
+          v-model="gridType"
+          class="grid-select"
+          @change="onGridChange"
+        >
+          <option value="none">None</option>
+          <option value="gray">Gray</option>
+          <option value="blue">Blue</option>
+          <option value="crosshair">Crosshair</option>
+        </select>
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -235,6 +293,47 @@ export default {
   align-self: end;
   font-size: 1.5em;
   margin: 0.3rem;
+}
+
+.copy-button {
+  background: transparent;
+  font-size: 1em;
+  margin: 0;
+}
+
+.copy-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.popup {
+  position: absolute;
+  background-color: #222;
+  color: #fff;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.copied-popup {
+  top: -1.5rem;
+  right: 0;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .settings {
@@ -271,6 +370,10 @@ ul.how-to-list li {
   background-color: transparent;
 }
 
+hr {
+  width: 100%;
+}
+
 .settings-list {
   list-style: none;
   display: flex;
@@ -279,11 +382,23 @@ ul.how-to-list li {
   margin: 0;
 }
 
+.settings-list p {
+  margin: 0.5rem 0;
+}
+
 .settings-list li {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   font-size: 1em;
+}
+
+.settings-list li p:first-child {
+  font-weight: bold;
+}
+
+.coord-header {
+  display: inline;
 }
 
 .measurements-controls {
@@ -299,17 +414,10 @@ ul.how-to-list li {
 }
 
 .help-popup {
-  position: absolute;
   bottom: 80%;
   max-width: 10rem;
-  padding: 0.5rem 0.75rem;
-  background-color: #222;
-  color: #fff;
   border-radius: 6px 6px 0px 6px;
-  font-size: 0.85rem;
   white-space: normal;
-  z-index: 10;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .fa-circle-info {
@@ -344,5 +452,55 @@ ul.how-to-list li {
 
 .help-popup.right::after {
   left: 10px;
+}
+
+.slider-containter {
+  font-weight: normal;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  margin: 1rem 0;
+}
+
+#parameter-slider {
+  width: inherit;
+}
+
+.slider-wrapper {
+  position: relative;
+  width: inherit;
+  margin: 0 1rem;
+  align-content: center;
+}
+
+.slider-bubble {
+  position: absolute;
+  top: -1rem;
+  transform: translateX(-30%);
+  background: #222;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+
+.curr-measurements-li {
+  margin-top: 1rem;
+}
+
+.btn-danger {
+  background-color: crimson;
+}
+
+select {
+  border: 2px solid black;
+}
+
+@media (min-width: 800px) {
+  .settings {
+    grid-area: 1 / 1 / 4 / 2;
+  }
 }
 </style>

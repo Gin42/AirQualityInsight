@@ -83,7 +83,7 @@ export default {
     };
   },
   methods: {
-    ...mapMutations(["setCenter"]),
+    ...mapMutations("map", ["setCenter"]),
 
     ...mapActions("sensors", ["fetchSensors"], { root: true }),
 
@@ -106,7 +106,7 @@ export default {
       // Leaflet's interactive map
       this.map = L.map("map").setView(
         [this.center.lat, this.center.lng],
-        this.zoom
+        this.zoom,
       );
       // OpenStreetMap's layer
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -146,7 +146,7 @@ export default {
       });
 
       const coordinatesCopyBtn = document.getElementById(
-        "coordinates-copy-btn"
+        "coordinates-copy-btn",
       );
       if (!coordinatesCopyBtn) return;
 
@@ -213,7 +213,7 @@ export default {
       try {
         const params = "format=json";
         const jsonResponse = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&${params}`
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&${params}`,
         );
         if (!jsonResponse.ok) {
           throw new Error(`HTTP error! status: ${jsonResponse.status}`);
@@ -231,7 +231,7 @@ export default {
 
         // Assemble the address string, checking for undefined values
         const addressParts = [road, city, house_number, country].filter(
-          Boolean
+          Boolean,
         ); // Filter out any undefined parts
 
         return addressParts.join(", ");
@@ -280,7 +280,7 @@ export default {
       for (const measurementType of Object.keys(this.measurements)) {
         const intensity = this.getIntensity(
           data[measurementType],
-          measurementType
+          measurementType,
         );
 
         const latLng = [sensor.lat, sensor.lng, intensity.value];
@@ -297,7 +297,7 @@ export default {
     },
     updateHeatmap() {
       this.heatLayer.setLatLngs(
-        this.measurements[this.selectedMeasurement].heatLatLng
+        this.measurements[this.selectedMeasurement].heatLatLng,
       );
     },
     highlightSensor(sensor) {
@@ -557,7 +557,7 @@ export default {
         "grid-crosshair",
         "grid-dashed",
         "grid-dots",
-        "grid-animated"
+        "grid-animated",
       );
       if (this.gridType !== "none")
         mapContainer.classList.add(`grid-${this.gridType}`);

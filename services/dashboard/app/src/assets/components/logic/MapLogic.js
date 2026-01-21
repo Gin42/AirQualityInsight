@@ -9,28 +9,28 @@ import { fetchFromApi } from "@/services/api";
 import { SensorOperations } from "../../../store/modules/sensors";
 
 import { TrinityRingsSpinner } from "epic-spinners";
+import measurements from "@/store/modules/measurements";
 
 export default {
   name: "MapComponent",
   computed: {
     ...mapState({
+      minMeasurements: (state) => state.measurements.minMeasurements,
+      maxMeasurements: (state) => state.measurements.maxMeasurements,
       sensors: (state) => state.sensors.sensors,
-      center: (state) => state.center,
+      center: (state) => state.map.center,
       newMeasurement: (state) => state.measurements.measurements,
       lastChange: (state) => state.sensors.lastChange,
-      currentMeasurements: (state) => state.currentMeasurements,
+      currentMeasurements: (state) => state.measurements.currentMeasurements,
+      zoom: (state) => state.map.zoom,
+      selectedMeasurement: (state) => state.map.selectedMeasurement,
+      gridType: (state) => state.map.gridType,
+      currentCoords: (state) => state.map.currentCoords,
     }),
     ...mapGetters("measurements", ["lastMeasurement", "allMeasurementsCount"]),
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
     ...mapGetters("socket", ["isSocketConnected", "isServerReady"]),
-    sliderValue: {
-      get() {
-        return this.currentMeasurements;
-      },
-      set(value) {
-        this.setCurrentMeasurements(value);
-      },
-    },
+    ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
   },
   watch: {
     lastChange: {
@@ -65,50 +65,15 @@ export default {
       deep: true,
     },
   },
-  props: {
-    measurements: {
-      type: Object,
-      default: () => ({
-        voc: [],
-        co2: [],
-        pm25: [],
-        pm10: [],
-        no2: [],
-        o3: [],
-        so2: [],
-        temperature: [],
-        humidity: [],
-        pressure: [],
-      }),
-    },
-    minMeasurements: {
-      type: Number,
-      required: true,
-    },
-    maxMeasurements: {
-      type: Number,
-      required: true,
-    },
-    getIntensity: {
-      type: Function,
-      required: true,
-    },
-    thresholds: {
-      type: Object,
-      required: true,
-    },
-  },
   components: {
     TrinityRingsSpinner,
   },
 
   data() {
     return {
-      zoom: ref(13),
+      measurements: this.getMeasurementsTypes,
       map: null,
       heatLayer: null,
-      loading: ref(false),
-      selectedMeasurement: "pm25",
       error: false,
       show: {
         sensorLocations: true,
@@ -131,14 +96,11 @@ export default {
         zones: [],
         ztl: [],
       },
-      gridType: "none",
-      isHovered: ref(false),
-      isPinned: ref(false),
-      loading: ref(true),
+      loading: true,
     };
   },
   methods: {
-    ...mapMutations(["setCenter", "setCurrentMeasurements"]),
+    ...mapMutations("map", ["setCenter", "setZoom", "setCurrentCoords"]),
     ...mapMutations("sensors", [
       "clearLastChange",
       "deleteSensorData",
@@ -150,6 +112,7 @@ export default {
       "addSensor",
       "deleteSensor",
     ]),
+    ...mapActions("stats", ["getIntensity"]),
 
     initMap() {
       // Leaflet's interactive map
@@ -182,12 +145,15 @@ export default {
       homeMarker.bindPopup(`Center of the map: “${this.center.name}”`);
       homeMarker.addTo(this.map);
 
-      let currentLat, currentLng;
-
       const updateCurrentCoordinates = () => {
         const newCenter = this.map.getCenter();
-        currentLat = newCenter.lat.toFixed(7);
-        currentLng = newCenter.lng.toFixed(7);
+
+        const coords = {
+          lng: parseFloat(newCenter.lng.toFixed(7)),
+          lat: parseFloat(newCenter.lat.toFixed(7)),
+        };
+
+        this.setCurrentCoords(coords);
       };
 
       updateCurrentCoordinates();
@@ -195,37 +161,11 @@ export default {
       // Update map's coordinates on move
       this.map.on("moveend", () => {
         updateCurrentCoordinates();
-        this.setCenter({ currentLng, currentLat });
-        this.zoom = this.map.getZoom();
-      });
-
-      const coordinatesCopyBtn = document.getElementById(
-        "coordinates-copy-btn",
-      );
-      if (!coordinatesCopyBtn) return;
-
-      coordinatesCopyBtn.addEventListener("click", () => {
-        const coordText = `${currentLat}\t${currentLng}`;
-
-        navigator.clipboard
-          .writeText(coordText)
-          .then(() => {
-            // Visual feedback that copying has occurred
-            const btn = coordinatesCopyBtn;
-            const originalText = btn.textContent;
-            btn.textContent = "Copied!";
-            btn.classList.add("copied");
-
-            // Restore original text after 1.5 seconds
-            setTimeout(() => {
-              btn.textContent = originalText;
-              btn.classList.remove("copied");
-            }, 1.5 * 1000); // ms
-          })
-          .catch((err) => {
-            console.error("Error copying coordinates: ", err);
-            alert("Could not copy coordinates. Try doing it manually.");
-          });
+        console.log("COORD", this.currentCoords);
+        lng = this.currentCoords.lng;
+        lat = this.currentCoords.lat;
+        this.setCenter({ lng, lat });
+        this.setZoom(this.map.getZoom());
       });
 
       // Leaflet caches on the parent container may result in a misaligned center
@@ -239,7 +179,7 @@ export default {
       });
 
       const gradient = {};
-      for (const threshold of Object.values(this.thresholds)) {
+      for (const threshold of Object.values(this.getThresholds)) {
         gradient[threshold.value] = threshold.color;
       }
 
@@ -568,23 +508,6 @@ export default {
       };
 
       return configs[layer];
-    },
-
-    onGridChange() {
-      const mapContainer = document.querySelector(".map-container");
-      if (!mapContainer) return;
-      mapContainer.classList.remove(
-        "grid-simple",
-        "grid-dark",
-        "grid-fine",
-        "grid-coordinate",
-        "grid-crosshair",
-        "grid-dashed",
-        "grid-dots",
-        "grid-animated",
-      );
-      if (this.gridType !== "none")
-        mapContainer.classList.add(`grid-${this.gridType}`);
     },
 
     updateHeatmap() {

@@ -29,7 +29,7 @@ const login = async (req, res) => {
       sameSite: "strict",
     });
 
-    res.json(result);
+    res.json({ message: "Login successful", username: result.username });
   } catch (error) {
     res.json({ error: error.message });
   }
@@ -64,7 +64,7 @@ const checkAuthToken = async (req, res) => {
   try {
     const authDecoded = jwt.verify(authToken, process.env.ACCESS_TOKEN_SECRET);
     // il token è ancora valido
-    return res.json(authDecoded.name);
+    return res.json({ username: authDecoded.name });
   } catch (error) {
     //il token non è valido
     if (error.name === "TokenExpiredError") {
@@ -85,7 +85,7 @@ const refreshAuthToken = async (req, res) => {
   try {
     const decodedRefresh = jwt.verify(
       refreshToken,
-      process.env.REFRESH_TOKEN_SECRET
+      process.env.REFRESH_TOKEN_SECRET,
     );
 
     const newAuthToken = authService.generateAuthToken(decodedRefresh.name);
@@ -96,7 +96,10 @@ const refreshAuthToken = async (req, res) => {
       sameSite: "strict",
     });
 
-    res.json({ message: "Access token refreshed", name: decodedRefresh.name });
+    res.json({
+      username: decodedRefresh.name,
+      message: "Access token refreshed",
+    });
   } catch (err) {
     logout(req, res);
     return res.json({

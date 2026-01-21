@@ -7,7 +7,7 @@ export default {
   name: "HomeView",
   computed: {
     ...mapState({
-      center: (state) => state.center,
+      center: (state) => state.map.center,
     }),
     ...mapGetters("data", ["getMeasurementsTypes"]),
   },
@@ -33,6 +33,9 @@ export default {
       return `&le; ${threshold}`;
     };
 
+    console.log("TYPES", this.getMeasurementsTypes);
+    console.log(this.infoMeasurement);
+
     for (const [key, data] of Object.entries(this.getMeasurementsTypes)) {
       this.infoMeasurement.data.push({
         measurement: data.label,
@@ -46,7 +49,7 @@ export default {
         thresholdVeryPoor: explainThreshold(data.thresholds.very_poor),
         thresholdExtremelyPoor: explainThreshold(
           data.thresholds.extremely_poor,
-          true
+          true,
         ),
         info: this.createInfoIcon(data.info.description),
       });

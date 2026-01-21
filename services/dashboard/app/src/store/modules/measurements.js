@@ -7,6 +7,9 @@
  **/
 const state = () => ({
   measurements: [],
+  minMeasurements: 50,
+  maxMeasurements: 1000,
+  currentMeasurements: 250,
 });
 
 //GETTERS
@@ -22,14 +25,14 @@ const getters = {
   },
   getAllOfType: (state) => (measurementType) => {
     return state.measurements.map((measurement) =>
-      parseFloat(measurement[measurementType])
+      parseFloat(measurement[measurementType]),
     );
   },
 };
 
 //MUTATIONS
 const mutations = {
-  setMeasurement(state, { formattedData, maxMeasurements }) {
+  setMeasurement(state, { formattedData }) {
     const measurement = {
       ...formattedData,
       ...formattedData.data,
@@ -38,18 +41,20 @@ const mutations = {
     delete measurement.data;
     state.measurements.unshift(measurement);
 
-    if (state.measurements.length > maxMeasurements) {
-      state.measurements = state.measurements.slice(0, maxMeasurements);
+    if (state.measurements.length > state.maxMeasurements) {
+      state.measurements = state.measurements.slice(0, state.maxMeasurements);
     }
+  },
+  setCurrentMeasurements(state, value) {
+    state.currentMeasurements = value;
   },
 };
 
 //ACTIONS
 const actions = {
-  updateMeasurements({ commit, rootState }, { formattedData }) {
+  updateMeasurements({ commit }, { formattedData }) {
     commit("setMeasurement", {
       formattedData,
-      maxMeasurements: rootState.currentMeasurements,
     });
   },
 };

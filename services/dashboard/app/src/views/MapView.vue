@@ -19,8 +19,8 @@ export default {
   },
   computed: {
     ...mapState({
-      minMeasurements: (state) => state.minMeasurements,
-      maxMeasurements: (state) => state.maxMeasurements,
+      minMeasurements: (state) => state.measurements.minMeasurements,
+      maxMeasurements: (state) => state.measurements.maxMeasurements,
     }),
     ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
     ...mapGetters("sensors", ["allSensorsCount", "allSensors"]),
@@ -43,7 +43,6 @@ export default {
   created() {},
   methods: {
     ...mapMutations(["setSocketActive"]),
-    ...mapActions("stats", ["getIntensity"]),
     ...mapActions("sensors", ["updateTimeSinceLastMeasurements"]),
 
     refreshSensors() {
@@ -149,11 +148,7 @@ export default {
 
     <MapComponent
       ref="mapComponent"
-      :measurements="getMeasurementsTypes"
-      :min-measurements="minMeasurements"
-      :max-measurements="maxMeasurements"
       :thresholds="getThresholds"
-      :get-intensity="getIntensity"
       @marker-click="handleMarkerClick"
       @sensors-loaded="handleSensorsLoaded"
       @measurements-cleared="handleMeasurementsCleared"
@@ -166,10 +161,12 @@ export default {
     >
     </SensorCardComponent>
     <MapButtonComponent @open-settings="showSettings"></MapButtonComponent>
-    <SettingsComponent
-      v-if="isSettingsVisible"
-      @close-settings="hideSettings"
-    ></SettingsComponent>
+    <transition name="slide-left">
+      <SettingsComponent
+        v-if="isSettingsVisible"
+        @close-settings="hideSettings"
+      ></SettingsComponent>
+    </transition>
 
     <!-- Add sensor Form -->
     <FormComponent
@@ -230,5 +227,20 @@ export default {
   grid-template-rows: repeat(3, 1fr);
   grid-column-gap: 0px;
   grid-row-gap: 0px;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-left-enter-from,
+.slide-left-leave-to {
+  transform: translateX(-100%); /* Start off-screen to the left */
+}
+
+.slide-left-enter-to,
+.slide-left-leave-from {
+  transform: translateX(0); /* Slide into place */
 }
 </style>

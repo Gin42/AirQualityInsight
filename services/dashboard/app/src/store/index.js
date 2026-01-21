@@ -6,18 +6,11 @@ import data from "./modules/data";
 import table from "./modules/table";
 import user from "./modules/user";
 import socket from "./modules/socket";
+import map from "./modules/map";
 
 export const store = createStore({
   state: {
     maxMessages: 50,
-    minMeasurements: 50,
-    maxMeasurements: 1000,
-    currentMeasurements: 250,
-    center: {
-      lng: "11.3426000",
-      lat: "44.4939000",
-      name: "Piazza Maggiore",
-    },
     initialized: false,
   },
   getters: {
@@ -26,19 +19,14 @@ export const store = createStore({
     },
   },
   mutations: {
-    setCurrentMeasurements(state, value) {
-      state.currentMeasurements = value;
-    },
-    setCenter(state, { currentLng, currentLat }) {
-      state.center.lng = currentLng;
-      state.center.lat = currentLat;
-    },
     setInitialized(state, value) {
       state.initialized = value;
     },
   },
   actions: {
     async initializeAll({ dispatch, commit, getters }) {
+      await dispatch("data/initializeData");
+      await dispatch("table/initializeTableData");
       console.log("Waiting for backend readiness...");
 
       while (
@@ -49,8 +37,7 @@ export const store = createStore({
       }
 
       console.log("Backend ready — initializing app");
-      await dispatch("data/initializeData");
-      await dispatch("table/initializeTableData");
+
       await dispatch("sensors/initializeSensors");
       await dispatch("stats/initializeStats");
 
@@ -66,5 +53,6 @@ export const store = createStore({
     table,
     user,
     socket,
+    map,
   },
 });

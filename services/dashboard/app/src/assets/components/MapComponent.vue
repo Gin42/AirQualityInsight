@@ -17,8 +17,8 @@
         class="map-grid-overlay map-grid-overlay--gray"
       ></div>
       <div
-        v-if="gridType === 'red'"
-        class="map-grid-overlay map-grid-overlay--red"
+        v-if="gridType === 'blue'"
+        class="map-grid-overlay map-grid-overlay--blue"
       ></div>
       <div
         v-if="gridType === 'crosshair'"
@@ -58,6 +58,7 @@
   position: relative;
   width: -webkit-fill-available;
   grid-area: 1 / 1 / 4 / 6;
+  z-index: 0;
 
   &-overlay {
     position: absolute;
@@ -121,42 +122,50 @@
 }
 
 .map-grid-overlay {
-  --red-line-color: #3590f3;
+  --blue-line-color: #3590f3;
   --gray-line-color: rgba(0, 0, 0, 0.25);
+
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   pointer-events: none;
   z-index: 400;
 
-  &--gray {
-    border-bottom: solid 1px var(--gray-line-color);
-    border-right: solid 1px var(--gray-line-color);
-    background-image:
-      linear-gradient(to right, var(--gray-line-color) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--gray-line-color) 1px, transparent 1px);
-    background-size: 5% 5%;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  &--gray,
+  &--blue {
+    --grid-size: clamp(40px, 6vmin, 80px);
+
+    background-size: var(--grid-size) var(--grid-size);
   }
 
-  &--red {
-    border-bottom: solid 2px var(--red-line-color);
-    border-right: solid 2px var(--red-line-color);
+  &--gray {
+    border-right: 2px solid var(--gray-line-color);
+    border-bottom: 2px solid var(--gray-line-color);
+
     background-image:
-      linear-gradient(to right, var(--red-line-color) 2px, transparent 2px),
-      linear-gradient(to bottom, var(--red-line-color) 2px, transparent 2px);
-    background-size: 10% 10%;
+      linear-gradient(to right, var(--gray-line-color) 2px, transparent 2px),
+      linear-gradient(to bottom, var(--gray-line-color) 2px, transparent 2px);
+  }
+
+  &--blue {
+    border-right: 2px solid var(--blue-line-color);
+    border-bottom: 2px solid var(--blue-line-color);
+
+    background-image:
+      linear-gradient(to right, var(--blue-line-color) 2px, transparent 2px),
+      linear-gradient(to bottom, var(--blue-line-color) 2px, transparent 2px);
   }
 
   &--crosshair {
-    border: solid 2px var(--red-line-color);
+    border: 2px solid var(--blue-line-color);
 
     &::before,
     &::after {
       content: "";
       position: absolute;
-      background: var(--red-line-color);
+      background: var(--blue-line-color);
     }
 
     &::before {
@@ -173,6 +182,16 @@
       bottom: 0;
       width: 2px;
       transform: translateX(-50%);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .map-grid-overlay {
+    &--gray,
+    &--blue {
+      --grid-size: clamp(48px, 8vmin, 96px);
+      background-size: clamp(64px, 12vmin, 140px) clamp(64px, 12vmin, 140px);
     }
   }
 }
@@ -295,23 +314,6 @@
     border-right: 1px solid #4a5568;
   }
 
-  .copy-btn {
-    background-color: #4a5568;
-    color: white;
-    border: none;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    z-index: 1;
-  }
-
-  .copy-btn:hover {
-    opacity: 1;
-  }
-
   hr {
     width: 100%;
     margin: 0.5rem 0;
@@ -414,27 +416,6 @@
 .toggle-btn {
   @include button-base;
   @include button-hover;
-}
-
-// Copy button with additional states
-.copy-btn {
-  @include button-base;
-  @include button-hover;
-
-  background-color: #4caf50;
-  color: white;
-
-  &:hover {
-    background-color: #45a049;
-  }
-
-  &:active {
-    background-color: #3e8e41;
-  }
-
-  &.copied {
-    background-color: #45a049;
-  }
 }
 
 .content-frozen {

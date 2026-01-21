@@ -123,7 +123,7 @@ const actions = {
       commit("setSensorsData", {
         sensorsData,
         measurementsTypes,
-        center: rootState.center,
+        center: rootState.map.center,
       });
       console.log(`Loaded ${getters.allSensorsCount} sensors from API`);
       return getters.allSensors;
@@ -155,7 +155,7 @@ const actions = {
 
       commit("addNewSensor", {
         sensorData: response,
-        center: rootState.center,
+        center: rootState.map.center,
       });
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
@@ -210,13 +210,13 @@ const actions = {
     dispatch("fetchSensors");
   },
 
-  updateLastMeasurement({ commit, rootState, rootGetters }, { formattedData }) {
-    const measurementsData = rootGetters["data/getMeasurementsTypes"];
+  updateLastMeasurement({ commit, rootState }, { formattedData }) {
+    const maxMeasurements = rootState.measurements.maxMeasurements;
     commit("updateSensor", {
       id: formattedData.sensor_id,
       timestamp: formattedData.timestamp,
       data: formattedData.data,
-      maxMeasurements: rootState.maxMeasurements,
+      maxMeasurements: maxMeasurements,
     });
   },
 
