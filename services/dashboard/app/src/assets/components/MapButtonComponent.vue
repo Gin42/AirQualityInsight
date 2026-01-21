@@ -12,7 +12,7 @@ export default {
     <button class="btn-map tertiary-color">
       <i class="fa-solid fa-map-location-dot"></i>
     </button>
-    <button class="btn-map tertiary-color">
+    <button class="btn-map tertiary-color" @click="$emit('open-info')">
       <i class="fa-solid fa-map-pin"></i>
     </button>
   </div>

@@ -162,8 +162,9 @@ export default {
       this.map.on("moveend", () => {
         updateCurrentCoordinates();
         console.log("COORD", this.currentCoords);
-        lng = this.currentCoords.lng;
-        lat = this.currentCoords.lat;
+        const lng = this.currentCoords.lng;
+        const lat = this.currentCoords.lat;
+
         this.setCenter({ lng, lat });
         this.setZoom(this.map.getZoom());
       });

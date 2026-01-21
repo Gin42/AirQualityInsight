@@ -119,7 +119,7 @@ export default {
 
 <template>
   <div class="settings bg-color">
-    <button class="close-button" @click="$emit('close-settings')">
+    <button class="icon-button" @click="$emit('close-settings')">
       <i class="fa-solid fa-xmark"></i>
     </button>
     <!-- Map instructions -->
@@ -262,7 +262,7 @@ export default {
         <p>{{ allMeasurementsCount }}</p>
         <button
           @click="clearMeasurements"
-          class="btn btn-danger clear-measurements"
+          class="btn danger-color clear-measurements"
         >
           <i class="fas fa-trash"></i> Clear
         </button>
@@ -288,13 +288,6 @@ export default {
 </template>
 
 <style>
-.close-button {
-  background: transparent;
-  align-self: end;
-  font-size: 1.5em;
-  margin: 0.3rem;
-}
-
 .copy-button {
   background: transparent;
   font-size: 1em;
@@ -337,7 +330,7 @@ export default {
 }
 
 .settings {
-  grid-area: 1 / 1 / 4 / 6;
+  grid-area: 1 / 1 / 4 / 4;
   display: flex;
   flex-direction: column;
   z-index: 2;
@@ -368,10 +361,6 @@ ul.how-to-list li {
 
 .collapsible-button {
   background-color: transparent;
-}
-
-hr {
-  width: 100%;
 }
 
 .settings-list {

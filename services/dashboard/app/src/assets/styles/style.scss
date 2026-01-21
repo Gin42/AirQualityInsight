@@ -28,6 +28,14 @@
   }
 }
 
+.danger-color {
+  background-color: var(--danger-color);
+
+  &:hover {
+    background-color: var(--danger-hover);
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -67,6 +75,17 @@ button {
 
 button:hover {
   cursor: pointer;
+}
+
+.icon-button {
+  background: transparent;
+  align-self: end;
+  font-size: 1.5em;
+  margin: 0.3rem;
+}
+
+hr {
+  width: 100%;
 }
 
 ul {

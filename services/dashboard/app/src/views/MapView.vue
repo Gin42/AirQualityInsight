@@ -3,9 +3,10 @@ import { mapState, mapGetters, mapActions, mapMutations } from "vuex";
 import MapComponent from "@/assets/components/MapComponent.vue";
 import FormComponent from "@/assets/components/FormComponent.vue";
 import TableComponent from "@/assets/components/TableComponent.vue";
-import SensorCardComponent from "@/assets/components/SensorCardComponent.vue";
+import SensorInfoComponent from "@/assets/components/SensorInfoComponent.vue";
 import MapButtonComponent from "@/assets/components/MapButtonComponent.vue";
 import SettingsComponent from "@/assets/components/SettingsComponent.vue";
+import SensorCardsComponent from "@/assets/components/SensorCardsComponent.vue";
 
 export default {
   name: "MapView",
@@ -13,9 +14,10 @@ export default {
     MapComponent,
     FormComponent,
     TableComponent,
-    SensorCardComponent,
+    SensorInfoComponent,
     MapButtonComponent,
     SettingsComponent,
+    SensorCardsComponent,
   },
   computed: {
     ...mapState({
@@ -32,12 +34,12 @@ export default {
       activeSensors: true,
       timeUpdateInterval: null,
       isFormVisible: false,
-      isCardVisible: false,
+      isInfoVisible: false,
       isSettingsVisible: false,
       latitude: null,
       longitude: null,
       address: null,
-      cardSensor: null,
+      selectedSensor: null,
     };
   },
   created() {},
@@ -66,7 +68,8 @@ export default {
       if (!sensor) return;
       console.log(`Selected sensor from map: ${sensor}`);
       this.centerMapOnSensor(sensor);
-      this.showCard(sensor);
+      this.selectedSensor = sensor;
+      this.showInfo();
       //this.addInfo(`Selected sensor from map: ${marker.id}`);
     },
     handleSensorsLoaded(sensors) {
@@ -85,13 +88,11 @@ export default {
     hideForm() {
       this.isFormVisible = false;
     },
-    showCard(sensor) {
-      console.log("CARD TIME", sensor);
-      this.cardSensor = sensor;
-      this.isCardVisible = true;
+    showInfo() {
+      this.isInfoVisible = true;
     },
-    hideCard() {
-      this.isCardVisible = false;
+    hideInfo() {
+      this.isInfoVisible = false;
     },
 
     showSettings() {
@@ -154,18 +155,26 @@ export default {
       @measurements-cleared="handleMeasurementsCleared"
       @open-form="showForm"
     />
-    <SensorCardComponent
-      v-if="isCardVisible"
-      @close-card="hideCard"
-      :sensor="cardSensor"
-    >
-    </SensorCardComponent>
-    <MapButtonComponent @open-settings="showSettings"></MapButtonComponent>
+
     <transition name="slide-left">
       <SettingsComponent
         v-if="isSettingsVisible"
         @close-settings="hideSettings"
       ></SettingsComponent>
+    </transition>
+
+    <MapButtonComponent
+      @open-settings="showSettings"
+      @open-info="showInfo"
+    ></MapButtonComponent>
+
+    <transition name="slide-right">
+      <SensorInfoComponent
+        v-if="isInfoVisible"
+        @close-info="hideInfo"
+        :sensor="selectedSensor"
+      >
+      </SensorInfoComponent>
     </transition>
 
     <!-- Add sensor Form -->
@@ -195,6 +204,12 @@ export default {
       @row-click="handleSensorRowClick"
     />
   </div>
+
+  <!-- CHECK da discutere con Kelvin. A mio parere a livello mobile è meglio
+   perchè le tabelle mobile sono uno schifo, però a livello desktop sono davvero tanti. 
+   O si mette una funzione di ricerca al posto dell'ordine
+  <SensorCardsComponent :data="allSensors"></SensorCardsComponent>
+  -->
 </template>
 
 <style lang="scss">
@@ -236,11 +251,26 @@ export default {
 
 .slide-left-enter-from,
 .slide-left-leave-to {
-  transform: translateX(-100%); /* Start off-screen to the left */
+  transform: translateX(-100%);
 }
 
 .slide-left-enter-to,
 .slide-left-leave-from {
-  transform: translateX(0); /* Slide into place */
+  transform: translateX(0);
+}
+
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-right-enter-from,
+.slide-right-leave-to {
+  transform: translateX(100%);
+}
+
+.slide-right-enter-to,
+.slide-right-leave-from {
+  transform: translateX(0);
 }
 </style>

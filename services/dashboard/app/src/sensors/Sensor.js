@@ -13,7 +13,7 @@ export default class Sensor {
       center.lat,
       center.lng,
       this.lat,
-      this.lng
+      this.lng,
     ).toFixed(2);
     this.lastMeasurementReceived = "N/A";
     this.lastMeasurementReceivedRaw = null;
@@ -41,8 +41,20 @@ export default class Sensor {
     return this.sensor_id;
   }
 
+  getDistanceFromCenter() {
+    return this.distance_center;
+  }
+
+  getLastMeasurementReceived() {
+    return this.lastMeasurementReceived;
+  }
+
   getLastMeasurementReceivedRaw() {
     return this.lastMeasurementReceivedRaw;
+  }
+
+  getTimeSinceMeasurement() {
+    return this.timeSinceLastMeasurement;
   }
 
   getMarker() {
