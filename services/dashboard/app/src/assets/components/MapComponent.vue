@@ -32,9 +32,6 @@
 </template>
 
 <style scoped lang="scss">
-#map {
-  height: 500px;
-}
 .pushpin-icon {
   background: none !important;
   border: none !important;
@@ -49,7 +46,8 @@
 }
 
 .map {
-  height: 50rem; /* MOMENTANEO */
+  height: 100%;
+  width: 100%;
   background-color: #f1e3f3;
   border-radius: 6px;
   display: flex;
@@ -57,7 +55,7 @@
   align-items: center;
   position: relative;
   width: -webkit-fill-available;
-  grid-area: 1 / 1 / 4 / 6;
+  grid-area: 1 / 1 / -1 / -1;
   z-index: 0;
 
   &-overlay {
@@ -93,6 +91,7 @@
 .map-container {
   height: 100%;
   width: 100%;
+  position: relative;
 
   #map {
     height: 100%;

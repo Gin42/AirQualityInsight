@@ -88,6 +88,9 @@ export default {
     hideForm() {
       this.isFormVisible = false;
     },
+    toggleInfo() {
+      this.isInfoVisible = !this.isInfoVisible;
+    },
     showInfo() {
       this.isInfoVisible = true;
     },
@@ -95,12 +98,16 @@ export default {
       this.isInfoVisible = false;
     },
 
-    showSettings() {
-      console.log("Settings TIME");
-      this.isSettingsVisible = true;
+    toggleSettings() {
+      this.isSettingsVisible = !this.isSettingsVisible;
     },
     hideSettings() {
       this.isSettingsVisible = false;
+    },
+
+    closeAll() {
+      this.hideInfo();
+      this.hideSettings();
     },
     centerMapOnSensor(sensor) {
       if (!this.$refs.mapComponent) return;
@@ -164,14 +171,16 @@ export default {
     </transition>
 
     <MapButtonComponent
-      @open-settings="showSettings"
-      @open-info="showInfo"
+      @toggle-settings="toggleSettings"
+      @toggle-info="toggleInfo"
+      @close-all="closeAll"
     ></MapButtonComponent>
 
     <transition name="slide-right">
       <SensorInfoComponent
         v-if="isInfoVisible"
         @close-info="hideInfo"
+        @select-sensor="handleMarkerClick"
         :sensor="selectedSensor"
       >
       </SensorInfoComponent>
@@ -187,7 +196,7 @@ export default {
     ></FormComponent>
   </div>
 
-  <!-- Registered sensors list -->
+  <!-- Registered sensors list 
   <div class="dashboard-component sensors-component-container">
     <div class="component-header">
       <h2>Registered sensors: {{ allSensorsCount }}</h2>
@@ -203,13 +212,7 @@ export default {
       :columns="getSensorsTable.columns"
       @row-click="handleSensorRowClick"
     />
-  </div>
-
-  <!-- CHECK da discutere con Kelvin. A mio parere a livello mobile è meglio
-   perchè le tabelle mobile sono uno schifo, però a livello desktop sono davvero tanti. 
-   O si mette una funzione di ricerca al posto dell'ordine
-  <SensorCardsComponent :data="allSensors"></SensorCardsComponent>
-  -->
+  </div>-->
 </template>
 
 <style lang="scss">
@@ -220,6 +223,10 @@ export default {
   z-index: 1;
   gap: 0.5rem;
   align-items: end;
+  height: fit-content;
+  width: fit-content;
+  justify-self: end;
+  margin: 1rem;
 }
 
 .btn {
@@ -235,13 +242,13 @@ export default {
 }
 
 .map-component-container {
-  height: 100%;
-  width: 100%;
+  height: 90vh;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   grid-column-gap: 0px;
   grid-row-gap: 0px;
+  margin: 1rem 0;
 }
 
 .slide-left-enter-active,

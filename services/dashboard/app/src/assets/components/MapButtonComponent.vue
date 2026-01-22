@@ -6,13 +6,13 @@ export default {
 
 <template>
   <div class="btn-group-map">
-    <button class="btn-map tertiary-color" @click="$emit('open-settings')">
+    <button class="btn-map tertiary-color" @click="$emit('toggle-settings')">
       <i class="fa-solid fa-gear"></i>
     </button>
-    <button class="btn-map tertiary-color">
+    <button class="btn-map tertiary-color" @click="$emit('close-all')">
       <i class="fa-solid fa-map-location-dot"></i>
     </button>
-    <button class="btn-map tertiary-color" @click="$emit('open-info')">
+    <button class="btn-map tertiary-color" @click="$emit('toggle-info')">
       <i class="fa-solid fa-map-pin"></i>
     </button>
   </div>
