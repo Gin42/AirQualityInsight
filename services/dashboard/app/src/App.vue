@@ -654,44 +654,9 @@ export default {
 </template>
 
 <style lang="scss">
-.info-component-container {
-  grid-area: info;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-
-  .description,
-  .measurement-ranges,
-  /*.how-to-use-it {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    h2 {
-      margin-bottom: 0.5rem;
-    }
-  }*/
-
-  .description .project-link {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
-  .description p:not(.project-link) {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .measurement-ranges .table-wrapper {
-    height: auto;
-  }
-
-  .how-to-use-it ul {
-    margin-left: 1rem;
-  }
+.dashboard {
+  margin-bottom: 2rem;
 }
-
 .eaqi-component-container {
   grid-area: eaqi;
   min-width: 0;
@@ -749,19 +714,6 @@ export default {
   grid-area: sensors;
 }
 
-tbody tr {
-  font-family: monospace;
-  font-size: 14px;
-}
-
-thead tr {
-  background-color: #f0f0f0;
-}
-
-tbody tr:nth-child(even) {
-  background-color: #fafafa;
-}
-
 .component-header {
   display: flex;
   justify-content: space-between;
@@ -805,16 +757,6 @@ tbody tr:nth-child(even) {
 }*/
 
 @media (min-width: 768px) {
-  .dashboard {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-areas:
-      "info info info"
-      "eaqi eaqi eaqi"
-      "map map map"
-      "measurements measurements measurements"
-      "stats stats log"
-      "sensors sensors sensors";
-  }
 }
 
 .intensity-label {

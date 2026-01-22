@@ -33,9 +33,6 @@ export default {
       return `&le; ${threshold}`;
     };
 
-    console.log("TYPES", this.getMeasurementsTypes);
-    console.log(this.infoMeasurement);
-
     for (const [key, data] of Object.entries(this.getMeasurementsTypes)) {
       this.infoMeasurement.data.push({
         measurement: data.label,
@@ -95,22 +92,65 @@ export default {
       </p>
     </div>
 
+    <h2>Measurement ranges</h2>
+    <p class="ranges">
+      The table below explains what types of measurements are collected and how
+      they are interpreted. It shows the measurement name, the unit of
+      measurement, the sampling interval, and 3 indicators that represent the
+      quality of the obtained measurement: the closer the measurement value is
+      to the quality thresholds, the better the value. If you hover the cursor
+      over the information label, a brief description of the measure is
+      displayed.
+    </p>
+
     <div class="measurement-ranges">
-      <h2>Measurement ranges</h2>
       <TableComponent
         ref="measurementComponent"
         :data="infoMeasurement.data"
         :columns="infoMeasurement.columns"
       />
-      <p>
-        The table above explains what types of measurements are collected and
-        how they are interpreted. It shows the measurement name, the unit of
-        measurement, the sampling interval, and 3 indicators that represent the
-        quality of the obtained measurement: the closer the measurement value is
-        to the quality thresholds, the better the value. If you hover the cursor
-        over the information label, a brief description of the measure is
-        displayed.
-      </p>
     </div>
   </div>
 </template>
+
+<style>
+.info-component-container {
+  grid-area: info;
+  display: flex;
+  flex-direction: column;
+
+  p {
+    margin: 0.3rem 0;
+  }
+
+  .description,
+  .measurement-ranges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: start;
+
+    h2 {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .description .project-link {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .description p:not(.project-link) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .measurement-ranges .table-wrapper {
+    height: auto;
+  }
+
+  p.ranges {
+    margin-bottom: 0.5rem;
+  }
+}
+</style>

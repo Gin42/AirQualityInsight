@@ -4,7 +4,7 @@
   <div class="table-wrapper">
     <table>
       <thead>
-        <tr>
+        <tr class="secondary-color">
           <th
             v-for="column in columns"
             :key="column.key"
@@ -70,27 +70,28 @@
   width: 100%;
   overflow-x: auto;
   height: 500px;
-
-  .table-row {
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #f5f5f5;
-    }
-  }
 }
 
 table {
   width: 100%;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
   border-collapse: collapse;
+}
+
+tbody tr {
+  font-family: monospace;
+  font-size: 1em;
 }
 
 th,
 td {
-  padding: 10px;
+  padding: 0.5rem;
   text-align: left;
-  border-bottom: 1px solid #eee;
 
   &.text-center {
     text-align: center;
@@ -99,25 +100,7 @@ td {
 
 th {
   position: sticky;
-  top: 0;
-  z-index: 1;
-  border-bottom: 2px solid #dee2e6;
-  background-color: #f9f9f9;
-  font-weight: 600;
-  user-select: none;
-
-  &.sortable {
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #e9ecef;
-    }
-  }
-
-  &.sorted {
-    background-color: #e3f2fd;
-  }
+  font-weight: bold;
 
   .th-content {
     display: flex;
@@ -135,13 +118,9 @@ th {
 
     .sort-arrow {
       font-size: 10px;
-      color: #bbb;
+      //color: #bbb;
       transition: color 0.2s;
       line-height: 1;
-
-      &.active {
-        color: #007bff;
-      }
     }
   }
 
