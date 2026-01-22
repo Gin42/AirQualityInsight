@@ -1,16 +1,8 @@
 <!-- components/MapComponent.vue -->
 <script src="./logic/MapLogic.js"></script>
 <template>
-  <div class="map">
+  <div class="map surface-color">
     <div class="map-container">
-      <div v-if="loading">
-        <trinity-rings-spinner
-          :animation-duration="1500"
-          :size="66"
-          color="#ff1d5e"
-        />
-      </div>
-
       <div id="map"></div>
       <div
         v-if="gridType === 'gray'"
@@ -24,7 +16,7 @@
         v-if="gridType === 'crosshair'"
         class="map-grid-overlay map-grid-overlay--crosshair"
       ></div>
-      <div class="center-marker">
+      <div class="center-marker" v-if="!loading">
         <div class="icon"></div>
       </div>
     </div>
@@ -48,7 +40,6 @@
 .map {
   height: 100%;
   width: 100%;
-  background-color: #f1e3f3;
   border-radius: 6px;
   display: flex;
   justify-content: center;
@@ -541,7 +532,7 @@
   letter-spacing: 0.03em;
 }
 
-trinity-rings-spinner {
+.loading-spinner {
   grid-area: 2 / 3 / 3 / 4;
 }
 </style>

@@ -49,7 +49,7 @@ export default {
     <div
       v-for="sensor in data"
       :key="sensor.getId()"
-      class="sensor-card"
+      class="sensor-card bg-color"
       @click="$emit('select-sensor', sensor)"
     >
       <ul class="sensor-info-list">
@@ -141,7 +141,6 @@ export default {
 /* Card styling */
 .sensor-card {
   position: relative; /* Needed for pseudo-element */
-  background-color: #fff;
   display: flex;
   flex-direction: column;
   padding: 1rem;

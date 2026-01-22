@@ -118,12 +118,12 @@ export default {
 </script>
 
 <template>
-  <div class="settings bg-color">
+  <div class="settings surface-color">
     <button class="icon-button" @click="$emit('close-settings')">
       <i class="fa-solid fa-xmark"></i>
     </button>
     <!-- Map instructions -->
-    <div class="collapsible-header secondary-color" @click="toggleCollapsible">
+    <div class="collapsible-header" @click="toggleCollapsible">
       <h2>How to use it</h2>
       <button class="collapsible-button">
         <i class="fa-solid fa-angle-down" v-if="!isCollapsibleOpen"></i>
@@ -131,10 +131,7 @@ export default {
       </button>
     </div>
 
-    <ul
-      class="how-to-list collapsible-content secondary-color"
-      v-if="isCollapsibleOpen"
-    >
+    <ul class="how-to-list collapsible-content" v-if="isCollapsibleOpen">
       <li>
         The map displays a collection of sensors indicated by red pushpins.
       </li>
@@ -183,7 +180,7 @@ export default {
       </li>
       <li>
         <p>Coordinates:</p>
-        <p>{{ center.lat }} / {{ center.lng }}</p>
+        <p>{{ currentCoords.lat }} / {{ currentCoords.lng }}</p>
         <div class="copy-wrapper">
           <button class="copy-button" @click="copyCoords">
             <i class="fa-regular fa-copy"></i>
@@ -335,7 +332,8 @@ export default {
   flex-direction: column;
   z-index: 2;
   padding: 0 1rem 1rem 1rem;
-  border: 2px solid black;
+  overflow-y: scroll;
+  border-radius: 8px;
 }
 
 ul.how-to-list {
@@ -343,6 +341,8 @@ ul.how-to-list {
   list-style-type: disc;
   margin: 0;
   padding-bottom: 2rem;
+  border: #222 1px solid;
+  border-top: transparent;
 }
 
 ul.how-to-list li {
@@ -357,6 +357,7 @@ ul.how-to-list li {
   flex-direction: row;
   justify-content: space-between;
   padding: 0.5rem;
+  border: #222 1px solid;
 }
 
 .collapsible-button {
@@ -477,10 +478,6 @@ ul.how-to-list li {
 
 .curr-measurements-li {
   margin-top: 1rem;
-}
-
-.btn-danger {
-  background-color: crimson;
 }
 
 select {

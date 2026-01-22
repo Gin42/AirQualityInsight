@@ -7,6 +7,7 @@ import SensorInfoComponent from "@/assets/components/SensorInfoComponent.vue";
 import MapButtonComponent from "@/assets/components/MapButtonComponent.vue";
 import SettingsComponent from "@/assets/components/SettingsComponent.vue";
 import SensorCardsComponent from "@/assets/components/SensorCardsComponent.vue";
+import { TrinityRingsSpinner } from "epic-spinners";
 
 export default {
   name: "MapView",
@@ -18,6 +19,7 @@ export default {
     MapButtonComponent,
     SettingsComponent,
     SensorCardsComponent,
+    TrinityRingsSpinner,
   },
   computed: {
     ...mapState({
@@ -40,6 +42,7 @@ export default {
       longitude: null,
       address: null,
       selectedSensor: null,
+      isLoading: true,
     };
   },
   created() {},
@@ -65,12 +68,12 @@ export default {
       this.activeSensors = !this.activeSensors;
     },
     handleMarkerClick(sensor) {
-      if (!sensor) return;
-      console.log(`Selected sensor from map: ${sensor}`);
-      this.centerMapOnSensor(sensor);
       this.selectedSensor = sensor;
-      this.showInfo();
-      //this.addInfo(`Selected sensor from map: ${marker.id}`);
+
+      if (sensor) {
+        this.centerMapOnSensor(sensor);
+        this.showInfo();
+      }
     },
     handleSensorsLoaded(sensors) {
       //this.addInfo(`Loaded ${sensors.size} sensors`);
@@ -135,7 +138,7 @@ export default {
 <template>
   <!-- Main element: should contain settings, map and sensor info if selected -->
   <div class="dashboard-component map-component-container">
-    <div class="component-header-buttons">
+    <div class="component-header-buttons" v-if="!isLoading">
       <!-- Refresh and stop buttons -->
       <button @click="refreshSensors" class="btn tertiary-color">
         <i class="fas fa-sync-alt"></i> Refresh
@@ -154,18 +157,27 @@ export default {
       </button>
     </div>
 
+    <TrinityRingsSpinner
+      :animation-duration="1500"
+      :size="66"
+      color="#3590f3"
+      class="loading-spinner"
+      v-if="isLoading"
+    />
+
     <MapComponent
       ref="mapComponent"
       :thresholds="getThresholds"
+      :loading="isLoading"
       @marker-click="handleMarkerClick"
-      @sensors-loaded="handleSensorsLoaded"
       @measurements-cleared="handleMeasurementsCleared"
       @open-form="showForm"
+      @loading-change="isLoading = $event"
     />
 
     <transition name="slide-left">
       <SettingsComponent
-        v-if="isSettingsVisible"
+        v-if="isSettingsVisible && !isLoading"
         @close-settings="hideSettings"
       ></SettingsComponent>
     </transition>
@@ -174,11 +186,12 @@ export default {
       @toggle-settings="toggleSettings"
       @toggle-info="toggleInfo"
       @close-all="closeAll"
+      v-if="!isLoading"
     ></MapButtonComponent>
 
     <transition name="slide-right">
       <SensorInfoComponent
-        v-if="isInfoVisible"
+        v-if="isInfoVisible && !isLoading"
         @close-info="hideInfo"
         @select-sensor="handleMarkerClick"
         :sensor="selectedSensor"
@@ -186,7 +199,6 @@ export default {
       </SensorInfoComponent>
     </transition>
 
-    <!-- Add sensor Form -->
     <FormComponent
       v-if="isFormVisible"
       @close-form="hideForm"
@@ -195,24 +207,6 @@ export default {
       :initial-name="name"
     ></FormComponent>
   </div>
-
-  <!-- Registered sensors list 
-  <div class="dashboard-component sensors-component-container">
-    <div class="component-header">
-      <h2>Registered sensors: {{ allSensorsCount }}</h2>
-      <div>
-        <button @click="refreshSensors" class="btn">
-          <i class="fas fa-sync-alt"></i> Refresh
-        </button>
-      </div>
-    </div>
-    <TableComponent
-      ref="sensorsComponent"
-      :data="allSensors"
-      :columns="getSensorsTable.columns"
-      @row-click="handleSensorRowClick"
-    />
-  </div>-->
 </template>
 
 <style lang="scss">
@@ -227,18 +221,6 @@ export default {
   width: fit-content;
   justify-self: end;
   margin: 1rem;
-}
-
-.btn {
-  color: white;
-  padding: 0.5rem;
-  font-size: 1em;
-  height: fit-content;
-  width: fit-content;
-  gap: 0.5rem;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 }
 
 .map-component-container {
@@ -279,5 +261,12 @@ export default {
 .slide-right-enter-to,
 .slide-right-leave-from {
   transform: translateX(0);
+}
+
+.loading-spinner {
+  grid-area: 2 / 2 / 3 / 3;
+  z-index: 10;
+  pointer-events: none;
+  place-self: center;
 }
 </style>

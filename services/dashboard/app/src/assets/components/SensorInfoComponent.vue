@@ -31,6 +31,7 @@ export default {
       this.$emit("select-sensor", sensor);
     },
     clearSensor() {
+      console.log("I clean i clean");
       this.$emit("select-sensor", null);
     },
   },
@@ -59,7 +60,7 @@ export default {
 </script>
 
 <template>
-  <div class="sensor-info">
+  <div class="sensor-info surface-color">
     <button class="icon-button" @click="$emit('close-info')">
       <i class="fa-solid fa-xmark"></i>
     </button>
@@ -79,14 +80,13 @@ export default {
 
 <style>
 .sensor-info {
-  background-color: #fafafa;
   display: flex;
   flex-direction: column;
   grid-area: 1 / 1 / 4 / 4;
   z-index: 2;
   padding: 0 1rem 1rem 1rem;
-  border: 2px solid black;
-  overflow: scroll;
+  overflow-y: scroll;
+  border-radius: 8px;
 }
 
 .link-button {

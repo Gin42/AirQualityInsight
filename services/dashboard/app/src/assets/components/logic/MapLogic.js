@@ -1,18 +1,20 @@
 import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
-import { ref } from "vue";
 import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
 import { fetchFromApi } from "@/services/api";
 import { SensorOperations } from "../../../store/modules/sensors";
 
-import { TrinityRingsSpinner } from "epic-spinners";
-import measurements from "@/store/modules/measurements";
-
 export default {
   name: "MapComponent",
+  props: {
+    loading: {
+      type: Boolean,
+      required: true,
+    },
+  },
   computed: {
     ...mapState({
       minMeasurements: (state) => state.measurements.minMeasurements,
@@ -65,9 +67,6 @@ export default {
       deep: true,
     },
   },
-  components: {
-    TrinityRingsSpinner,
-  },
 
   data() {
     return {
@@ -96,7 +95,6 @@ export default {
         zones: [],
         ztl: [],
       },
-      loading: true,
     };
   },
   methods: {
@@ -126,11 +124,20 @@ export default {
       }
 
       // OpenStreetMap's layer
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(this.map);
+      const tileLayer = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+        },
+      );
+
+      tileLayer.addTo(this.map);
+
+      tileLayer.once("load", () => {
+        this.$emit("loading-change", false);
+      });
 
       const pushpinHomeIcon = L.icon({
         //da colorare pushpinVectorHome
@@ -566,7 +573,6 @@ export default {
     },
 
     async loadData(filename) {
-      this.loading = true;
       try {
         const path = `/data/${filename}`;
         const response = await fetch(path);
@@ -575,7 +581,6 @@ export default {
       } catch (err) {
         console.error(err);
       } finally {
-        this.loading = false;
       }
     },
 
@@ -601,12 +606,11 @@ export default {
     },
   },
   async mounted() {
+    this.$emit("loading-change", true);
     try {
       while (!this.isSocketConnected || !this.isServerReady) {
         await new Promise((r) => setTimeout(r, 100));
       }
-
-      this.loading = false;
 
       this.initMap();
 
@@ -632,6 +636,7 @@ export default {
       }
     } catch (error) {
       console.error("Error initializing map:", error);
+    } finally {
     }
   },
 };

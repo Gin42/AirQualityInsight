@@ -81,6 +81,18 @@ button:hover {
   cursor: pointer;
 }
 
+.btn {
+  color: white;
+  padding: 0.5rem;
+  font-size: 1em;
+  height: fit-content;
+  width: fit-content;
+  gap: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .icon-button {
   background: transparent;
   align-self: end;

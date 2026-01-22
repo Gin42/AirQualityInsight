@@ -97,7 +97,6 @@ export default {
   font-size: 1.5em;
   font-weight: bold;
   cursor: default;
-  text-align: center;
   flex: 1;
 }
 

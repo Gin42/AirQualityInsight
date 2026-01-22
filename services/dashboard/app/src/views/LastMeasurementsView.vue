@@ -27,15 +27,13 @@ export default {
 </script>
 
 <template>
-  <h1>Hi i'm last measurements</h1>
   <div class="dashboard-component measurements-component-container">
     <div class="component-header">
       <h2>Last {{ this.maxMessages }} measurements received</h2>
-      <div class="component-header-buttons">
-        <button @click="clearMeasurements" class="btn btn-danger">
-          <i class="fas fa-trash"></i> Clear
-        </button>
-      </div>
+
+      <button @click="clearMeasurements" class="btn danger-color">
+        <i class="fas fa-trash"></i> Clear
+      </button>
     </div>
     <TableComponent
       ref="measurementComponent"
@@ -44,3 +42,16 @@ export default {
     />
   </div>
 </template>
+
+<style lang="scss">
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+</style>
