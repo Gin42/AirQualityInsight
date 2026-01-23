@@ -4,6 +4,7 @@
   <div class="map surface-color">
     <div class="map-container">
       <div id="map"></div>
+
       <div
         v-if="gridType === 'gray'"
         class="map-grid-overlay map-grid-overlay--gray"

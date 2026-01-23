@@ -73,6 +73,7 @@ export default {
       measurements: this.getMeasurementsTypes,
       map: null,
       heatLayer: null,
+      searchLayer: null,
       error: false,
       show: {
         sensorLocations: true,
@@ -95,6 +96,7 @@ export default {
         zones: [],
         ztl: [],
       },
+      searchQuery: "",
     };
   },
   methods: {
@@ -229,6 +231,28 @@ export default {
         return addressParts.join(", ");
       } catch (error) {
         console.error("Unable to fetch sensors from API:", error);
+      }
+    },
+
+    setSearchLayer(data) {
+      this.searchLayer = L.geoJSON(data, {
+        style: {
+          color: "#3590f3",
+          weight: 2,
+          fillColor: "#8fb8ed",
+          fillOpacity: 0.2,
+        },
+      }).addTo(this.map);
+
+      this.map.flyToBounds(this.searchLayer.getBounds(), {
+        duration: 1.5,
+      });
+    },
+
+    clearSearchLayer() {
+      if (this.searchLayer) {
+        this.map.removeLayer(this.searchLayer);
+        this.searchLayer = null;
       }
     },
 
