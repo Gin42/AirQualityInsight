@@ -9,7 +9,11 @@ export default {
     },
   },
   methods: {
-    ...mapActions("sensors", ["deleteSensor", "modifySensor"]),
+    ...mapActions("sensors", [
+      "deleteSensor",
+      "modifySensor",
+      "updateSensorStatus",
+    ]),
 
     onDeleteSensor() {
       this.deleteSensor(this.sensor.getId());
@@ -27,6 +31,15 @@ export default {
       });
 
       this.isModify = false;
+    },
+
+    onToggleSensorStatus(sensor, event) {
+      const active = event.target.checked;
+
+      this.updateSensorStatus({
+        sensorId: sensor.getId(),
+        active,
+      });
     },
   },
   data() {
@@ -100,7 +113,14 @@ export default {
         </li>
         <li>
           <p>Status</p>
-          <p>{{ sensor.getActive() }}</p>
+          <label class="switch" @click.stop>
+            <input
+              type="checkbox"
+              @click="onToggleSensorStatus(sensor, $event)"
+              :checked="sensor.getActive()"
+            />
+            <span class="slider round"></span>
+          </label>
         </li>
         <li>
           <p>Distance from center (m)</p>
@@ -227,5 +247,72 @@ export default {
 
 li.delete-li {
   justify-content: end;
+}
+
+.switch label {
+  display: flex;
+  flex-direction: row;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  cursor: pointer;
+  background-color: var(--danger-color);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  width: 3.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.slider:before {
+  content: "\f011";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 1em;
+  color: #555;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  transition: 0.4s;
+  width: fit-content;
+  height: fit-content;
+  padding: 0.3rem;
+}
+
+input:checked + .slider::before {
+  content: "\f00c"; /* check icon */
+  color: #2ecc71;
+}
+
+input:checked + .slider {
+  background-color: var(--success-color);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #23b964;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 </style>

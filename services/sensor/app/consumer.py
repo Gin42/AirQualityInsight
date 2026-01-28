@@ -28,6 +28,14 @@ def register_update_handler(handler):
     global on_update_sensor
     on_update_sensor = handler
 
+def register_status_update_handler(handler):
+    global on_status_update_sensor
+    on_status_update_sensor = handler
+
+def register_status_all_handler(handler):
+    global on_status_all_sensor
+    on_status_all_sensor = handler
+
 def create_consumer(max_retries=10, delay=5):
     global consumer
     for _ in range(max_retries):
@@ -51,6 +59,8 @@ def run_consumer():
         payload = message.value
 
         if message.key == "INIT":
+            message_id = None
+
             if isinstance(payload, dict) and "sensors" in payload:
                 INIT_SENSORS = payload["sensors"]
                 message_id = payload.get("message_id")
@@ -67,6 +77,8 @@ def run_consumer():
 
             if message_id:
                 send_ack(message_id)
+            else:
+                logger.warning("INIT payload has no message_id, cannot ack")
         elif message.key == "CREATE":
             if on_create_sensor:
                 on_create_sensor(payload["sensor"])
@@ -79,6 +91,18 @@ def run_consumer():
             if on_update_sensor:
                 on_update_sensor(payload["sensor"])
             send_ack(payload["message_id"])
+        elif message.key == "UPDATE_STATUS":
+            if  on_status_update_sensor:
+                 on_status_update_sensor(payload["sensor"])
+            send_ack(payload["message_id"])
+        elif message.key == "STATUS_ALL":
+            if on_status_all_sensor:
+                status = payload.get("status")
+                if status is None:
+                    logger.warning(f"STATUS_ALL received without 'status': {payload}")
+                    continue
+                on_status_all_sensor(status)
+            send_ack(payload.get("message_id"))
 
 def wait_init(timeout=60):
     return INIT_RECEIVED.wait(timeout)

@@ -6,6 +6,8 @@ const {
   retryUntilAck,
   deleteSensor,
   updateSensor,
+  statusUpdateSensor,
+  statusAllSensors,
 } = require("../kafka/producer");
 
 const connectWithRetry = async () => {
@@ -104,6 +106,52 @@ const modifySensorData = async (sensorId, sensorName) => {
   }
 };
 
+const updateSensorStatus = async (sensorId, value) => {
+  try {
+    const modifiedSensor = await Sensor.findOneAndUpdate(
+      { sensor_id: sensorId },
+      { $set: { active: value } },
+      { new: true },
+    );
+
+    if (!modifiedSensor) {
+      throw new Error(`Sensor ${sensorId} not found`);
+    }
+
+    await retryUntilAck(10, statusUpdateSensor, {
+      sensor_id: sensorId,
+      active: value,
+    });
+
+    return modifiedSensor;
+  } catch (err) {
+    console.error("Error updating sensor:", err);
+    throw err;
+  }
+};
+
+const updateAllSensorsStatus = async (selectedStatus) => {
+  try {
+    const result = await Sensor.updateMany(
+      {}, // match ALL sensors
+      { $set: { active: selectedStatus } },
+    );
+
+    console.log("FOO, this is selectedStatus", selectedStatus);
+
+    if (!result) {
+      throw new Error(`Could not complete request`);
+    }
+
+    await retryUntilAck(10, statusAllSensors, { selectedStatus });
+
+    return result;
+  } catch (err) {
+    console.error("Error updating sensor:", err);
+    throw err;
+  }
+};
+
 const getSensorData = async (query) => {
   return await Sensor.find(query);
 };
@@ -129,7 +177,9 @@ module.exports = {
   deleteSensorData,
   getSensorData,
   modifySensorData,
+  updateSensorStatus,
   countSensors,
   generateIPAddresses,
   connectWithRetry,
+  updateAllSensorsStatus,
 };

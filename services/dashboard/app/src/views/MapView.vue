@@ -60,7 +60,10 @@ export default {
   created() {},
   methods: {
     ...mapMutations(["setSocketActive"]),
-    ...mapActions("sensors", ["updateTimeSinceLastMeasurements"]),
+    ...mapActions("sensors", [
+      "updateTimeSinceLastMeasurements",
+      "updateAllStatus",
+    ]),
 
     refreshSensors() {
       console.log("refresh");
@@ -69,13 +72,11 @@ export default {
     },
     handleActiveSensors() {
       if (this.activeSensors) {
-        this.setSocketActive({ value: false });
         console.log("Stopped sensors data reception");
-        //this.addInfo("Stopped sensors data reception");
+        this.updateAllStatus(false);
       } else {
-        this.setSocketActive({ value: true });
         console.log("Started sensors data reception");
-        //this.addInfo("Started sensors data reception");
+        this.updateAllStatus(true);
       }
       this.activeSensors = !this.activeSensors;
     },

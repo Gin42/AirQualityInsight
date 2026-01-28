@@ -17,6 +17,8 @@ export const SensorOperations = {
   ADD: "add",
   DELETE: "delete",
   MODIFY: "modify",
+  UPDATE_STATUS: "update_status",
+  ALL_STATUS: "update_status",
 };
 
 const state = () => ({
@@ -70,8 +72,13 @@ const mutations = {
 
   modifySensorData(state, { sensorId, sensorName }) {
     let sensor = state.sensors.get(sensorId);
-    console.log("HEYLA: ", sensor, sensor.name);
     sensor.name = sensorName;
+    state.sensors.set(sensorId, sensor);
+  },
+
+  updateStatus(state, { sensorId, active }) {
+    let sensor = state.sensors.get(sensorId);
+    sensor.active = active;
     state.sensors.set(sensorId, sensor);
   },
 
@@ -82,6 +89,11 @@ const mutations = {
 
   setLastChangeModify(state, { sensorId }) {
     state.lastChange.type = SensorOperations.MODIFY;
+    state.lastChange.id = sensorId;
+  },
+
+  setLastChangeState(state, { sensorId }) {
+    state.lastChange.type = SensorOperations.UPDATE_STATUS;
     state.lastChange.id = sensorId;
   },
 
@@ -97,6 +109,15 @@ const mutations = {
     }
 
     sensor.setMeasurements(timestamp, data, maxMeasurements);
+  },
+
+  updateAllStatuses(state, active) {
+    console.log("Setto a", active);
+    for (const [id, sensor] of state.sensors.entries()) {
+      sensor.active = active;
+      state.sensors.set(id, sensor);
+      console.log(sensor);
+    }
   },
 
   clearLastChange(state) {
@@ -184,12 +205,11 @@ const actions = {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
 
-      const response = await fetchFromApi(
-        `${apiUrl}/api/sensor/${sensorId}?name=${encodeURIComponent(sensorName)}`,
-        {
-          method: "PUT",
-        },
-      );
+      const response = await fetchFromApi(`${apiUrl}/api/sensor/${sensorId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: sensorName }),
+      });
 
       if (response) {
         commit("setLastChangeModify", {
@@ -200,6 +220,57 @@ const actions = {
         sensorId,
         sensorName,
       });
+    } catch (error) {
+      console.error("Unable to send sensor to API:", error);
+    }
+  },
+
+  async updateSensorStatus({ commit }, { sensorId, active }) {
+    try {
+      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+
+      const response = await fetchFromApi(
+        `${apiUrl}/api/sensor/${sensorId}/status`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ active }),
+        },
+      );
+
+      if (response) {
+        commit("setLastChangeState", {
+          sensorId,
+        });
+      }
+      commit("updateStatus", {
+        sensorId,
+        active,
+      });
+    } catch (error) {
+      console.error("Unable to send sensor to API:", error);
+    }
+  },
+
+  async updateAllStatus({ commit, dispatch }, selectedStatus) {
+    try {
+      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+      console.log("Ora aggiorno mo'");
+
+      const response = await fetchFromApi(`${apiUrl}/api/sensor/setAllStatus`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedStatus }),
+      });
+
+      console.log("UGO, ho aggiornato!");
+      if (response) {
+        /*commit("setLastChangeState", {
+          sensorId,
+        });
+      }*/
+        commit("updateAllStatuses", selectedStatus);
+      }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }

@@ -35,7 +35,7 @@ const deleteSensor = async (req, res) => {
 const modifySensor = async (req, res) => {
   console.log("HE-MAN");
   const { id } = req.params;
-  const { name } = req.query;
+  const { name } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: "name query parameter is required" });
@@ -43,6 +43,35 @@ const modifySensor = async (req, res) => {
 
   try {
     const result = await sensorService.modifySensorData(id, name);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const updateStatus = async (req, res) => {
+  const { id } = req.params;
+  const { active } = req.body;
+
+  if (active == null) {
+    return res
+      .status(400)
+      .json({ error: "Active query parameter is required" });
+  }
+
+  try {
+    const result = await sensorService.updateSensorStatus(id, active);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const setAllStatus = async (req, res) => {
+  console.log("UGO");
+  const selectedStatus = req.body.selectedStatus;
+  try {
+    const result = await sensorService.updateAllSensorsStatus(selectedStatus);
     res.status(201).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -67,4 +96,11 @@ const getSensor = async (req, res) => {
   }
 };
 
-module.exports = { addSensor, getSensor, deleteSensor, modifySensor };
+module.exports = {
+  addSensor,
+  getSensor,
+  deleteSensor,
+  modifySensor,
+  updateStatus,
+  setAllStatus,
+};

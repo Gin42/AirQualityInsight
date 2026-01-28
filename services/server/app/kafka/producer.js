@@ -13,6 +13,8 @@ const Sensors_actions = {
   CREATE: "CREATE",
   DELETE: "DELETE",
   MODIFY: "MODIFY",
+  UPDATE_STATUS: "UPDATE_STATUS",
+  STATUS_ALL: "STATUS_ALL",
 };
 
 const kafka = new Kafka({
@@ -149,6 +151,53 @@ const updateSensor = async (messageId, updatedSensor) => {
   }
 };
 
+const statusUpdateSensor = async (messageId, updatedSensor) => {
+  try {
+    await producer.send({
+      topic: sensors_topic,
+      messages: [
+        {
+          key: Sensors_actions.UPDATE_STATUS,
+          value: JSON.stringify({
+            message_id: messageId,
+            sensor: updatedSensor,
+          }),
+        },
+      ],
+    });
+
+    console.log(
+      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.UPDATE_STATUS}`,
+    );
+  } catch (err) {
+    console.error("Error sending Kafka message:", err.message);
+  }
+};
+
+const statusAllSensors = async (messageId, selectedStatus) => {
+  console.log("BAR, this is status", selectedStatus);
+  try {
+    await producer.send({
+      topic: sensors_topic,
+      messages: [
+        {
+          key: Sensors_actions.STATUS_ALL,
+          value: JSON.stringify({
+            message_id: messageId,
+            status: selectedStatus.selectedStatus,
+          }),
+        },
+      ],
+    });
+
+    console.log(
+      `Message sent to sensor topic, id: ${messageId}, action: ${Sensors_actions.STATUS_ALL}`,
+    );
+  } catch (err) {
+    console.error("Error sending Kafka message:", err.message);
+  }
+};
+
 const waitForAck = (messageId, timeoutMs = 10000) => {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -198,4 +247,6 @@ module.exports = {
   addSensor,
   deleteSensor,
   updateSensor,
+  statusUpdateSensor,
+  statusAllSensors,
 };
