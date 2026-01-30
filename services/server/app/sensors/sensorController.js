@@ -1,6 +1,7 @@
 const sensorService = require("./sensorService");
 
 const addSensor = async (req, res) => {
+  console.log("\nADDING A NEW SENSOR\n");
   try {
     let count = await sensorService.countSensors();
     count = count + 1;

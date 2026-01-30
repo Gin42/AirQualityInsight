@@ -2,6 +2,7 @@
 import { mapState, mapGetters } from "vuex";
 import TableComponent from "../assets/components/TableComponent.vue";
 import tableData from "../assets/data/tableData.json";
+import McpChat from "@/assets/components/McpChat.vue";
 
 export default {
   name: "HomeView",
@@ -13,6 +14,7 @@ export default {
   },
   components: {
     TableComponent,
+    McpChat,
   },
   data() {
     return {
@@ -56,6 +58,7 @@ export default {
 </script>
 
 <template>
+  <McpChat></McpChat>
   <div class="dashboard-component info-component-container">
     <div class="description">
       <h2>Description</h2>
