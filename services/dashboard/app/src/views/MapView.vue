@@ -63,13 +63,9 @@ export default {
     ...mapActions("sensors", [
       "updateTimeSinceLastMeasurements",
       "updateAllStatus",
+      "refreshSensors",
     ]),
 
-    refreshSensors() {
-      console.log("refresh");
-      this.$refs.mapComponent?.refreshSensorData();
-      //this.addInfo("Refreshed sensors");
-    },
     handleActiveSensors() {
       if (this.activeSensors) {
         console.log("Stopped sensors data reception");

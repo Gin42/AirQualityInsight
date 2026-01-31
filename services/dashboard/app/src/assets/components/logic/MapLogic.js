@@ -5,7 +5,6 @@ import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 import pushpinHomeSvg from "@/assets/pushpinVector.svg";
 import { fetchFromApi } from "@/services/api";
-import { SensorOperations } from "../../../store/modules/sensors";
 
 export default {
   name: "MapComponent",
@@ -19,10 +18,8 @@ export default {
     ...mapState({
       minMeasurements: (state) => state.measurements.minMeasurements,
       maxMeasurements: (state) => state.measurements.maxMeasurements,
-      sensors: (state) => state.sensors.sensors,
       center: (state) => state.map.center,
       newMeasurement: (state) => state.measurements.measurements,
-      lastChange: (state) => state.sensors.lastChange,
       currentMeasurements: (state) => state.measurements.currentMeasurements,
       zoom: (state) => state.map.zoom,
       selectedMeasurement: (state) => state.map.selectedMeasurement,
@@ -33,41 +30,28 @@ export default {
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
     ...mapGetters("socket", ["isSocketConnected", "isServerReady"]),
     ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
-  },
-  watch: {
-    lastChange: {
-      handler(lastChange) {
-        console.log("CHANGE TIME: ", lastChange);
-        if (!lastChange) {
-          return;
-        } else if (lastChange.type == SensorOperations.ADD) {
-          console.log("ADD");
-          this.drawSensor(this.getSensor(lastChange.id), "sensorLocations");
-          this.clearLastChange();
-        } else if (lastChange.type == SensorOperations.DELETE) {
-          console.log("DELETE");
-          if (this.getSensor(lastChange.id).getMarker()) {
-            this.getSensor(lastChange.id).getMarker().remove();
-            this.getSensor(lastChange.id).setMarker(null);
-            this.deleteSensorData(lastChange.id);
-          }
-        } else if (lastChange.type == SensorOperations.MODIFY) {
-          console.log("MODIFY");
-          const sensor = this.getSensor(lastChange.id);
-          if (!sensor) return;
-
-          const marker = sensor.getMarker();
-          if (marker) {
-            marker.setPopupContent(`<p>${sensor.getName()}</p>`);
-          }
-
-          this.clearLastChange();
-        }
-      },
-      deep: true,
+    sensorSignature() {
+      return this.allSensors.map((s) => ({
+        id: s.sensor_id,
+        lat: s.lat,
+        lng: s.lng,
+        name: s.name,
+        active: s.active,
+      }));
     },
   },
+  watch: {
+    sensorSignature: {
+      handler(newSig, oldSig = []) {
+        if (!this.map) return;
 
+        this.syncSensorsOnMap(this.allSensors, this._prevSensors || []);
+        this._prevSensors = [...this.allSensors];
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
   data() {
     return {
       measurements: this.getMeasurementsTypes,
@@ -75,44 +59,67 @@ export default {
       heatLayer: null,
       searchLayer: null,
       error: false,
-      show: {
-        sensorLocations: true,
-        postalCodeBoundaries: false,
-        neighborhoods: false,
-        zones: false,
-        ztl: false,
-      },
-      data: {
-        sensorLocations: [],
-        postalCodeBoundaries: [],
-        neighborhoods: [],
-        zones: [],
-        ztl: [],
-      },
-      layers: {
-        sensorLocations: [],
-        postalCodeBoundaries: [],
-        neighborhoods: [],
-        zones: [],
-        ztl: [],
-      },
+      pushpinIcon: L.icon({
+        iconUrl: pushpinSvg,
+        iconSize: [24, 24],
+        iconAnchor: [12, 20],
+      }),
       searchQuery: "",
     };
   },
   methods: {
     ...mapMutations("map", ["setCenter", "setZoom", "setCurrentCoords"]),
-    ...mapMutations("sensors", [
-      "clearLastChange",
-      "deleteSensorData",
-      "modifySensorData",
-    ]),
-    ...mapActions("sensors", [
-      "fetchSensors",
-      "updateLastMeasurement",
-      "addSensor",
-      "deleteSensor",
-    ]),
+    ...mapActions("sensors", ["updateLastMeasurement"]),
     ...mapActions("stats", ["getIntensity"]),
+
+    syncSensorsOnMap(newSensors, oldSensors) {
+      console.log("The newst ferrari on the market", newSensors, oldSensors);
+
+      const newMap = new Map(newSensors.map((s) => [s.sensor_id, s]));
+
+      const oldMap = new Map(oldSensors.map((s) => [s.sensor_id, s]));
+
+      for (const [id, sensor] of newMap.entries()) {
+        if (!oldMap.has(id)) {
+          this.addSensorMarker(sensor);
+        } else {
+          this.updateSensorMarker(sensor);
+        }
+      }
+      for (const [id, sensor] of oldMap.entries()) {
+        if (!newMap.has(id)) {
+          this.removeSensorMarker(sensor);
+        }
+      }
+    },
+
+    addSensorMarker(sensor) {
+      if (sensor.getMarker()) return;
+
+      const marker = L.marker([sensor.getLat(), sensor.getLng()], {
+        icon: this.pushpinIcon,
+      });
+
+      marker.addTo(this.map);
+
+      marker.on("click", () => {
+        this.$emit("marker-click", sensor);
+      });
+
+      sensor.setMarker(marker);
+    },
+
+    updateSensorMarker(sensor) {
+      /** se mi serve per la heat map è qui */
+    },
+
+    removeSensorMarker(sensor) {
+      const marker = sensor.getMarker();
+      if (!marker) return;
+
+      marker.remove();
+      sensor.setMarker(null);
+    },
 
     initMap() {
       // Leaflet's interactive map
@@ -229,7 +236,7 @@ export default {
         );
         return addressParts.join(", ");
       } catch (error) {
-        console.error("Unable to fetch sensors from API:", error);
+        console.error("Unable to fetch address from API:", error);
       }
     },
 
@@ -253,146 +260,6 @@ export default {
         this.map.removeLayer(this.searchLayer);
         this.searchLayer = null;
       }
-    },
-
-    toggleLayer(layer, hideOrEvent = false) {
-      const hide = hideOrEvent instanceof Event ? false : hideOrEvent;
-
-      this.show[layer] = !this.show[layer];
-      if (hide) this.show[layer] = false;
-
-      const exclusiveGroups = {
-        postalCodeBoundaries: ["neighborhoods", "zones", "ztl"],
-        neighborhoods: ["postalCodeBoundaries", "zones", "ztl"],
-        zones: ["postalCodeBoundaries", "neighborhoods", "ztl"],
-        ztl: [
-          "neighborhoods",
-          "zones",
-          "postalCodeBoundaries",
-          "neighborhoods",
-        ],
-      };
-
-      if (this.show[layer]) {
-        this.drawLayer(layer);
-        if (exclusiveGroups[layer])
-          for (const otherLayer of exclusiveGroups[layer])
-            this.toggleLayer(otherLayer, true);
-      } else this.clearLayer(layer);
-    },
-
-    async drawLayer(layer) {
-      if (!this.data[layer]) return console.error("Data not provided");
-      const pushpinIcon = L.icon({
-        iconUrl: pushpinSvg,
-        iconSize: [24, 24],
-        iconAnchor: [12, 20],
-        popupAnchor: [0, -20],
-      });
-
-      if ("sensorLocations" === layer) {
-        for (const sensorLocation of this.allSensors) {
-          const marker = L.marker(
-            [sensorLocation.getLat(), sensorLocation.getLng()],
-            { icon: pushpinIcon },
-          );
-
-          marker.addTo(this.map);
-
-          marker.bindPopup(`<p>${sensorLocation.getName()}</p>`);
-
-          marker.on("click", () => {
-            this.$emit("marker-click", sensorLocation);
-          });
-
-          this.layers[layer].push(marker);
-          sensorLocation.setMarker(marker);
-        }
-        return;
-      }
-
-      this.clearLayer(layer);
-
-      let geojsonLayer;
-
-      const highlightFeature = (feature, layer) => {
-        if (!feature.properties) return;
-
-        const value = feature.properties[config.propertyKey];
-        const displayValue = config.displayKey
-          ? feature.properties[config.displayKey]
-          : value;
-
-        layer
-          .bindPopup(`<b>${config.labelKey}:</b> ${displayValue}`)
-          .openPopup();
-
-        layer.setStyle({
-          color: getColor(value),
-          weight: 3,
-          opacity: 1,
-          fillColor: getColor(value),
-          fillOpacity: 0.5,
-        });
-
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge)
-          layer.bringToFront();
-      };
-
-      const createStyle = (feature) => {
-        const value = feature.properties[config.propertyKey];
-        return {
-          color: getColor(value),
-          weight: 2,
-          opacity: 0.5,
-          fillColor: getColor(value),
-          fillOpacity: 0.2,
-        };
-      };
-
-      const pointToLayer = (feature, lat_lng) => {
-        const value = feature.properties[config.propertyKey];
-        return L.circleMarker(lat_lng, {
-          radius: 8,
-          color: "#000",
-          weight: 3,
-          opacity: 1,
-          fillColor: getColor(value),
-          fillOpacity: 0.5,
-        });
-      };
-      const colors = this.getOrangeColorPalette();
-      const config = this.getLayerConfig(layer, colors);
-      const getColor = (value) => {
-        return config.colorMap[value] || colors.baseOrange;
-      };
-
-      const resetFeatureStyle = (layer) => {
-        geojsonLayer.resetStyle(layer);
-      };
-
-      function onEachFeature(feature, layer) {
-        layer.on({
-          mouseover: () => highlightFeature(feature, layer),
-          mouseout: () => resetFeatureStyle(layer),
-          click: () => highlightFeature(feature, layer),
-        });
-      }
-
-      for (const feature of this.data[layer]) {
-        geojsonLayer = L.geoJSON(feature, {
-          style: createStyle,
-          pointToLayer,
-          onEachFeature,
-        }).addTo(this.map);
-
-        this.layers[layer].push(geojsonLayer);
-      }
-    },
-
-    clearLayer(layer) {
-      for (const l of this.layers[layer]) if (this.map) this.map.removeLayer(l);
-      this.layers[layer] = [];
     },
 
     /** Dato che al momento passo da kafka per aggiornare le misurazioni dei sensori
@@ -439,108 +306,6 @@ export default {
       }
     },
 
-    getDisplayName(key) {
-      const displayNames = {
-        sensorLocations: "Sensors",
-        postalCodeBoundaries: "CAPs",
-        neighborhoods: "Neighborhoods",
-        zones: "Zones",
-        ztl: "ZTL",
-      };
-      return displayNames[key] || key;
-    },
-
-    getOrangeColorPalette() {
-      return {
-        veryLightPeachyOrange: "#ffc499",
-        lightPeachyOrange: "#ffb680",
-        veryPaleOrange: "#ffac66",
-        paleOrange: "#ff9f4c",
-        pastelOrange: "#ff9a47",
-        lightOrange: "#ff9232",
-        softOrange: "#ff8f38",
-        slightlyLighter: "#ff8519",
-        baseOrange: "#ff7800",
-        slightlyDarker: "#ff6a00",
-        brightOrangeRed: "#ff6200",
-        darkerOrange: "#ff5c00",
-        deepOrange: "#ff4e00",
-        veryDeepOrange: "#ff4000",
-        mutedOrange: "#eb7000",
-        earthyOrange: "#e56e00",
-        brownishOrange: "#d66600",
-        deepEarthyOrange: "#cc6200",
-        darkBrownishOrange: "#c25d00",
-      };
-    },
-
-    getLayerConfig(layer, colors) {
-      const configs = {
-        // Postal Code Boundaries of the Municipality of Bologna
-        postalCodeBoundaries: {
-          propertyKey: "cap",
-          labelKey: "CAP",
-          colorMap: {
-            40121: colors.veryLightPeachyOrange,
-            40122: colors.lightPeachyOrange,
-            40123: colors.veryPaleOrange,
-            40124: colors.paleOrange,
-            40125: colors.pastelOrange,
-            40126: colors.lightOrange,
-            40127: colors.softOrange,
-            40128: colors.slightlyLighter,
-            40129: colors.baseOrange,
-            40131: colors.slightlyDarker,
-            40132: colors.brightOrangeRed,
-            40133: colors.darkerOrange,
-            40134: colors.deepOrange,
-            40135: colors.veryDeepOrange,
-            40136: colors.mutedOrange,
-            40137: colors.earthyOrange,
-            40138: colors.brownishOrange,
-            40139: colors.deepEarthyOrange,
-            40141: colors.darkBrownishOrange,
-          },
-        },
-        // Neighborhoods of the Municipality of Bologna
-        neighborhoods: {
-          propertyKey: "cod_quar",
-          labelKey: "Quartiere",
-          displayKey: "quartiere",
-          colorMap: {
-            11: colors.lightPeachyOrange,
-            12: colors.paleOrange,
-            13: colors.lightOrange,
-            14: colors.slightlyLighter,
-            15: colors.darkerOrange,
-            16: colors.darkBrownishOrange,
-          },
-        },
-        // Zones of the Municipality of Bologna
-        zones: {
-          propertyKey: "numquart",
-          labelKey: "Zona",
-          displayKey: "nomezona",
-          colorMap: {
-            11: colors.veryPaleOrange,
-            12: colors.pastelOrange,
-            13: colors.softOrange,
-            14: colors.baseOrange,
-            15: colors.brightOrangeRed,
-            16: colors.deepOrange,
-          },
-        },
-        ztl: {
-          propertyKey: "@id",
-          labelKey: "ZTL",
-          displayKey: "alt_name",
-          colorMap: {},
-        },
-      };
-
-      return configs[layer];
-    },
-
     updateHeatmap() {
       this.heatLayer.setLatLngs(
         this.measurements[this.selectedMeasurement].heatLatLng,
@@ -565,101 +330,18 @@ export default {
       this.updateHeatmap();
       this.$emit("measurements-cleared", count);
     },
-
-    async refreshSensorData() {
-      if (this.allSensorsCount == 0) throw "Data not provided";
-      this.drawLayer("sensorLocations");
-    },
-
-    async drawSensor(sensor, layer) {
-      if (sensor.getMarker()) return;
-      const pushpinIcon = L.icon({
-        iconUrl: pushpinSvg,
-        iconSize: [24, 24],
-        iconAnchor: [12, 20],
-        popupAnchor: [0, -20],
-      });
-      if ("sensorLocations" === layer) {
-        const marker = L.marker([sensor.getLat(), sensor.getLng()], {
-          icon: pushpinIcon,
-        });
-        marker.bindPopup(sensor.getName());
-        marker.addTo(this.map);
-        marker.on("click", () => {
-          this.$emit("marker-click", sensor);
-        });
-
-        this.layers[layer].push(marker);
-        sensor.setMarker(marker);
-        return;
-      }
-    },
-
-    async loadData(filename) {
-      try {
-        const path = `/data/${filename}`;
-        const response = await fetch(path);
-        if (!response.ok) throw new Error("Failed to load data");
-        return response.json();
-      } catch (err) {
-        console.error(err);
-      } finally {
-      }
-    },
-
-    async populateLayer(layer) {
-      if (layer === "sensorLocations") {
-        return;
-      }
-
-      const dataFile = {
-        postalCodeBoundaries: "caps.geojson",
-        neighborhoods: "neighborhoods.geojson",
-        zones: "zones.geojson",
-        ztl: "ztl.geojson",
-      };
-
-      try {
-        const data = await this.loadData(dataFile[layer]);
-        if (!data) throw new Error("Data not provided");
-        this.data[layer] = data.features;
-      } catch (error) {
-        console.error("Error loading layer data:", error);
-      }
-    },
   },
+
   async mounted() {
     this.$emit("loading-change", true);
-    try {
-      while (!this.isSocketConnected || !this.isServerReady) {
-        await new Promise((r) => setTimeout(r, 100));
-      }
-
-      this.initMap();
-
-      /**
-       * TODO: c'è un qualche problema di race condition per cui se sensorLocation è il primo
-       * ad essere esaminato non riesce a caricare correttamente i sensori.
-       * Al momento posso semplicemente spostarlo in fondo all'array, ma dato che vorrei cancellare
-       * i vari tipi di layers, devo capire se poi da ancora errore
-       */
-      const layers = [
-        "postalCodeBoundaries",
-        "neighborhoods",
-        "zones",
-        "ztl",
-        "sensorLocations",
-      ];
-
-      for (const layer of layers) {
-        await this.populateLayer(layer);
-        if (this.show[layer]) {
-          this.drawLayer(layer);
-        }
-      }
-    } catch (error) {
-      console.error("Error initializing map:", error);
-    } finally {
+    while (!this.isSocketConnected || !this.isServerReady) {
+      await new Promise((r) => setTimeout(r, 100));
     }
+
+    this.initMap();
+
+    this.$nextTick(() => {
+      this.syncSensorsOnMap(this.allSensors, []);
+    });
   },
 };

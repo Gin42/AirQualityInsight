@@ -1,17 +1,6 @@
-/*sensor shape: [{
-sensor_id,
-name,
-position: [lat, lng]
-status,
-ip
-}]*/
-/**
- * lastChange:
- * type: add, delete, modify
- * id: sensor_id
- */
 import Sensor from "@/sensors/Sensor";
 import { fetchFromApi } from "@/services/api";
+import { reactive } from "vue";
 
 export const SensorOperations = {
   ADD: "add",
@@ -22,12 +11,7 @@ export const SensorOperations = {
 };
 
 const state = () => ({
-  sensors: new Map(),
-  lastChange: {
-    type: null,
-    id: null,
-  },
-  timeUpdateInterval: null,
+  sensors: reactive(new Map()),
 });
 
 //GETTERS
@@ -49,21 +33,16 @@ const getters = {
 //MUTATIONS
 const mutations = {
   setSensorsData(state, { sensorsData, center }) {
-    const sensorMap = new Map(
-      sensorsData.map((sensor) => [
-        sensor.sensor_id,
-        new Sensor(sensor, center),
-      ]),
-    );
-    state.sensors = sensorMap;
+    state.sensors.clear();
+
+    for (const sensor of sensorsData) {
+      state.sensors.set(sensor.sensor_id, new Sensor(sensor, center));
+    }
   },
 
   addNewSensor(state, { sensorData, center }) {
     const sensor = new Sensor(sensorData, center);
     state.sensors.set(sensorData.sensor_id, sensor);
-
-    state.lastChange.type = SensorOperations.ADD;
-    state.lastChange.id = sensorData.sensor_id;
   },
 
   deleteSensorData(state, { sensorId }) {
@@ -82,23 +61,8 @@ const mutations = {
     state.sensors.set(sensorId, sensor);
   },
 
-  setLastChangeDelete(state, { sensorId }) {
-    state.lastChange.type = SensorOperations.DELETE;
-    state.lastChange.id = sensorId;
-  },
-
-  setLastChangeModify(state, { sensorId }) {
-    state.lastChange.type = SensorOperations.MODIFY;
-    state.lastChange.id = sensorId;
-  },
-
-  setLastChangeState(state, { sensorId }) {
-    state.lastChange.type = SensorOperations.UPDATE_STATUS;
-    state.lastChange.id = sensorId;
-  },
-
   resetSensors(state) {
-    state.sensors = new Map();
+    state.sensors.clear();
   },
 
   updateSensor(state, { id, timestamp, data, maxMeasurements }) {
@@ -118,11 +82,6 @@ const mutations = {
       state.sensors.set(id, sensor);
       console.log(sensor);
     }
-  },
-
-  clearLastChange(state) {
-    state.lastChange.type = null;
-    state.lastChange.id = null;
   },
 };
 
@@ -191,11 +150,7 @@ const actions = {
         method: "DELETE",
       });
 
-      if (response) {
-        commit("setLastChangeDelete", {
-          sensorId,
-        });
-      }
+      /** TODO */
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }
@@ -210,12 +165,6 @@ const actions = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: sensorName }),
       });
-
-      if (response) {
-        commit("setLastChangeModify", {
-          sensorId,
-        });
-      }
       commit("modifySensorData", {
         sensorId,
         sensorName,
@@ -238,11 +187,6 @@ const actions = {
         },
       );
 
-      if (response) {
-        commit("setLastChangeState", {
-          sensorId,
-        });
-      }
       commit("updateStatus", {
         sensorId,
         active,
@@ -263,12 +207,7 @@ const actions = {
         body: JSON.stringify({ selectedStatus }),
       });
 
-      console.log("UGO, ho aggiornato!");
       if (response) {
-        /*commit("setLastChangeState", {
-          sensorId,
-        });
-      }*/
         commit("updateAllStatuses", selectedStatus);
       }
     } catch (error) {
