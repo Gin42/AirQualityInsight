@@ -25,6 +25,23 @@ export default {
     createInfoIcon(title) {
       return `<i class="fas fa-info-circle" title="${title}"></i>`;
     },
+
+    async sendTest() {
+      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+
+      const name = "test sensor 1.1";
+
+      const queryParam = `?query=${encodeURIComponent(JSON.stringify({ name }))}`;
+      const res = await fetch(`${apiUrl}/api/sensor/${queryParam}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) throw new Error(`Backend error: ${res.status}`);
+
+      const selectedSensor = await res.json();
+      console.log(selectedSensor);
+    },
   },
   created() {
     const explainThreshold = (threshold, extremely_poor = false) => {
@@ -87,6 +104,9 @@ export default {
           The distance of the sensors from the center is in meters [m].
         </span>
       </p>
+
+      <button @click="sendTest">TRY SEARCH</button>
+
       <p class="project-link">
         <i class="fa-brands fa-github"></i>
         <a href="https://github.com/MatteoZenoBagli/AirQualityInsight"

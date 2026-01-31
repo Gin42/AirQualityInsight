@@ -1,12 +1,12 @@
 import express from "express";
 import router from "./src/chat.js";
+import cors from "cors";
 
-export const OLLAMA_API_URL =
-  process.env.OLLAMA_API_URL || "http://ollama:11434";
-export const BACKEND_URL = process.env.BACKEND_URL || "http://server:3000";
-export const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4000;
 
 const app = express();
+app.use(cors());
+
 app.use(express.json());
 
 app.use("/chat", router);

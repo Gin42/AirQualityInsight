@@ -12,10 +12,13 @@ export default {
     messages() {
       this.scrollToBottom();
     },
+    userPrompt() {
+      this.adjustTextAreaHeight();
+    },
   },
   data() {
     return {
-      isOpen: true, //TEST
+      isOpen: false,
       loading: false,
       userPrompt: "",
       messages: [
@@ -66,6 +69,9 @@ export default {
       } finally {
         this.loading = false;
         this.userPrompt = "";
+        this.$nextTick(() => {
+          this.resetTextAreaHeight();
+        });
       }
     },
 
@@ -75,6 +81,24 @@ export default {
         if (!el) return;
         el.scrollTop = el.scrollHeight;
       });
+    },
+
+    adjustTextAreaHeight() {
+      const textArea = this.$refs.textArea;
+      if (!textArea) return;
+
+      textArea.style.height = "auto";
+
+      if (this.userPrompt.trim() !== "") {
+        textArea.style.height = `${textArea.scrollHeight}px`;
+      }
+    },
+
+    resetTextAreaHeight() {
+      const textArea = this.$refs.textArea;
+      if (!textArea) return;
+
+      textArea.style.height = "auto";
     },
   },
 };
@@ -116,18 +140,20 @@ export default {
           </p>
 
           <div class="input-container">
-            <input
+            <textarea
               v-model="userPrompt"
               placeholder="Ask something..."
               @keyup.enter="sendMessage"
               :disabled="loading"
               class="surface-color chat-input"
-            />
+              rows="1"
+              ref="textArea"
+            ></textarea>
 
             <button
               @click="sendMessage"
               :disabled="loading"
-              class="input-send-button"
+              class="input-send-button icon-button"
             >
               <i class="fa-solid fa-paper-plane"></i>
             </button>
@@ -201,7 +227,8 @@ export default {
 .inner-chat {
   overflow-y: scroll;
   scroll-behavior: smooth;
-  padding: 0rem 1rem 1rem 1rem;
+  padding: 0rem 0.5rem 0.5rem 0.5rem;
+  margin: 0rem 0.5rem 0.5rem 0.5rem;
 }
 
 .input-send-button {
@@ -211,7 +238,7 @@ export default {
 
 .input-container {
   border: 1px solid black;
-  border-radius: 50px;
+  border-radius: 16px;
   display: flex;
   flex-direction: row;
   padding: 0.5rem;
@@ -219,7 +246,18 @@ export default {
 }
 
 .chat-input {
+  width: 100%;
+  height: auto;
+  min-height: 1.5rem;
+  max-height: 6rem;
+  overflow-y: auto;
+  resize: none;
+  padding: 0.5rem;
   border: none;
+
+  :focus {
+    outline: none;
+  }
 }
 
 .messages {

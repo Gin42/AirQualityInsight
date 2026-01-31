@@ -80,17 +80,22 @@ const setAllStatus = async (req, res) => {
 };
 
 const getSensor = async (req, res) => {
-  const { sensorId } = req.query;
-  const query = {};
+  const { query } = req.query;
 
-  if (sensorId) query.sensor_id = sensorId;
+  let parsedQuery = {};
+  if (query) {
+    try {
+      parsedQuery = JSON.parse(query);
+    } catch (err) {
+      return res.status(400).json({ error: "Invalid query JSON" });
+    }
+  }
+
+  console.log();
 
   try {
-    console.log("UGO, mi collego al database");
     await sensorService.connectWithRetry();
-    console.log("FOO, ora cerco nel database");
-    const sensors = await sensorService.getSensorData(query);
-    console.log("BAR, ecco i sensori", sensors);
+    const sensors = await sensorService.getSensorData(parsedQuery);
     res.json(sensors);
   } catch (error) {
     res.status(500).json({ error: error.message });

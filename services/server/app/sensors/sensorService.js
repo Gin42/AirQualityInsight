@@ -48,8 +48,11 @@ const addSensorData = async (sensorData) => {
 
     return savedSensor;
   } catch (err) {
-    console.error("Error adding sensor:", err);
-    throw err;
+    if (err.code === 11000 && err.keyPattern?.name) {
+      console.error(`Sensor name "${sensorData.name}" already exists`);
+    } else {
+      console.error("Error adding sensor:", err);
+    }
   }
 };
 

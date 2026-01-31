@@ -39,15 +39,67 @@ export const tools = [
       required: ["name", "longitude", "latitude", "active"],
     },
   },
+  {
+    name: "deleteSensor",
+    description: "Delete an existing sensor from the database.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        name: {
+          type: Type.STRING,
+          description: "The name of the sensor",
+        },
+      },
+      required: ["name"],
+    },
+  },
+  {
+    name: "updateSensor",
+    description: "Update an existing sensor name.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        name: {
+          type: Type.STRING,
+          description: "The new name of the sensor",
+        },
+      },
+      required: ["name"],
+    },
+  },
+  {
+    name: "updateSensorStatus",
+    description: "Update an existing sensor status. Updates only one sensor.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        active: {
+          type: Type.BOOLEAN,
+          description:
+            "Represent if the sensor is to be set active (true) or inactive (false)",
+        },
+      },
+      required: ["active"],
+    },
+  },
+  {
+    name: "updateAllSensorStatus",
+    description: "Update all existing sensor status.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        active: {
+          type: Type.BOOLEAN,
+          description:
+            "Represent if the sensor are to be set active (true) or inactive (false)",
+        },
+      },
+      required: ["active"],
+    },
+  },
 ];
 
 /**
  * TOOLS:
- * chiedi tutti i sensori,
  * chiedi un sensore per nome,
- * aggiunta sensore,
- * eliminazione sensore,
- * modifica sensore (nome),
- * modifica sensore (stato),
- * spegni/accendi tutti i sensori
  */

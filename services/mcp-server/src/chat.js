@@ -2,6 +2,7 @@ import express from "express";
 import { executeTool, validateToolCall } from "./tools/toolExecutor.js";
 import { tools } from "./tools/tools.js";
 import { GoogleGenAI } from "@google/genai";
+import { systemPrompt } from "./systemPrompt.js";
 
 const MODEL = "gemini-2.5-flash";
 
@@ -10,10 +11,7 @@ const ai = new GoogleGenAI({
 });
 
 const config = {
-  system_instruction: `You are an assistant for managing sensors. 
-  You MUST call a tool whenever a user request matches an available tool.
-  Do NOT answer from general knowledge if a tool is available.
-  If no tool applies, respond with suggested actions.`,
+  system_instruction: systemPrompt,
   tools: [{ functionDeclarations: tools }],
 };
 
@@ -56,8 +54,6 @@ router.post("/", async (req, res) => {
     if (functionCalls.length > 0) {
       const toolCall = functionCalls[0].functionCall;
 
-      console.log("\nI WANT THIS TOOL:\n", JSON.stringify(toolCall, null, 2));
-
       if (!validateToolCall(toolCall)) {
         throw new Error("Invalid tool call received from model");
       }
@@ -92,8 +88,6 @@ router.post("/", async (req, res) => {
         ?.filter((p) => p.text)
         .map((p) => p.text)
         .join("\n") ?? "";
-
-    console.log("Returning text:", text);
 
     return res.json({ answer: text });
   } catch (err) {

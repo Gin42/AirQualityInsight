@@ -44,6 +44,36 @@ const toolHandlers = {
     const sensor = await res.json();
     return compactSensors([sensor]);
   },
+
+  deleteSensor: async ({ name }) => {
+    if (!name) {
+      throw new Error("Missing required sensor fields");
+    }
+    const queryParam = `?query=${encodeURIComponent(JSON.stringify({ name }))}`;
+
+    const res = await fetch(`${BACKEND_URL}${mainRoute}/${queryParam}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) throw new Error(`Backend error: ${res.status}`);
+
+    const selectedSensor = await res.json();
+
+    console.log(JSON.stringify(selectedSensor));
+
+    const response = await fetch(
+      `${BACKEND_URL}${mainRoute}/${selectedSensor[0].sensor_id}`,
+      {
+        method: "DELETE",
+      },
+    );
+
+    if (!response.ok) throw new Error(`Backend error: ${response.status}`);
+
+    const result = await response.json();
+    return result;
+  },
 };
 
 export async function executeTool(toolName, args) {
