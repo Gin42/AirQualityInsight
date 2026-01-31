@@ -112,21 +112,8 @@ services:
     working_dir: /usr/src/app
     command: sh -c "npm i && npm run dev"
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    environment:
-      - OLLAMA_HOST=0.0.0.0:11434
-      - OLLAMA_PORT=11434
-    networks:
-      - app-network
-
   mcp-server:
-    image: node:18-alpine
+    image: node:20-alpine
     container_name: air-quality-map-mcp
     ports:
       - "4000:4000"
@@ -135,10 +122,11 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_started
+    env_file:
+      - .env
     environment:
       BACKEND_URL: http://server:3000
-      MONGO_URI: mongodb://mongodb:27017
-      OLLAMA_BASE_URL: http://ollama:11434
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
     networks:
       - app-network
     working_dir: /usr/src/app

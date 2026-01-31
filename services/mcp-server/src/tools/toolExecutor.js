@@ -55,14 +55,24 @@ export async function executeTool(toolName, args) {
 export function validateToolCall(toolCall) {
   if (!toolCall || typeof toolCall !== "object") return false;
   if (!toolCall.name) return false;
-  const toolDef = tools.find((t) => t.function.name === toolCall.name);
-  if (!toolDef) return false;
-  if (toolCall.arguments && typeof toolCall.arguments !== "object")
-    return false;
 
-  const required = toolDef.function.parameters.required || [];
+  const toolDef = tools.find((t) => t.name === toolCall.name);
+  if (!toolDef) return false;
+
+  const required = toolDef.parameters?.required || [];
+
+  const argsInput = toolCall.arguments || toolCall.args || {};
+  const lowerArgs = {};
+  for (const key of Object.keys(argsInput)) {
+    lowerArgs[key.toLowerCase()] = argsInput[key];
+  }
+
   for (const field of required) {
-    if (!(field in toolCall.arguments)) return false;
+    if (!(field.toLowerCase() in lowerArgs)) return false;
+  }
+  toolCall.arguments = {};
+  for (const field of required) {
+    toolCall.arguments[field] = lowerArgs[field.toLowerCase()];
   }
 
   return true;

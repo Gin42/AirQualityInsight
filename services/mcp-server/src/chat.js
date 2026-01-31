@@ -1,194 +1,101 @@
 import express from "express";
-import { systemPrompt } from "./systemPrompt.js";
 import { executeTool, validateToolCall } from "./tools/toolExecutor.js";
 import { tools } from "./tools/tools.js";
-import { Ollama } from "ollama";
+import { GoogleGenAI } from "@google/genai";
 
-const OLLAMA_API_URL = process.env.OLLAMA_API_URL || "http://ollama:11434";
-const MODEL = "functiongemma:270m";
+const MODEL = "gemini-2.5-flash";
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_API_KEY,
+});
+
+const config = {
+  system_instruction: `You are an assistant for managing sensors. 
+  You MUST call a tool whenever a user request matches an available tool.
+  Do NOT answer from general knowledge if a tool is available.
+  If no tool applies, respond with suggested actions.`,
+  tools: [{ functionDeclarations: tools }],
+};
 
 const router = express.Router();
-const ollama = new Ollama({ host: OLLAMA_API_URL });
 
-// Send messages to Ollama
-async function sendToOllama(messages, tool_calls = null) {
-  const res = await ollama.chat({
-    model: MODEL,
-    messages: messages,
-    tools: tools,
-    tool_calls: tool_calls,
-  });
-  return res.message;
-}
-
-// Safely parse JSON from a string
-function parseJSONSafe(text) {
+async function askAi(contents, retries = 3) {
   try {
-    return JSON.parse(text);
-  } catch {
-    return null;
+    const result = await ai.models.generateContent({
+      model: MODEL,
+      contents,
+      config,
+    });
+    return result;
+  } catch (err) {
+    if (err.status === 503 && retries > 0) {
+      const delay = (4 - retries) * 500;
+      await new Promise((r) => setTimeout(r, delay));
+      return askAi(contents, retries - 1);
+    }
+    throw err;
   }
-}
-
-function chunkArray(array, size) {
-  const chunks = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
-  }
-  return chunks;
-}
-
-function formatSensors(sensors) {
-  return sensors.map(
-    (s) => `- ${s.name} — [${s.location.join(", ")}] (${s.status})`,
-  );
 }
 
 router.post("/", async (req, res) => {
   const userMessage = req.body.message;
 
-  let messages = [];
+  const contents = [
+    {
+      role: "user",
+      parts: [{ text: userMessage }],
+    },
+  ];
 
   try {
-    messages.push({ role: "system", content: systemPrompt });
-    messages.push({ role: "user", content: userMessage });
+    const response = await askAi(contents);
+    let content = response.candidates[0].content;
 
-    const toolResponse = await sendToOllama(messages);
+    const functionCalls = content.parts?.filter((p) => p.functionCall) ?? [];
 
-    let toolCall = null;
-    if (toolResponse.tool_calls && toolResponse.tool_calls.length > 0) {
-      toolCall = toolResponse.tool_calls[0].function;
-    } else if (toolResponse.content) {
-      toolCall = parseJSONSafe(toolResponse.content);
-    }
+    if (functionCalls.length > 0) {
+      const toolCall = functionCalls[0].functionCall;
 
-    toolCall = toolCall || { name: null, arguments: {} };
+      console.log("\nI WANT THIS TOOL:\n", JSON.stringify(toolCall, null, 2));
 
-    if (toolCall && toolCall.name) {
       if (!validateToolCall(toolCall)) {
         throw new Error("Invalid tool call received from model");
       }
 
-      const toolResult = await executeTool(
-        toolCall.name,
-        toolCall.arguments || {},
-      );
+      console.log("\nTHE TOOL CALL:", JSON.stringify(toolCall, null, 2));
 
-      const bullets = formatSensors(toolResult);
+      const toolResult = await executeTool(toolCall.name, toolCall.args);
 
-      messages.push({
-        role: "tool",
-        content: bullets.join("\n"),
-        name: toolCall.name,
+      contents.push({
+        role: "model",
+        parts: content.parts,
       });
 
-      console.log("MESSAGES:", JSON.stringify(messages, null, 2));
-
-      const finalResponse = await ollama.chat({
-        model: MODEL,
-        messages,
-      });
-
-      //const contentString = bullets.join("\n");
-
-      /*const help = await ollama.chat({
-        model: "gemma3:270m",
-        messages: [
+      contents.push({
+        role: "function",
+        parts: [
           {
-            role: "system",
-            content: `
-              You are an assistant.
-              Start with repeating the user request in a friendly way and then include the content verbatim.
-              `,
-          },
-          {
-            role: "user",
-            content: `
-              User Request: ${userMessage}
-
-              Tool Output:
-              ${contentString}
-                    `,
+            functionResponse: {
+              name: toolCall.name,
+              response: { result: toolResult },
+            },
           },
         ],
       });
 
-      const insidePrompt = `
-        You are a helpful assistant.
-        Whenever a tool is executed, you must:
-        1. Start your reply with a friendly acknowledgment of the user's request.
-        2. Include the tool result verbatim, exactly as provided.
-        3. Format the output exactly as shown below:
-
-        - Adding a sensor:
-          Sure! Here's the added sensor:
-          - sensor name — [lat, lon] (status)
-        - Listing all sensors:
-          Here's a list of all sensors:
-          - sensor name — [lat, lon] (status)
-          - sensor name — [lat, lon] (status)
-
-        Do NOT change the tool output.
-        `;
-
-      console.log(
-        `\nEAT THIS:\n Tool output:\n${formatSensors(toolResult).join("\n")}\n`,
-      );
-
-      const messages = [
-        { role: "system", content: insidePrompt },
-        { role: "user", content: userMessage },
-        {
-          role: "assistant",
-          content: `${formatSensors(toolResult).join("\n")}`,
-        },
-      ];
-
-      const response = await ollama.chat({
-        model: "gemma3:270m",
-        messages,
-      });*/
-
-      console.log("THE BIG REVEAL", finalResponse);
-
-      /*const chunks = chunkArray(bullets, 5);
-      let summaries = [];
-
-      for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i];
-
-        console.log("CHUCK CHUCK:", chunk);
-
-        const result = await ollama.chat({
-          model: "gemma3:270m",
-          messages: [
-            {
-              role: "system",
-              content: `
-              You are an assistant.
-              Start with "Here is the list of sensors:" and then include the content verbatim.
-              `,
-            },
-            {
-              role: "user",
-              content: chunk.join("\n"),
-            },
-          ],
-        });
-
-        console.log(`Chunk ${i + 1} RAW:\n`, result.message.content);
-
-        summaries.push(result.message.content.trim());
-      }*/
-
-      return res.json({
-        answer: finalResponse.message.content,
-        data: toolResult,
-      });
+      const finalResponse = await askAi(contents);
+      content = finalResponse.candidates[0].content;
     }
 
-    console.log("No tool needed; returning model response");
-    return res.json({ answer: toolResponse.message.content });
+    const text =
+      content.parts
+        ?.filter((p) => p.text)
+        .map((p) => p.text)
+        .join("\n") ?? "";
+
+    console.log("Returning text:", text);
+
+    return res.json({ answer: text });
   } catch (err) {
     console.error("Chat error:", err);
     return res.status(500).json({ error: "Chat failed" });
