@@ -12,6 +12,14 @@ function compactSensors(sensors) {
   }));
 }
 
+function isValidWGS84(lat, lon) {
+  if (typeof lat !== "number" || typeof lon !== "number") return false;
+
+  if (Number.isNaN(lat) || Number.isNaN(lon)) return false;
+
+  return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+}
+
 const toolHandlers = {
   getSensors: async () => {
     const res = await fetch(`${BACKEND_URL}${mainRoute}/`);
@@ -23,6 +31,10 @@ const toolHandlers = {
   addSensor: async ({ name, longitude, latitude, active }) => {
     if (!name || longitude == null || latitude == null || active == null) {
       throw new Error("Missing required sensor fields");
+    }
+
+    if (!isValidWGS84(latitude, longitude)) {
+      throw new Error("Latitude and longitude are not valid");
     }
 
     const res = await fetch(`${BACKEND_URL}${mainRoute}/addSensor`, {

@@ -10,23 +10,6 @@ const {
   statusAllSensors,
 } = require("../kafka/producer");
 
-const connectWithRetry = async () => {
-  const MONGODB_URI =
-    process.env.MONGODB_URI || "mongodb://mongodb:27017/sensordata";
-
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      connectTimeoutMS: 10000, // Give up initial connection after 10s
-    });
-    console.log("MongoDB connected successfully");
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-    console.log("Retrying in 5 seconds...");
-    setTimeout(connectWithRetry, 5000);
-  }
-};
-
 const countSensors = () => {
   return Sensor.countDocuments();
 };
@@ -61,8 +44,6 @@ const deleteSensorData = async (sensorId) => {
     const deletedSensor = await Sensor.findOneAndDelete({
       sensor_id: sensorId,
     });
-
-    console.log("DELETED: ", deletedSensor);
 
     if (!deletedSensor) {
       throw new Error(`Sensor ${sensorId} not found`);
@@ -183,6 +164,5 @@ module.exports = {
   updateSensorStatus,
   countSensors,
   generateIPAddresses,
-  connectWithRetry,
   updateAllSensorsStatus,
 };

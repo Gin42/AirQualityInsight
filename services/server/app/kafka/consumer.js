@@ -39,7 +39,7 @@ const runConsumer = async (io) => {
         try {
           if (topic === measurements_topic) {
             const measurement = JSON.parse(message.value.toString());
-            console.log("Received message:", measurement);
+            console.log("Received MEASUREMENT from:", measurement.sensor_id);
             await saveMeasurement(measurement);
 
             latestMeasurements.set(measurement.sensor_id, measurement);

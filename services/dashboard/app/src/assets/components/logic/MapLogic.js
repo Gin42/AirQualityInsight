@@ -170,7 +170,6 @@ export default {
       // Update map's coordinates on move
       this.map.on("moveend", () => {
         updateCurrentCoordinates();
-        console.log("COORD", this.currentCoords);
         const lng = this.currentCoords.lng;
         const lat = this.currentCoords.lat;
 

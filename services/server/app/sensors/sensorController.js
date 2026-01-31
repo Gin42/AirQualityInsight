@@ -94,7 +94,6 @@ const getSensor = async (req, res) => {
   console.log();
 
   try {
-    await sensorService.connectWithRetry();
     const sensors = await sensorService.getSensorData(parsedQuery);
     res.json(sensors);
   } catch (error) {

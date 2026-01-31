@@ -28,11 +28,7 @@ export default {
 
     async sendTest() {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-
-      const name = "test sensor 1.1";
-
-      const queryParam = `?query=${encodeURIComponent(JSON.stringify({ name }))}`;
-      const res = await fetch(`${apiUrl}/api/sensor/${queryParam}`, {
+      const res = await fetch(`${apiUrl}/api/sensor`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });

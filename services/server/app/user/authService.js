@@ -23,22 +23,6 @@ const loginUser = async (credentials) => {
   }
 };
 
-const connectWithRetry = async () => {
-  const MONGODB_URI = process.env.MONGODB_URI || "mongodb://mongodb:27017/user";
-
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      connectTimeoutMS: 10000, // Give up initial connection after 10s
-    });
-    console.log("MongoDB connected successfully");
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-    console.log("Retrying in 5 seconds...");
-    setTimeout(connectWithRetry, 5000);
-  }
-};
-
 function generateAuthToken(username) {
   const jwt = require("jsonwebtoken");
 
@@ -50,7 +34,7 @@ function generateAuthToken(username) {
       role: "admin",
     },
     secretKey,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" },
   );
 
   console.log("Generated Token:", token);
@@ -68,7 +52,7 @@ function generateRefreshToken(username) {
       name: username,
     },
     secretKey,
-    { expiresIn: "3d" }
+    { expiresIn: "3d" },
   );
 
   console.log("Generated Token:", token);
@@ -79,5 +63,4 @@ module.exports = {
   generateAuthToken,
   generateRefreshToken,
   loginUser,
-  connectWithRetry,
 };

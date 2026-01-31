@@ -111,7 +111,6 @@ const refreshAuthToken = async (req, res) => {
 
 const initializeAccount = async (req, res) => {
   try {
-    await authService.connectWithRetry();
     const userData = await authService.getAccount();
   } catch (error) {
     res.status(500).json({ error: error.message });

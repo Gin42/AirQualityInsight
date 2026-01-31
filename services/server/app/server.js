@@ -23,6 +23,8 @@ const {
 const wotRoutes = require("./wot/wotRoutes");
 const authRoutes = require("./user/authRoutes");
 const sensorRoutes = require("./sensors/sensorRoutes");
+const { getSensor } = require("./sensors/sensorController");
+const { getSensorData } = require("./sensors/sensorService");
 
 const app = express();
 const server = http.createServer(app);
@@ -112,6 +114,7 @@ async function startServer() {
   try {
     await connectWithRetry();
     await initializeWoTGateway(io, port);
+
     await ensureTopics();
     await createProducer();
     await runAckConsumer();
@@ -122,7 +125,7 @@ async function startServer() {
     io.emit("server:ready");
 
     server.listen(port, () =>
-      console.log(`Server running on http://localhost:${port}`)
+      console.log(`Server running on http://localhost:${port}`),
     );
   } catch (err) {
     console.error("Fatal startup error:", err);

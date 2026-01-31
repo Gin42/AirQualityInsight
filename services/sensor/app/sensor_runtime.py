@@ -30,7 +30,10 @@ def create_sensor_thread(sensor_data, send_message):
     sensor_id = sensor_data["sensor_id"]
     stop_event = threading.Event()
     active_event = threading.Event()
-    if GLOBAL_ACTIVE_STATUS:
+
+    sensor_is_active = sensor_data.get("active",True)
+
+    if GLOBAL_ACTIVE_STATUS and sensor_is_active:
         active_event.set()
     else:
         active_event.clear()

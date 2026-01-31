@@ -34,7 +34,6 @@ export default class Sensor {
   }
 
   getActive() {
-    console.log("VEDI", this.active);
     return this.active;
   }
 

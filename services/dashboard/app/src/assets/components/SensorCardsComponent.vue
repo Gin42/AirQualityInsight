@@ -15,13 +15,13 @@ export default {
       "updateSensorStatus",
     ]),
 
-    onDeleteSensor() {
-      this.deleteSensor(this.sensor.getId());
+    onDeleteSensor(sensor) {
+      this.deleteSensor(sensor.getId());
     },
 
-    onModifySensor() {
-      console.log("MODIFY");
+    onModifySensor(name) {
       this.isModify = true;
+      this.formData.name = name;
     },
 
     submitForm() {
@@ -73,7 +73,7 @@ export default {
             <p>{{ sensor.getName() }}</p>
             <button
               class="icon-button modify"
-              @click="onModifySensor"
+              @click="onModifySensor(sensor.getName())"
               v-if="data.length === 1"
             >
               <i class="fa-regular fa-pen-to-square"></i>
@@ -137,7 +137,7 @@ export default {
         <li class="delete-li" v-if="data.length === 1">
           <button
             class="sensor-action-btn danger-color"
-            @click="onDeleteSensor"
+            @click="onDeleteSensor(sensor)"
           >
             DELETE
           </button>
@@ -213,6 +213,7 @@ export default {
   width: 100%;
   margin: 0 0.5rem;
   font-size: 1em;
+  z-index: 100;
 }
 
 .name-form,
@@ -255,6 +256,7 @@ li.delete-li {
 }
 
 .switch input {
+  display: none;
   opacity: 0;
   width: 0;
   height: 0;
@@ -272,11 +274,11 @@ li.delete-li {
 }
 
 .slider:before {
-  content: "\f011";
+  content: "\f00d";
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   font-size: 1em;
-  color: #555;
+  color: var(--danger-color);
 
   display: flex;
   align-items: center;
@@ -290,7 +292,7 @@ li.delete-li {
 
 input:checked + .slider::before {
   content: "\f00c"; /* check icon */
-  color: #2ecc71;
+  color: var(--success-color);
 }
 
 input:checked + .slider {
@@ -310,6 +312,7 @@ input:checked + .slider:before {
 /* Rounded sliders */
 .slider.round {
   border-radius: 34px;
+  padding: 0.2rem;
 }
 
 .slider.round:before {
