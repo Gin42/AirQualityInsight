@@ -20,9 +20,7 @@ const getters = {
   allMeasurementsCount: (state) => {
     return state.measurements.length;
   },
-  lastMeasurement: (state) => {
-    return state.measurements[state.measurements.length - 1];
-  },
+  lastMeasurement: (state) => state.measurements.at(0) ?? null,
   getAllOfType: (state) => (measurementType) => {
     return state.measurements.map((measurement) =>
       parseFloat(measurement[measurementType]),

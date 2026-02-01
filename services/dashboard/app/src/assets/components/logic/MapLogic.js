@@ -26,7 +26,11 @@ export default {
       gridType: (state) => state.map.gridType,
       currentCoords: (state) => state.map.currentCoords,
     }),
-    ...mapGetters("measurements", ["lastMeasurement", "allMeasurementsCount"]),
+    ...mapGetters("measurements", [
+      "lastMeasurement",
+      "allMeasurementsCount",
+      "allMeasurements",
+    ]),
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
     ...mapGetters("socket", ["isSocketConnected", "isServerReady"]),
     ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
@@ -51,10 +55,18 @@ export default {
       deep: true,
       immediate: true,
     },
+    allMeasurements: {
+      handler() {
+        if (!this.map || !this.lastMeasurement) return;
+
+        this.registerNewMeasurement(this.lastMeasurement);
+      },
+      deep: true,
+      immediate: false,
+    },
   },
   data() {
     return {
-      measurements: this.getMeasurementsTypes,
       map: null,
       heatLayer: null,
       searchLayer: null,
@@ -65,6 +77,7 @@ export default {
         iconAnchor: [12, 20],
       }),
       searchQuery: "",
+      zoomThreshold: 14,
     };
   },
   methods: {
@@ -200,13 +213,14 @@ export default {
       }
 
       this.heatLayer = L.heatLayer([], {
-        radius: 30,
-        blur: 25,
-        maxZoom: 17,
         gradient,
+        radius: 30, // radius of each “point” in pixels
+        blur: 25, // how blurry each point is
+        maxZoom: 18, // max zoom where heat intensity scales
+        minOpacity: 0.3,
+        max: 1.0, // maximum intensity
       }).addTo(this.map);
 
-      //se clicco sulla mappa posso aggiungere un pin nell coordinate selezionate
       this.map.on("click", async (e) => {
         const longitude = Number(e.latlng.lng.toFixed(7));
         const latitude = Number(e.latlng.lat.toFixed(7));
@@ -262,54 +276,42 @@ export default {
       }
     },
 
-    /** Dato che al momento passo da kafka per aggiornare le misurazioni dei sensori
-     * questo metodo rimane utile solo per la heat map, e dato che non mi soddisfa
-     * l'attuale setting per quest'ultima, lo commmento con un to-do
-     */
     registerNewMeasurement(data) {
-      if (this.allSensorsCount === 0) return;
+      if (!data || !data.sensor_id) return;
 
       const id = data.sensor_id;
 
       const sensor = this.getSensor(id);
       if (!sensor) return;
 
-      this.highlightSensor(sensor);
-      /*
-      this.updateLastMeasurement(id, data);
-      for (const measurementType of Object.keys(this.measurements)) {
+      let measurements = this.getMeasurementsTypes;
+
+      for (const measurementType of Object.keys(measurements)) {
         const intensity = this.getIntensity({
           concentration: data[measurementType],
           pollutant: measurementType,
         });
+
+        console.log("This is getting a little intense:", intensity);
+
         const latLng = [sensor.lat, sensor.lng, intensity.value];
-        this.measurements[measurementType].heatLatLng.unshift(latLng);
+
+        measurements[measurementType].heatLatLng.unshift(latLng);
         if (
-          this.measurements[measurementType].heatLatLng.length >
-          currentMeasurement
+          measurements[measurementType].heatLatLng.length >
+          this.currentMeasurements
         ) {
-          this.measurements[measurementType].heatLatLng = this.measurements[
+          measurements[measurementType].heatLatLng = measurements[
             measurementType
-          ].heatLatLng.slice(0, currentMeasurement);
+          ].heatLatLng.slice(0, this.currentMeasurements);
         }
       }
-      this.updateHeatmap();*/
+
+      this.updateHeatmap(measurements[this.selectedMeasurement].heatLatLng);
     },
 
-    highlightSensor(sensor) {
-      const marker = sensor.getMarker();
-      if (marker != null) {
-        marker.setOpacity(0.2);
-        setTimeout(() => {
-          marker.setOpacity(1);
-        }, 250);
-      }
-    },
-
-    updateHeatmap() {
-      this.heatLayer.setLatLngs(
-        this.measurements[this.selectedMeasurement].heatLatLng,
-      );
+    updateHeatmap(heatLatLng) {
+      this.heatLayer.setLatLngs(heatLatLng);
     },
 
     centerOnLocation(lat, lng, zoom = 16) {
@@ -331,7 +333,6 @@ export default {
       this.$emit("measurements-cleared", count);
     },
   },
-
   async mounted() {
     this.$emit("loading-change", true);
     while (!this.isSocketConnected || !this.isServerReady) {

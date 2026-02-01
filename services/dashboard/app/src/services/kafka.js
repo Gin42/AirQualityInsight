@@ -58,8 +58,6 @@ socket.on("kafka-message", (message) => {
       },
     };
 
-    console.log("new measurement");
-
     store.dispatch("sensors/updateLastMeasurement", {
       formattedData,
     });
