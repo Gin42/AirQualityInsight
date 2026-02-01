@@ -2,14 +2,6 @@ import Sensor from "@/sensors/Sensor";
 import { fetchFromApi } from "@/services/api";
 import { reactive } from "vue";
 
-export const SensorOperations = {
-  ADD: "add",
-  DELETE: "delete",
-  MODIFY: "modify",
-  UPDATE_STATUS: "update_status",
-  ALL_STATUS: "update_status",
-};
-
 const state = () => ({
   sensors: reactive(new Map()),
 });
@@ -100,18 +92,16 @@ const actions = {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const sensorsData = await fetchFromApi(`${apiUrl}/api/sensor`);
       const measurementsTypes = rootGetters["data/getMeasurementsTypes"];
-      commit("setSensorsData", {
-        sensorsData,
-        measurementsTypes,
-        center: rootState.map.center,
-      });
-      console.log(`Loaded ${getters.allSensorsCount} sensors from API`);
+      if (sensorsData) {
+        commit("setSensorsData", {
+          sensorsData,
+          measurementsTypes,
+          center: rootState.map.center,
+        });
+      }
       return getters.allSensors;
     } catch (error) {
-      console.error(
-        "Unable to fetch sensors from API:",
-        error,
-      ); /* E' qui che tira l'errore allo start*/
+      console.error("Unable to fetch sensors from API:", error);
     }
   },
 
@@ -133,10 +123,12 @@ const actions = {
         }),
       });
 
-      commit("addNewSensor", {
-        sensorData: response,
-        center: rootState.map.center,
-      });
+      if (response) {
+        commit("addNewSensor", {
+          sensorData: response,
+          center: rootState.map.center,
+        });
+      }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }
@@ -150,7 +142,11 @@ const actions = {
         method: "DELETE",
       });
 
-      /** TODO */
+      if (response) {
+        commit("deleteSensorData", {
+          sensorId,
+        });
+      }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }
@@ -165,10 +161,12 @@ const actions = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: sensorName }),
       });
-      commit("modifySensorData", {
-        sensorId,
-        sensorName,
-      });
+      if (response) {
+        commit("modifySensorData", {
+          sensorId,
+          sensorName,
+        });
+      }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }
@@ -186,11 +184,12 @@ const actions = {
           body: JSON.stringify({ active }),
         },
       );
-
-      commit("updateStatus", {
-        sensorId,
-        active,
-      });
+      if (response) {
+        commit("updateStatus", {
+          sensorId,
+          active,
+        });
+      }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
     }

@@ -4,10 +4,16 @@ export const tools = [
   {
     name: "getSensors",
     description:
-      "Returns the authoritative list of all air quality sensors stored in the system. This is the ONLY valid source of sensor data.",
+      "Returns all sensors if no parameters are provided. If `name` is provided, returns only the sensor with that name.",
     parameters: {
       type: Type.OBJECT,
-      properties: {},
+      properties: {
+        name: {
+          type: Type.STRING,
+          description: "The name of the sensor to be searched, if provided",
+          nullable: false,
+        },
+      },
       required: [],
     },
   },
@@ -59,12 +65,16 @@ export const tools = [
     parameters: {
       type: Type.OBJECT,
       properties: {
-        name: {
+        oldName: {
+          type: Type.STRING,
+          description: "The old name of the sensor",
+        },
+        newName: {
           type: Type.STRING,
           description: "The new name of the sensor",
         },
       },
-      required: ["name"],
+      required: ["oldName", "newName"],
     },
   },
   {
@@ -78,8 +88,12 @@ export const tools = [
           description:
             "Represent if the sensor is to be set active (true) or inactive (false)",
         },
+        name: {
+          type: Type.STRING,
+          description: "The name of the sensor to be updated",
+        },
       },
-      required: ["active"],
+      required: ["active", "name"],
     },
   },
   {
@@ -91,15 +105,10 @@ export const tools = [
         active: {
           type: Type.BOOLEAN,
           description:
-            "Represent if the sensor are to be set active (true) or inactive (false)",
+            "Represent if the sensors are to be set active (true) or inactive (false)",
         },
       },
       required: ["active"],
     },
   },
 ];
-
-/**
- * TOOLS:
- * chiedi un sensore per nome,
- */

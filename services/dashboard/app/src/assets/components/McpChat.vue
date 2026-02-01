@@ -1,5 +1,6 @@
 <script>
 import { nextTick } from "vue";
+import { mapActions } from "vuex";
 
 const MessageFrom = {
   AI: "ai",
@@ -30,6 +31,8 @@ export default {
     };
   },
   methods: {
+    ...mapActions("sensors", ["refreshSensors"]),
+
     async sendMessage() {
       if (!this.userPrompt.trim()) return;
 
@@ -58,6 +61,8 @@ export default {
           from: MessageFrom.AI,
           text: response.answer,
         });
+
+        this.refreshSensors();
       } catch (err) {
         console.error("Chat request failed:", err);
 

@@ -20,11 +20,33 @@ function isValidWGS84(lat, lon) {
   return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 }
 
+async function searchSensor(name = null) {
+  const url =
+    name == null
+      ? `${BACKEND_URL}${mainRoute}`
+      : `${BACKEND_URL}${mainRoute}?query=${encodeURIComponent(
+          JSON.stringify({ name }),
+        )}`;
+
+  const res = await fetch(url, { method: "GET" });
+
+  if (!res.ok) throw new Error(`Backend error: ${res.status}`);
+  const sensors = await res.json();
+  console.log(
+    "I've FOUND a new friend, or maybe a treasure. I've searched for:",
+    name,
+    "\nFOUND:",
+    JSON.stringify(sensors),
+  );
+  return sensors;
+}
+
 const toolHandlers = {
-  getSensors: async () => {
-    const res = await fetch(`${BACKEND_URL}${mainRoute}/`);
-    if (!res.ok) throw new Error(`Backend error: ${res.status}`);
-    const sensors = await res.json();
+  getSensors: async ({ name = null }) => {
+    const sensors = await searchSensor(name);
+    if (!sensors.length) {
+      throw new Error(`Sensor "${name}" not found`);
+    }
     return compactSensors(sensors);
   },
 
@@ -61,18 +83,12 @@ const toolHandlers = {
     if (!name) {
       throw new Error("Missing required sensor fields");
     }
-    const queryParam = `?query=${encodeURIComponent(JSON.stringify({ name }))}`;
 
-    const res = await fetch(`${BACKEND_URL}${mainRoute}/${queryParam}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+    const selectedSensor = await searchSensor(name);
 
-    if (!res.ok) throw new Error(`Backend error: ${res.status}`);
-
-    const selectedSensor = await res.json();
-
-    console.log(JSON.stringify(selectedSensor));
+    if (!selectedSensor.length) {
+      throw new Error(`Sensor "${name}" not found`);
+    }
 
     const response = await fetch(
       `${BACKEND_URL}${mainRoute}/${selectedSensor[0].sensor_id}`,
@@ -80,6 +96,73 @@ const toolHandlers = {
         method: "DELETE",
       },
     );
+
+    if (!response.ok) throw new Error(`Backend error: ${response.status}`);
+
+    const result = await response.json();
+    return result;
+  },
+  updateSensor: async ({ oldName, newName }) => {
+    if (!oldName || !newName) {
+      throw new Error("Missing required sensor fields");
+    }
+
+    const selectedSensor = await searchSensor(oldName);
+
+    if (!selectedSensor.length) {
+      throw new Error(`Sensor "${name}" not found`);
+    }
+
+    const response = await fetch(
+      `${BACKEND_URL}${mainRoute}/${selectedSensor[0].sensor_id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName }),
+      },
+    );
+
+    if (!response.ok) throw new Error(`Backend error: ${response.status}`);
+
+    const result = await response.json();
+    return result;
+  },
+  updateSensorStatus: async ({ name, active }) => {
+    if (!name || active == null) {
+      throw new Error("Missing required sensor fields");
+    }
+
+    const selectedSensor = await searchSensor(name);
+
+    if (!selectedSensor.length) {
+      throw new Error(`Sensor "${name}" not found`);
+    }
+
+    const response = await fetch(
+      `${BACKEND_URL}${mainRoute}/${selectedSensor[0].sensor_id}/status`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active }),
+      },
+    );
+
+    if (!response.ok) throw new Error(`Backend error: ${response.status}`);
+
+    const result = await response.json();
+    return result;
+  },
+  updateAllSensorStatus: async ({ active }) => {
+    console.log("Exercise is important:", active);
+    if (active === null) {
+      throw new Error("Missing required sensor fields");
+    }
+
+    const response = await fetch(`${BACKEND_URL}${mainRoute}/setAllStatus`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ selectedStatus: active }),
+    });
 
     if (!response.ok) throw new Error(`Backend error: ${response.status}`);
 
@@ -102,20 +185,17 @@ export function validateToolCall(toolCall) {
   if (!toolDef) return false;
 
   const required = toolDef.parameters?.required || [];
-
   const argsInput = toolCall.arguments || toolCall.args || {};
-  const lowerArgs = {};
+
+  const normalizedArgs = {};
   for (const key of Object.keys(argsInput)) {
-    lowerArgs[key.toLowerCase()] = argsInput[key];
+    normalizedArgs[key.toLowerCase()] = argsInput[key];
   }
 
   for (const field of required) {
-    if (!(field.toLowerCase() in lowerArgs)) return false;
-  }
-  toolCall.arguments = {};
-  for (const field of required) {
-    toolCall.arguments[field] = lowerArgs[field.toLowerCase()];
+    if (!(field.toLowerCase() in normalizedArgs)) return false;
   }
 
+  toolCall.arguments = normalizedArgs;
   return true;
 }
