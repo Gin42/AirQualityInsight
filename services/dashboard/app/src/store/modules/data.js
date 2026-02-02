@@ -13,11 +13,12 @@ const getters = {
 const mutations = {
   setThresholds(state, thresholds) {
     state.thresholds = thresholds;
-    console.log(state.thresholds);
   },
   setMeasurements(state, measurementsTypes) {
+    Object.values(measurementsTypes).forEach((type) => {
+      type.heatLatLng = new Map();
+    });
     state.measurementsTypes = measurementsTypes;
-    console.log(state.measurementsTypes);
   },
 };
 

@@ -34,6 +34,7 @@ export default {
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
     ...mapGetters("socket", ["isSocketConnected", "isServerReady"]),
     ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
+    ...mapGetters("stats", ["getIntensity"]),
     sensorSignature() {
       return this.allSensors.map((s) => ({
         id: s.sensor_id,
@@ -83,7 +84,6 @@ export default {
   methods: {
     ...mapMutations("map", ["setCenter", "setZoom", "setCurrentCoords"]),
     ...mapActions("sensors", ["updateLastMeasurement"]),
-    ...mapActions("stats", ["getIntensity"]),
 
     syncSensorsOnMap(newSensors, oldSensors) {
       console.log("The newst ferrari on the market", newSensors, oldSensors);
@@ -218,7 +218,6 @@ export default {
         blur: 25, // how blurry each point is
         maxZoom: 18, // max zoom where heat intensity scales
         minOpacity: 0.3,
-        max: 1.0, // maximum intensity
       }).addTo(this.map);
 
       this.map.on("click", async (e) => {
@@ -280,7 +279,6 @@ export default {
       if (!data || !data.sensor_id) return;
 
       const id = data.sensor_id;
-
       const sensor = this.getSensor(id);
       if (!sensor) return;
 
@@ -292,26 +290,20 @@ export default {
           pollutant: measurementType,
         });
 
-        console.log("This is getting a little intense:", intensity);
-
         const latLng = [sensor.lat, sensor.lng, intensity.value];
 
-        measurements[measurementType].heatLatLng.unshift(latLng);
-        if (
-          measurements[measurementType].heatLatLng.length >
-          this.currentMeasurements
-        ) {
-          measurements[measurementType].heatLatLng = measurements[
-            measurementType
-          ].heatLatLng.slice(0, this.currentMeasurements);
-        }
+        measurements[measurementType].heatLatLng.set(sensor.sensor_id, latLng);
       }
 
-      this.updateHeatmap(measurements[this.selectedMeasurement].heatLatLng);
+      const heatArray = Array.from(
+        measurements[this.selectedMeasurement].heatLatLng.values(),
+      );
+
+      this.updateHeatmap(heatArray);
     },
 
-    updateHeatmap(heatLatLng) {
-      this.heatLayer.setLatLngs(heatLatLng);
+    updateHeatmap(heatLatLngArray) {
+      this.heatLayer.setLatLngs(heatLatLngArray);
     },
 
     centerOnLocation(lat, lng, zoom = 16) {

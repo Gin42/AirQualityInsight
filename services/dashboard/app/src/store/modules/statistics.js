@@ -1,5 +1,3 @@
-import measurements from "./measurements";
-
 const state = {
   stats: new Map(),
   eaqi: {},
@@ -10,6 +8,42 @@ const getters = {
     return Array.from(state.stats.values());
   },
   getEaqi: (state) => state.eaqi,
+  getIntensity:
+    (state, getters, rootState, rootGetters) =>
+    ({ concentration, pollutant }) => {
+      const measurements = rootGetters["data/getMeasurementsTypes"];
+      const threshold = measurements[pollutant].thresholds;
+      if (!threshold) throw new Error(`Unknown pollutant: ${pollutant}`);
+
+      const thresholds = rootGetters["data/getThresholds"];
+
+      if (Array.isArray(threshold.good)) {
+        const [minGood, maxGood] = threshold.good;
+        const [minFair, maxFair] = threshold.fair;
+        const [minModerate, maxModerate] = threshold.moderate;
+        const [minPoor, maxPoor] = threshold.poor;
+        const [minVeryPoor, maxVeryPoor] = threshold.very_poor;
+
+        if (minGood <= concentration && maxGood >= concentration)
+          return thresholds.good;
+        if (minFair <= concentration && maxFair >= concentration)
+          return thresholds.fair;
+        if (minModerate <= concentration && maxModerate >= concentration)
+          return thresholds.moderate;
+        if (minPoor <= concentration && maxPoor >= concentration)
+          return thresholds.poor;
+        if (minVeryPoor <= concentration && maxVeryPoor >= concentration)
+          return thresholds.very_poor;
+        return thresholds.extremely_poor;
+      }
+
+      if (concentration <= threshold.good) return thresholds.good;
+      if (concentration <= threshold.fair) return thresholds.fair;
+      if (concentration <= threshold.moderate) return thresholds.moderate;
+      if (concentration <= threshold.poor) return thresholds.poor;
+      if (concentration <= threshold.very_poor) return thresholds.very_poor;
+      return thresholds.extremely_poor;
+    },
 };
 
 const mutations = {};
@@ -47,7 +81,8 @@ const actions = {
       const measurementArray =
         rootGetters["measurements/getAllOfType"](measurementType);
       const statistics = calculateStats(measurementArray);
-      const intensity = await dispatch("getIntensity", {
+
+      const intensity = rootGetters["stats/getIntensity"]({
         concentration: statistics.mean,
         pollutant: measurementType,
       });
@@ -72,41 +107,6 @@ const actions = {
       state.stats.get("o3"),
       state.stats.get("so2"),
     ]);
-  },
-
-  async getIntensity({ rootGetters }, { concentration, pollutant }) {
-    const measurements = rootGetters["data/getMeasurementsTypes"];
-    const threshold = measurements[pollutant].thresholds;
-    if (!threshold) throw new Error(`Unknown pollutant: ${pollutant}`);
-
-    const thresholds = rootGetters["data/getThresholds"];
-
-    if (Array.isArray(threshold.good)) {
-      const [minGood, maxGood] = threshold.good;
-      const [minFair, maxFair] = threshold.fair;
-      const [minModerate, maxModerate] = threshold.moderate;
-      const [minPoor, maxPoor] = threshold.poor;
-      const [minVeryPoor, maxVeryPoor] = threshold.very_poor;
-
-      if (minGood <= concentration && maxGood >= concentration)
-        return thresholds.good;
-      if (minFair <= concentration && maxFair >= concentration)
-        return thresholds.fair;
-      if (minModerate <= concentration && maxModerate >= concentration)
-        return thresholds.moderate;
-      if (minPoor <= concentration && maxPoor >= concentration)
-        return thresholds.poor;
-      if (minVeryPoor <= concentration && maxVeryPoor >= concentration)
-        return thresholds.very_poor;
-      return thresholds.extremely_poor;
-    }
-
-    if (concentration <= threshold.good) return thresholds.good;
-    if (concentration <= threshold.fair) return thresholds.fair;
-    if (concentration <= threshold.moderate) return thresholds.moderate;
-    if (concentration <= threshold.poor) return thresholds.poor;
-    if (concentration <= threshold.very_poor) return thresholds.very_poor;
-    return thresholds.extremely_poor;
   },
 };
 

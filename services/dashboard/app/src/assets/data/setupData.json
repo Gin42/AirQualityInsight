@@ -68,7 +68,7 @@
         "very_poor": [0, 35],
         "extremely_poor": ["otherwise"]
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": -15,
         "max": 30,
@@ -88,7 +88,7 @@
         "very_poor": [10, 90],
         "extremely_poor": ["otherwise"]
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 30,
         "max": 100,
@@ -108,7 +108,7 @@
         "very_poor": [990, 1020],
         "extremely_poor": ["otherwise"]
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 980,
         "max": 1020,
@@ -128,7 +128,7 @@
         "very_poor": 2.5,
         "extremely_poor": 2.5
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 0,
         "max": 30,
@@ -148,7 +148,7 @@
         "very_poor": 1800,
         "extremely_poor": 1800
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 400,
         "max": 2000,
@@ -168,7 +168,7 @@
         "very_poor": 140,
         "extremely_poor": 140
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 0,
         "max": 50,
@@ -188,7 +188,7 @@
         "very_poor": 270,
         "extremely_poor": 270
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 0,
         "max": 100,
@@ -208,7 +208,7 @@
         "very_poor": 180,
         "extremely_poor": 180
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 0,
         "max": 200,
@@ -228,7 +228,7 @@
         "very_poor": 150,
         "extremely_poor": 150
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 0,
         "max": 200,
@@ -248,7 +248,7 @@
         "very_poor": 275,
         "extremely_poor": 275
       },
-      "heatLatLng": [],
+      "heatLatLng": null,
       "info": {
         "min": 0,
         "max": 300,
