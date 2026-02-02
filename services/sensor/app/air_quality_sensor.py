@@ -52,7 +52,7 @@ class AirQualitySensor:
         else:
             # Apply random change of 1-5% to previous values
             def random_change(value):
-                percent_change = random.uniform(0.01, 0.05)  # 1-5%
+                percent_change = random.uniform(0.01, 0.1)  # TEST 1-5%
                 direction = random.choice([-1, 1])  # Increase or decrease
                 return value * (1 + direction * percent_change)
 

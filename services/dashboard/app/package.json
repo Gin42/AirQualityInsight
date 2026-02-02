@@ -17,12 +17,14 @@
         "bologna"
     ],
     "dependencies": {
+        "@turf/turf": "^7.3.3",
         "epic-spinners": "^2.0.0",
         "jsonwebtoken": "^9.0.2",
         "jwt-builder": "^1.1.0",
         "leaflet": "^1.9.4",
         "leaflet.heat": "^0.2.0",
         "socket.io-client": "^4.8.1",
+        "turf": "^3.0.14",
         "vue": "^3.5.13",
         "vue-cookies": "^1.8.6",
         "vue-router": "^4.6.3",

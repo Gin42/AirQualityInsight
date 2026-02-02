@@ -207,17 +207,19 @@ export default {
         this.map.invalidateSize();
       });
 
-      const gradient = {};
-      for (const threshold of Object.values(this.getThresholds)) {
-        gradient[threshold.value] = threshold.color;
-      }
-      console.log("COLORII", JSON.stringify(gradient));
-
       this.heatLayer = L.heatLayer([], {
-        gradient,
-        radius: 40,
-        maxZoom: 18, // max zoom where heat intensity scales
+        gradient: {
+          0: "#00e400",
+          0.15: "#feff00",
+          0.3: "#ff7e00",
+          0.6: "#ff0000",
+          0.75: "#8f3f97",
+          1: "#7e0023",
+        },
+        radius: Math.max(8, this.map.getZoom() * 2),
+        maxZoom: 14, // max zoom where heat intensity scales
         minOpacity: 0.3,
+        max: 1,
       }).addTo(this.map);
 
       this.map.on("click", async (e) => {
@@ -290,24 +292,6 @@ export default {
           pollutant: measurementType,
         });
 
-        if (measurementType === this.selectedMeasurement) {
-          console.log(
-            "How steamy:",
-            intensity.color,
-            "sensor:",
-            sensor.sensor_id,
-          );
-
-          L.circleMarker([sensor.lat, sensor.lng], {
-            radius: 8,
-            color: intensity.color,
-            fillColor: intensity.color,
-            fillOpacity: 0.7,
-          })
-            .addTo(this.map)
-            .bindPopup(`AQI: ${sensor.value}`);
-        }
-
         const latLng = [sensor.lat, sensor.lng, intensity.value];
 
         measurements[measurementType].heatLatLng.set(sensor.sensor_id, latLng);
@@ -322,7 +306,9 @@ export default {
 
     updateHeatmap(heatLatLngArray) {
       this.heatLayer.setLatLngs(heatLatLngArray);
-      this.heatLayer.setOptions({ radius: this.map.zoom });
+      this.heatLayer.setOptions({
+        radius: Math.max(8, this.map.getZoom() * 2),
+      });
     },
 
     centerOnLocation(lat, lng, zoom = 16) {
