@@ -4,8 +4,9 @@ import pushpinSvg from "@/assets/pushpin.svg";
 
 import { createLeafletMap } from "./useLeafletMap";
 import { createSensorMarkers } from "./sensorMarkers";
-import { buildHeatmapPoints } from "./heatmapManager";
+import { createHeatMap } from "./heatmapManager";
 import { reverseGeocode } from "./geocoding";
+import { watch } from "vue";
 
 export default {
   name: "MapComponent",
@@ -15,6 +16,7 @@ export default {
     ...mapState({
       center: (s) => s.map.center,
       zoom: (s) => s.map.zoom,
+      selectedMeasurement: (s) => s.map.selectedMeasurement,
     }),
     ...mapGetters("measurements", ["lastMeasurement"]),
     ...mapGetters("data", ["getMeasurementsTypes"]),
@@ -32,6 +34,7 @@ export default {
         iconAnchor: [12, 20],
       }),
       prevSensors: [],
+      heatmapManager: null,
     };
   },
 
@@ -51,19 +54,28 @@ export default {
       const sensor = this.getSensor(data.sensor_id);
       if (!sensor) return;
 
-      const points = buildHeatmapPoints({
+      const points = this.heatmapManager.buildHeatmapPoints({
         data,
         sensor,
         measurementTypes: this.getMeasurementsTypes,
-        selectedMeasurement: this.$store.state.map.selectedMeasurement,
+        selectedMeasurement: this.selectedMeasurement,
         getIntensity: this.getIntensity,
       });
 
       this.leaflet.updateHeatmap(points);
       this.markers.refresh();
     },
-  },
+    selectedMeasurement(newVal) {
+      if (!this.heatmapManager || !this.leaflet) return;
 
+      const points = this.heatmapManager.changeHeatmapPoints({
+        measurementTypes: this.getMeasurementsTypes,
+        selectedMeasurement: newVal,
+      });
+      this.leaflet.updateHeatmap(points);
+      this.markers.refresh();
+    },
+  },
   methods: {
     ...mapMutations("map", ["setCenter", "setZoom"]),
 
@@ -89,8 +101,10 @@ export default {
       map,
       this.pushpinIcon,
       (sensor) => this.$emit("marker-click", sensor),
-      this.$store.state.map.selectedMeasurement,
+      () => this.$store.state.map.selectedMeasurement,
       this.getIntensity,
     );
+
+    this.heatmapManager = createHeatMap();
   },
 };

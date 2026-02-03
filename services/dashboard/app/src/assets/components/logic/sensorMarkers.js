@@ -3,17 +3,18 @@ import "leaflet.markercluster/dist/leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
+import { ref } from "vue";
 
 export function createSensorMarkers(
   map,
   icon,
   onClick,
-  selectedMeasurement,
+  getSelectedMeasurement,
   getIntensity,
 ) {
   const radius = (zoom) => {
     if (zoom >= 15) return 30;
-    if (zoom >= 10) return 60;
+    if (zoom >= 10) return 50;
     return 100;
   };
 
@@ -26,13 +27,13 @@ export function createSensorMarkers(
       let sum = 0;
       let count = 0;
 
+      const measurement = getSelectedMeasurement();
+
       cluster.getAllChildMarkers().forEach((marker) => {
         const sensor = marker.sensor;
         if (!sensor || !sensor.getActive()) return;
 
-        const value = Number(
-          sensor.getLatestMeasurementValue(selectedMeasurement),
-        );
+        const value = Number(sensor.getLatestMeasurementValue(measurement));
 
         if (Number.isNaN(value)) return;
 
@@ -44,7 +45,7 @@ export function createSensorMarkers(
 
       const intensity = getIntensity({
         concentration: Number(average),
-        pollutant: selectedMeasurement,
+        pollutant: measurement,
       });
 
       const formattedLabel = intensity.label.toLowerCase().replace(/\s+/g, "-");
@@ -62,10 +63,7 @@ export function createSensorMarkers(
   function add(sensor) {
     if (sensor.getMarker()) return;
 
-    const marker = L.marker([sensor.getLat(), sensor.getLng()], { icon }).addTo(
-      map,
-    );
-
+    const marker = L.marker([sensor.getLat(), sensor.getLng()], { icon });
     marker.sensor =
       sensor; /*TEST, potrebbe essere un accrocchio che possiamo evitarci */
 
@@ -77,7 +75,7 @@ export function createSensorMarkers(
   function remove(sensor) {
     const marker = sensor.getMarker();
     if (!marker) return;
-    marker.remove();
+    //marker.remove();
     cluster.removeLayer(marker);
     sensor.setMarker(null);
   }
@@ -93,6 +91,7 @@ export function createSensorMarkers(
     for (const [id, sensor] of oldMap) {
       if (!newMap.has(id)) remove(sensor);
     }
+    refresh();
   }
 
   function refresh() {

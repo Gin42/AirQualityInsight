@@ -32,6 +32,7 @@
   justify-content: center;
   font-weight: bold;
   background-clip: padding-box;
+  padding: 1.2rem;
 }
 
 .cluster-good {
