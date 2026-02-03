@@ -244,10 +244,10 @@ export default {
       if (this.searchState === this.SearchState.FULL) {
         this.setSearchState(this.SearchState.EMPTY);
       }
-      clearTimeout(this.timeout);
+      /*clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
         this.getSuggestions();
-      }, 300);
+      }, 300);*/
     },
 
     selectSuggestion(suggestion) {

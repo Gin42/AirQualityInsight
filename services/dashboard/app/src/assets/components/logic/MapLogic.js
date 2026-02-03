@@ -108,6 +108,14 @@ export default {
       this.leaflet.centerOnLocation(lat, lng, zoom);
     },
 
+    setSearchLayer(data) {
+      this.leaflet.setSearchLayer(data);
+    },
+
+    clearSearchLayer() {
+      this.leaflet.clearSearchLayer();
+    },
+
     async onMapClick(e) {
       if (!this.addMode) return;
       const lat = +e.latlng.lat.toFixed(7);
