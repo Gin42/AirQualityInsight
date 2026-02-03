@@ -61,6 +61,15 @@ export function createLeafletMap() {
     }
   }
 
+  function centerOnLocation(lat, lng, zoom = 16) {
+    if (!this.map) throw "Map not initialized";
+
+    this.map.flyTo([lat, lng], zoom, {
+      animate: true,
+      duration: 1.5, // sec
+    });
+  }
+
   return {
     get map() {
       return map;
@@ -69,5 +78,6 @@ export function createLeafletMap() {
     updateHeatmap,
     setSearchLayer,
     clearSearchLayer,
+    centerOnLocation,
   };
 }

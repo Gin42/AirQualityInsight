@@ -24,9 +24,9 @@ export default {
       this.formData.name = name;
     },
 
-    submitForm() {
+    submitForm(sensor) {
       this.modifySensor({
-        sensorId: this.sensor.getId(),
+        sensorId: sensor.getId(),
         sensorName: this.formData.name,
       });
 
@@ -80,7 +80,11 @@ export default {
             </button>
           </div>
 
-          <form class="name-form" @submit.prevent="submitForm" v-if="isModify">
+          <form
+            class="name-form"
+            @submit.prevent="submitForm(sensor)"
+            v-if="isModify"
+          >
             <label class="label" for="name">Sensor:</label>
             <input
               type="text"

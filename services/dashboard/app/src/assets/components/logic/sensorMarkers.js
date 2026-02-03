@@ -81,22 +81,40 @@ export function createSensorMarkers(
   }
 
   function sync(newSensors, oldSensors) {
+    console.log(
+      newSensors.filter(
+        (s) => typeof s.getLat() !== "number" || typeof s.getLng() !== "number",
+      ),
+    );
+
     const newMap = new Map(newSensors.map((s) => [s.sensor_id, s]));
     const oldMap = new Map(oldSensors.map((s) => [s.sensor_id, s]));
 
+    const toAdd = [];
+    const toRemove = [];
+
     for (const [id, sensor] of newMap) {
-      if (!oldMap.has(id)) add(sensor);
+      if (!oldMap.has(id)) toAdd.push(sensor);
     }
 
     for (const [id, sensor] of oldMap) {
-      if (!newMap.has(id)) remove(sensor);
+      if (!newMap.has(id)) toRemove.push(sensor);
     }
+
+    cluster.options.animate = false;
+    toRemove.forEach(remove);
+    toAdd.forEach(add);
+    cluster.options.animate = true;
     refresh();
+  }
+
+  function clear() {
+    cluster.clearLayers();
   }
 
   function refresh() {
     cluster.refreshClusters();
   }
 
-  return { sync, refresh };
+  return { sync, refresh, clear };
 }

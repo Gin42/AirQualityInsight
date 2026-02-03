@@ -6,7 +6,6 @@ import { createLeafletMap } from "./useLeafletMap";
 import { createSensorMarkers } from "./sensorMarkers";
 import { createHeatMap } from "./heatmapManager";
 import { reverseGeocode } from "./geocoding";
-import { watch } from "vue";
 
 export default {
   name: "MapComponent",
@@ -17,11 +16,21 @@ export default {
       center: (s) => s.map.center,
       zoom: (s) => s.map.zoom,
       selectedMeasurement: (s) => s.map.selectedMeasurement,
+      gridType: (state) => state.map.gridType,
     }),
     ...mapGetters("measurements", ["lastMeasurement"]),
     ...mapGetters("data", ["getMeasurementsTypes"]),
     ...mapGetters("sensors", ["allSensors", "getSensor"]),
     ...mapGetters("stats", ["getIntensity"]),
+    sensorSignature() {
+      return this.allSensors.map((s) => ({
+        id: s.sensor_id,
+        lat: s.lat,
+        lng: s.lng,
+        name: s.name,
+        active: s.active,
+      }));
+    },
   },
 
   data() {
@@ -37,15 +46,28 @@ export default {
       heatmapManager: null,
     };
   },
-
   watch: {
-    allSensors: {
+    sensorSignature: {
       immediate: true,
       deep: true,
-      handler(newVal) {
-        if (!this.markers) return;
-        this.markers.sync(newVal, this.prevSensors);
-        this.prevSensors = [...newVal];
+      handler(newSig, oldSig = []) {
+        if (!this.markers || !this.leaflet) return;
+
+        if (newSig.length === 0) {
+          this.markers.clear();
+          this._prevSensors = [];
+          this.leaflet.updateHeatmap([]);
+          /** Da controllare con Kelvin:
+           * Al momento se viene richiesto il refresh dei sensori
+           * L'icon del cluster non viene ricalcolata fino a che non
+           * avviene una misurazione ed ignora quindi le
+           * misurazioni già presenti
+           */
+          return;
+        }
+
+        this.markers.sync(this.allSensors, this._prevSensors || []);
+        this._prevSensors = [...this.allSensors];
       },
     },
 
@@ -78,6 +100,11 @@ export default {
   },
   methods: {
     ...mapMutations("map", ["setCenter", "setZoom"]),
+
+    centerOnLocation(lat, lng, zoom = 16) {
+      if (!this.leaflet) return;
+      this.leaflet.centerOnLocation(lat, lng, zoom);
+    },
 
     async onMapClick(e) {
       const lat = +e.latlng.lat.toFixed(7);
