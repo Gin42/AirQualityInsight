@@ -72,8 +72,6 @@ const modifySensorData = async (sensorId, sensorName) => {
       { new: true },
     );
 
-    console.log("UPDATED: ", modifiedSensor);
-
     if (!modifiedSensor) {
       throw new Error(`Sensor ${sensorId} not found`);
     }
@@ -120,8 +118,6 @@ const updateAllSensorsStatus = async (selectedStatus) => {
       {}, // match ALL sensors
       { $set: { active: selectedStatus } },
     );
-
-    console.log("FOO, this is selectedStatus", selectedStatus);
 
     if (!result) {
       throw new Error(`Could not complete request`);

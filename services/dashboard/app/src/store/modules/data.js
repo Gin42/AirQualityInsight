@@ -24,7 +24,6 @@ const mutations = {
 
 const actions = {
   initializeData({ commit }) {
-    console.log("INIZIALIZZIAMO STI DATI");
     commit("setThresholds", jsonData.thresholds);
     commit("setMeasurements", jsonData.measurementsTypes);
   },

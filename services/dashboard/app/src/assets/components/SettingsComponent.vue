@@ -25,6 +25,7 @@ export default {
     ...mapGetters("measurements", ["lastMeasurement", "allMeasurementsCount"]),
     ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
     ...mapGetters("sensors", ["getSensor", "allSensorsCount", "allSensors"]),
+    ...mapGetters("user", ["getUsername"]),
     sliderValue: {
       get() {
         return this.currentMeasurements;
@@ -55,7 +56,6 @@ export default {
     ...mapMutations("map", ["setSelectedMeasurement", "setGridType"]),
     toggleCollapsible() {
       this.isCollapsibleOpen = !this.isCollapsibleOpen;
-      console.log(this.isCollapsibleOpen);
     },
     showTooltip() {
       this.showHelpPopup = true;
@@ -112,7 +112,6 @@ export default {
   },
   mounted() {
     this.updateBubblePosition();
-    console.log("Measurements types:", this.getMeasurementsTypes);
   },
 };
 </script>
@@ -249,6 +248,7 @@ export default {
         <button
           @click="clearMeasurements"
           class="btn danger-color clear-measurements"
+          v-if="getUsername != null"
         >
           <i class="fas fa-trash"></i> Clear
         </button>

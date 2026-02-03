@@ -83,12 +83,6 @@ export function createSensorMarkers(
   }
 
   function sync(newSensors, oldSensors) {
-    console.log(
-      newSensors.filter(
-        (s) => typeof s.getLat() !== "number" || typeof s.getLng() !== "number",
-      ),
-    );
-
     const newMap = new Map(newSensors.map((s) => [s.sensor_id, s]));
     const oldMap = new Map(oldSensors.map((s) => [s.sensor_id, s]));
 

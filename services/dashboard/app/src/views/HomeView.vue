@@ -11,6 +11,7 @@ export default {
       center: (state) => state.map.center,
     }),
     ...mapGetters("data", ["getMeasurementsTypes"]),
+    ...mapGetters("user", ["getUsername"]),
   },
   components: {
     TableComponent,
@@ -35,7 +36,6 @@ export default {
       if (!res.ok) throw new Error(`Backend error: ${res.status}`);
 
       const selectedSensor = await res.json();
-      console.log(selectedSensor);
     },
   },
   created() {
@@ -72,7 +72,7 @@ export default {
 </script>
 
 <template>
-  <McpChat></McpChat>
+  <McpChat v-if="getUsername != null"></McpChat>
   <div class="dashboard-component info-component-container">
     <div class="description">
       <h2>Description</h2>

@@ -1,7 +1,6 @@
 const sensorService = require("./sensorService");
 
 const addSensor = async (req, res) => {
-  console.log("\nADDING A NEW SENSOR\n");
   try {
     let count = await sensorService.countSensors();
     count = count + 1;
@@ -34,7 +33,6 @@ const deleteSensor = async (req, res) => {
 };
 
 const modifySensor = async (req, res) => {
-  console.log("HE-MAN");
   const { id } = req.params;
   const { name } = req.body;
 
@@ -69,7 +67,6 @@ const updateStatus = async (req, res) => {
 };
 
 const setAllStatus = async (req, res) => {
-  console.log("UGO");
   const selectedStatus = req.body.selectedStatus;
   try {
     const result = await sensorService.updateAllSensorsStatus(selectedStatus);
@@ -90,8 +87,6 @@ const getSensor = async (req, res) => {
       return res.status(400).json({ error: "Invalid query JSON" });
     }
   }
-
-  console.log();
 
   try {
     const sensors = await sensorService.getSensorData(parsedQuery);

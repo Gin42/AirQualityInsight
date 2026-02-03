@@ -4,6 +4,10 @@ const state = () => ({
   username: null,
 });
 
+const getters = {
+  getUsername: (state) => state.username,
+};
+
 const mutations = {
   setAuth(state, username) {
     state.username = username;
@@ -15,57 +19,54 @@ const mutations = {
 
 const actions = {
   async login({ commit }, userData) {
-    console.log("PAYLOAD");
-    console.log(userData);
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const response = await fetchFromApi(`${apiUrl}/api/auth/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
         credentials: "include",
       });
-      commit("setAuth", response.username);
+
+      if (!response.error) {
+        commit("setAuth", response.username);
+      }
+
       return response;
     } catch (error) {
       console.error("Unable to login", error);
+      throw error;
     }
   },
 
   async logout({ commit }) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-      const response = await fetchFromApi(`${apiUrl}/api/auth/logout`, {
+      await fetchFromApi(`${apiUrl}/api/auth/logout`, {
         credentials: "include",
       });
-      if (response) {
-        commit("resetAuth");
-      } else {
-        console.error("Unable to logout");
-      }
     } catch (error) {
       console.error("Unable to logout", error);
+    } finally {
+      commit("resetAuth");
     }
   },
 
-  async checkAuth({ state, dispatch, commit }) {
+  async checkAuth({ commit, dispatch }) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const response = await fetchFromApi(`${apiUrl}/api/auth/checkAuthToken`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
-      if (response.error) {
+
+      if (response?.error) {
         if (response.logout) {
-          dispatch("logout");
+          dispatch("logout", null, { root: false });
         }
-      } else if (state.username == null) {
-        commit("setAuth", response.username); //deve prendere il name
+      } else {
+        commit("setAuth", response.username);
       }
     } catch (error) {
       console.error("Auth check failed:", error);
@@ -77,6 +78,7 @@ const actions = {
 export default {
   namespaced: true,
   state,
-  actions,
+  getters,
   mutations,
+  actions,
 };

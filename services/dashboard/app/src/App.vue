@@ -23,7 +23,6 @@ export default {
   },
   async created() {
     //this.setCookies();
-    console.log("sto per domandare l'inizializzazione");
     await this.initializeAll();
     await this.checkAuth();
   },

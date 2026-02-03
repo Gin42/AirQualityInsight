@@ -58,8 +58,6 @@ router.post("/", async (req, res) => {
         throw new Error("Invalid tool call received from model");
       }
 
-      console.log("\nTHE TOOL CALL:", JSON.stringify(toolCall, null, 2));
-
       const toolResult = await executeTool(toolCall.name, toolCall.args);
 
       contents.push({

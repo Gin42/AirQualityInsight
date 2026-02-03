@@ -42,11 +42,16 @@ export default {
         password: this.password,
       })
         .then((response) => {
-          console.log(response);
+          if (response?.error) {
+            console.error("Login failed:", response.error);
+            return;
+          }
+
           console.log("Login OK");
+          this.$router.push("/");
         })
         .catch((error) => {
-          console.error("Login failed:", error);
+          console.error("Login request failed:", error);
         });
     },
   },

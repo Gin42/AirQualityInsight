@@ -1,3 +1,8 @@
+/**
+ * Name: AirQuality
+ * Pass: SecretPassword12
+ */
+
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 

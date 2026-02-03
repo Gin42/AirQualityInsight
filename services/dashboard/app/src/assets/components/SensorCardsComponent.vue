@@ -1,5 +1,5 @@
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 export default {
   name: "SensorCardsComponent",
   props: {
@@ -7,6 +7,9 @@ export default {
       type: Array,
       default: () => [],
     },
+  },
+  computed: {
+    ...mapGetters("user", ["getUsername"]),
   },
   methods: {
     ...mapActions("sensors", [
@@ -75,7 +78,7 @@ export default {
             <button
               class="icon-button modify"
               @click="onModifySensor(sensor.getName())"
-              v-if="data.length === 1"
+              v-if="data.length === 1 && getUsername != null"
             >
               <i class="fa-regular fa-pen-to-square"></i>
             </button>
@@ -126,6 +129,7 @@ export default {
               name="sensor_active"
               @click="onToggleSensorStatus(sensor, $event)"
               :checked="sensor.getActive()"
+              :disabled="!getUsername"
             />
             <span class="btn-switch-inner btn-active-switch-inner"></span>
             <span class="btn-switch-circle btn-active-switch-circle"></span>
@@ -143,7 +147,7 @@ export default {
           <p>Time since last measurement</p>
           <p>{{ sensor.getTimeSinceMeasurement() }}</p>
         </li>
-        <li class="delete-li" v-if="data.length === 1">
+        <li class="delete-li" v-if="data.length === 1 && getUsername != null">
           <button
             class="sensor-action-btn danger-color"
             @click="onDeleteSensor(sensor)"

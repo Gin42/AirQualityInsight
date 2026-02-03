@@ -68,11 +68,9 @@ const mutations = {
   },
 
   updateAllStatuses(state, active) {
-    console.log("Setto a", active);
     for (const [id, sensor] of state.sensors.entries()) {
       sensor.active = active;
       state.sensors.set(id, sensor);
-      console.log(sensor);
     }
   },
 };
@@ -198,7 +196,6 @@ const actions = {
   async updateAllStatus({ commit, dispatch }, selectedStatus) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-      console.log("Ora aggiorno mo'");
 
       const response = await fetchFromApi(`${apiUrl}/api/sensor/setAllStatus`, {
         method: "POST",

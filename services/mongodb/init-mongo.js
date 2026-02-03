@@ -1,5 +1,3 @@
-//TEST: SecretPassword12
-
 const fs = require("fs");
 
 function printSection(title) {
@@ -183,8 +181,8 @@ if (reset) {
     const data = JSON.parse(
       fs.readFileSync(
         "/docker-entrypoint-initdb.d/sensor_locations.json",
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const sensors = data.elements;
     print(`Found ${sensors.length} sensors in JSON`);
@@ -211,7 +209,7 @@ if (reset) {
   try {
     print("Loading account data...");
     const accountData = JSON.parse(
-      fs.readFileSync("/docker-entrypoint-initdb.d/account.json", "utf8")
+      fs.readFileSync("/docker-entrypoint-initdb.d/account.json", "utf8"),
     );
     const userArray = accountData.user; // Renamed to avoid conflict
     for (let singleUser of userArray) {

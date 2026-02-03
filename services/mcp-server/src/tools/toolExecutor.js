@@ -32,12 +32,6 @@ async function searchSensor(name = null) {
 
   if (!res.ok) throw new Error(`Backend error: ${res.status}`);
   const sensors = await res.json();
-  console.log(
-    "I've FOUND a new friend, or maybe a treasure. I've searched for:",
-    name,
-    "\nFOUND:",
-    JSON.stringify(sensors),
-  );
   return sensors;
 }
 
@@ -153,7 +147,6 @@ const toolHandlers = {
     return result;
   },
   updateAllSensorStatus: async ({ active }) => {
-    console.log("Exercise is important:", active);
     if (active === null) {
       throw new Error("Missing required sensor fields");
     }

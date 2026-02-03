@@ -105,7 +105,6 @@ const addSensor = async (messageId, newSensor) => {
 };
 
 const deleteSensor = async (messageId, sensor) => {
-  console.log("UGO:", sensor);
   try {
     await producer.send({
       topic: sensors_topic,
@@ -175,7 +174,6 @@ const statusUpdateSensor = async (messageId, updatedSensor) => {
 };
 
 const statusAllSensors = async (messageId, selectedStatus) => {
-  console.log("BAR, this is status", selectedStatus);
   try {
     await producer.send({
       topic: sensors_topic,

@@ -9,6 +9,7 @@ import SettingsComponent from "@/assets/components/SettingsComponent.vue";
 import SensorCardsComponent from "@/assets/components/SensorCardsComponent.vue";
 import { TrinityRingsSpinner } from "epic-spinners";
 import { fetchFromApi } from "@/services/api";
+import McpChat from "@/assets/components/McpChat.vue";
 
 const SearchState = Object.freeze({
   EMPTY: "empty",
@@ -27,6 +28,7 @@ export default {
     SettingsComponent,
     SensorCardsComponent,
     TrinityRingsSpinner,
+    McpChat,
   },
   computed: {
     ...mapState({
@@ -36,6 +38,7 @@ export default {
     ...mapGetters("data", ["getMeasurementsTypes", "getThresholds"]),
     ...mapGetters("sensors", ["allSensorsCount", "allSensors"]),
     ...mapGetters("table", ["getSensorsTable"]),
+    ...mapGetters("user", ["getUsername"]),
   },
   data() {
     return {
@@ -334,7 +337,11 @@ export default {
       <button @click="refreshSensors" class="btn tertiary-color">
         <i class="fas fa-sync-alt"></i> Refresh
       </button>
-      <button @click="handleActiveSensors" class="btn tertiary-color">
+      <button
+        @click="handleActiveSensors"
+        class="btn tertiary-color"
+        v-if="getUsername != null"
+      >
         <i
           :class="[
             'fas',
@@ -346,7 +353,7 @@ export default {
         ></i>
         {{ this.activeSensors ? "Stop" : "Start" }}
       </button>
-      <div class="btn mode-switch">
+      <div class="btn mode-switch" v-if="getUsername != null">
         <label class="switch btn-switch btn-map-mode-switch" @click.stop>
           <input
             type="checkbox"
@@ -409,6 +416,8 @@ export default {
       :initial-longitude="longitude"
       :initial-name="name"
     ></FormComponent>
+
+    <McpChat v-if="getUsername != null"></McpChat>
   </div>
 </template>
 
