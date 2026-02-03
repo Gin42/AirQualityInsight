@@ -118,6 +118,7 @@ function calculateEAQI(pollutants) {
   let dominantPollutant = null;
 
   for (const pollutant of pollutants) {
+    if (!pollutant) continue; // skip missing
     if (dominantPollutant === null) {
       dominantPollutant = pollutant;
     } else if (
@@ -128,7 +129,18 @@ function calculateEAQI(pollutants) {
     }
   }
 
-  return dominantPollutant;
+  if (!dominantPollutant) return null;
+
+  return {
+    measurement: dominantPollutant.measurement,
+    mean: dominantPollutant.mean,
+    intensity: dominantPollutant.intensity,
+    // Instead of HTML, just color & label
+    quality: {
+      color: dominantPollutant.intensity.color,
+      label: dominantPollutant.intensity.label,
+    },
+  };
 }
 
 function calculateStats(values) {
@@ -146,8 +158,13 @@ function calculateStats(values) {
 
 function getIntensityLabel(intensity) {
   return `
-    <div class="intensity-label">
-      <i class="threshold-intensity" style="background-color: ${intensity.color}"></i>
+    <div class="intensity-label" style="  display: flex;
+  flex-direction: row;
+  align-items: center;">
+      <i class="threshold-intensity" style="background-color: ${intensity.color};  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 1.5px black solid; margin: 0 0.5rem;"></i>
       <span>${intensity.label}</span>
     </div>
   `;

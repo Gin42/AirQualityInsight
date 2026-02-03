@@ -135,4 +135,17 @@ th {
   color: #666;
   font-style: italic;
 }
+
+.intensity-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.threshold-intesity {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 1.5px black solid;
+}
 </style>

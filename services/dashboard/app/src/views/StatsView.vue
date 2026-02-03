@@ -19,57 +19,60 @@ export default {
 </script>
 
 <template>
-  <h1>Hi, I'm stats</h1>
-  <div class="dashboard-component stats-component-container">
-    <div class="component-header">
-      <h2>Statistics</h2>
-      <button @click="this.clearStats" class="btn btn-danger">
-        <i class="fas fa-trash"></i> Clear
-      </button>
-    </div>
-    <TableComponent
-      ref="measurementComponent"
-      :data="Object.values(getStats)"
-      :columns="getStatsTable.columns"
-    />
-  </div>
-
-  <div class="dashboard-component eaqi-component-container">
-    <div class="component-header">
-      <h2>Current EAQI (European Air Quality Index)</h2>
-    </div>
-    <div>
-      <div>
-        The EAQI (European Air Quality Index) is and index based on
-        concentration values for up to five key pollutants:
-        <ul>
-          <li>Particulate matter (PM10)</li>
-          <li>Fine particulate matter (PM2.5)</li>
-          <li>Nitrogen dioxide (NO2)</li>
-          <li>Ozone (O3)</li>
-          <li>Sulphur dioxide (SO2)</li>
-        </ul>
-        Each pollutant gets a sub-index based on its concentration against the
-        EAQI thresholds. The worst sub-index among all measured pollutants
-        becomes the overall EAQI.
+  <div class="stats-container">
+    <div class="dashboard-component eaqi-component-container">
+      <div class="component-header eaqi-desc-container">
+        <h2>Current EAQI (European Air Quality Index)</h2>
+        <div>
+          The EAQI (European Air Quality Index) is and index based on
+          concentration values for up to five key pollutants:
+          <ul class="eaqi-desc">
+            <li>Particulate matter (PM10)</li>
+            <li>Fine particulate matter (PM2.5)</li>
+            <li>Nitrogen dioxide (NO2)</li>
+            <li>Ozone (O3)</li>
+            <li>Sulphur dioxide (SO2)</li>
+          </ul>
+          Each pollutant gets a sub-index based on its concentration against the
+          EAQI thresholds. The worst sub-index among all measured pollutants
+          becomes the overall EAQI.
+        </div>
       </div>
-      <div v-if="eaqi">
-        <h3>Live EAQI</h3>
-        <ul>
-          <li style="display: flex; gap: 0.5rem">
-            Quality: <span v-html="eaqi?.quality ?? 'N/A'"></span>
-          </li>
-          <li>Worst pollutant: {{ eaqi?.measurement ?? "N/A" }}</li>
-          <li>Mean concentration: {{ eaqi?.mean ?? "N/A" }} µg/m³</li>
-          <li>
-            Health advice:
-            <ul>
+
+      <div v-if="eaqi" class="surface-color eaqi-container">
+        <h2 class="eaqi-title">Live EAQI</h2>
+        <ul class="eaqi-list">
+          <div class="quality-row">
+            <li>
+              <div
+                class="quality-visual"
+                :style="{
+                  backgroundColor: eaqi?.quality?.color || 'transparent',
+                }"
+              ></div>
+            </li>
+            <div>
+              <li>The <b>quality</b> is {{ eaqi?.quality?.label ?? "N/A" }}</li>
               <li>
-                General population:
+                The <b>worst pollutant</b> is {{ eaqi?.measurement ?? "N/A" }}
+              </li>
+              <li>
+                It's <b>mean concentration</b> is
+                {{ eaqi?.mean ?? "N/A" }} µg/m³
+              </li>
+            </div>
+          </div>
+
+          <hr />
+          <li>
+            <b>Health advice:</b>
+            <ul class="eaqi-list health-list">
+              <li>
+                <b>General population:</b>
                 {{ eaqi?.intensity?.advice?.general ?? "N/A" }}
               </li>
               <li>
-                Sensitive population:
+                <b>Sensitive population:</b>
                 {{ eaqi?.intensity?.advice?.sensitive ?? "N/A" }}
               </li>
             </ul>
@@ -77,5 +80,102 @@ export default {
         </ul>
       </div>
     </div>
+
+    <div class="dashboard-component stats-component-container">
+      <div class="component-header stats-header">
+        <h2>Statistics</h2>
+        <button @click="this.clearStats" class="btn danger-color">
+          <i class="fas fa-trash"></i> Clear
+        </button>
+      </div>
+      <TableComponent
+        ref="measurementComponent"
+        :data="Object.values(getStats)"
+        :columns="getStatsTable.columns"
+      />
+    </div>
   </div>
 </template>
+
+<style lang="scss">
+.eaqi-desc,
+.eaqi-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.eaqi-component-container {
+  display: flex;
+  flex-direction: row;
+  width: 100&;
+  height: fit-content;
+  padding: 1rem;
+  margin-top: 2rem;
+  gap: 2rem;
+}
+
+.eaqi-container {
+  width: 50%;
+  border: 2px solid black;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.eaqi-title {
+  margin-top: 0;
+}
+
+.eaqi-desc-container {
+  width: 50%;
+}
+
+.eaqi-list {
+  gap: 0.5rem;
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.quality-visual {
+  width: 5rem;
+  height: 5rem;
+  border: 2px solid black;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.quality-visual p {
+  margin: 0;
+  font-weight: bold;
+}
+
+.quality-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quality-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+hr {
+  width: 100%;
+}
+
+.health-list {
+  margin-top: 1rem;
+}
+
+.stats-header {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+</style>
