@@ -2,14 +2,14 @@ import L from "leaflet";
 import { mapState, mapGetters, mapMutations } from "vuex";
 import pushpinSvg from "@/assets/icons/pushpin.svg";
 
-import { createLeafletMap } from "./useLeafletMap";
-import { createSensorMarkers } from "./sensorMarkers";
-import { createHeatMap } from "./heatmapManager";
-import { reverseGeocode } from "./geocoding";
+import { createLeafletMap } from "./map/useLeafletMap";
+import { createSensorMarkers } from "./map/sensorMarkers";
+import { createHeatMap } from "./map/heatmapManager";
+import { reverseGeocode } from "./map/geocoding";
 
 export default {
   name: "MapComponent",
-  props: { loading: Boolean },
+  props: { loading: Boolean, addMode: Boolean },
 
   computed: {
     ...mapState({
@@ -109,6 +109,7 @@ export default {
     },
 
     async onMapClick(e) {
+      if (!this.addMode) return;
       const lat = +e.latlng.lat.toFixed(7);
       const lng = +e.latlng.lng.toFixed(7);
       const name = await reverseGeocode(lat, lng);
@@ -125,6 +126,10 @@ export default {
     );
 
     map.on("click", this.onMapClick);
+
+    this.$watch("addMode", (addMode) => {
+      map.getContainer().style.cursor = addMode ? "crosshair" : "grab";
+    });
 
     this.markers = createSensorMarkers(
       map,

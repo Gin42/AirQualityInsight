@@ -123,7 +123,11 @@ export default {
       <i class="fa-solid fa-xmark"></i>
     </button>
     <!-- Map instructions -->
-    <div class="collapsible-header" @click="toggleCollapsible">
+    <div
+      class="collapsible-header"
+      :class="{ open: isCollapsibleOpen }"
+      @click="toggleCollapsible"
+    >
       <h2>How to use it</h2>
       <button class="collapsible-button">
         <i class="fa-solid fa-angle-down" v-if="!isCollapsibleOpen"></i>
@@ -132,31 +136,16 @@ export default {
     </div>
 
     <ul class="how-to-list collapsible-content" v-if="isCollapsibleOpen">
-      <li>
-        The map displays a collection of sensors indicated by red pushpins.
-      </li>
-      <li>Clicking on a sensor will show its name.</li>
-      <li>
-        Collected live measurements are displayed in a table below the map, and
-        clicking on a row will navigate to the corresponding sensor on the map.
-      </li>
+      <li>The map displays a collection of sensors indicated by pushpins.</li>
+      <li>Clicking on a sensor will open the sensor's info card.</li>
       <li>
         The map shows collected measurements as a heatmap based on the selected
         measurement type.
       </li>
-      <li>You can choose from available options in the control panel.</li>
       <li>
-        The control panel opens by clicking the red pushpin in the top right
-        corner of the map.
+        The sensors are collected in a cluster if they are near each other.
       </li>
-      <li>
-        Opening the panel provides information such as the number of registered
-        sensors and collected measurements.
-      </li>
-      <li>
-        You can select the measurement type to display and any layers to
-        overlay.
-      </li>
+      <li>You can choose from available options in this panel.</li>
       <li>
         Data collection can be stopped and resumed at any time using the buttons
         in the top right corner of the map.
@@ -358,6 +347,10 @@ ul.how-to-list li {
   justify-content: space-between;
   padding: 0.5rem;
   border: #222 1px solid;
+}
+
+.collapsible-header.open {
+  border-bottom: transparent;
 }
 
 .collapsible-button {

@@ -55,6 +55,7 @@ export default {
       SearchState,
       timeout: null,
       searchSuggestions: [],
+      isAddMode: false,
     };
   },
   created() {},
@@ -68,10 +69,8 @@ export default {
 
     handleActiveSensors() {
       if (this.activeSensors) {
-        console.log("Stopped sensors data reception");
         this.updateAllStatus(false);
       } else {
-        console.log("Started sensors data reception");
         this.updateAllStatus(true);
       }
       this.activeSensors = !this.activeSensors;
@@ -84,18 +83,13 @@ export default {
         this.showInfo();
       }
     },
-    handleSensorsLoaded(sensors) {
-      //this.addInfo(`Loaded ${sensors.size} sensors`);
-    },
-    handleMeasurementsCleared(count) {
-      console.log("Cleared measurement");
-      //this.addInfo(`Cleared ${count} measurements from map`);
-    },
     showForm({ longitude, latitude, name }) {
-      this.name = name;
-      this.longitude = longitude;
-      this.latitude = latitude;
-      this.isFormVisible = true;
+      if (this.isAddMode) {
+        this.name = name;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.isFormVisible = true;
+      }
     },
     hideForm() {
       this.isFormVisible = false;
@@ -116,7 +110,6 @@ export default {
     hideSettings() {
       this.isSettingsVisible = false;
     },
-
     closeAll() {
       this.hideInfo();
       this.hideSettings();
@@ -134,11 +127,6 @@ export default {
         sensor.getLat(),
         sensor.getLng(),
       );
-    },
-    handleSensorRowClick(row) {
-      console.log(`Selected sensor: ${row.id}`);
-      //this.addInfo(`Selected sensor: ${row.id}`);
-      this.centerMapOnSensor(row);
     },
     setSearchState(value) {
       this.searchState = value;
@@ -279,6 +267,10 @@ export default {
           break;
       }
     },
+
+    onToggleMapMode(event) {
+      this.isAddMode = event.target.checked;
+    },
   },
 };
 </script>
@@ -354,6 +346,18 @@ export default {
         ></i>
         {{ this.activeSensors ? "Stop" : "Start" }}
       </button>
+      <div class="btn mode-switch">
+        <label class="switch btn-map-mode-switch" @click.stop>
+          <input
+            type="checkbox"
+            id="map_mode"
+            name="map_mode"
+            @click="onToggleMapMode($event)"
+          />
+          <span class="btn-map-mode-switch-inner"></span>
+          <span class="btn-map-mode-switch-circle"></span>
+        </label>
+      </div>
     </div>
 
     <TrinityRingsSpinner
@@ -368,8 +372,8 @@ export default {
       ref="mapComponent"
       :thresholds="getThresholds"
       :loading="isLoading"
+      :add-mode="isAddMode"
       @marker-click="handleMarkerClick"
-      @measurements-cleared="handleMeasurementsCleared"
       @open-form="showForm"
       @loading-change="isLoading = $event"
     />
@@ -495,6 +499,71 @@ export default {
   width: fit-content;
   justify-self: end;
   margin: 1rem;
+}
+
+.mode-switch {
+  background-color: var(--tertiary-color);
+  border-radius: 8px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.btn-map-mode-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.btn-map-mode-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.btn-map-mode-switch-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 34px;
+  transition: background-color 0.3s;
+}
+
+.btn-map-mode-switch-circle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 30px;
+  height: 30px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.btn-map-mode-switch input:checked ~ .btn-map-mode-switch-circle {
+  transform: translateX(26px);
+  content: "\f055"; /* plus icon */
+}
+
+.btn-map-mode-switch-circle::before {
+  content: "\f06e"; /* map icon */
+  color: #1d1b20;
+}
+
+.btn-map-mode-switch input:checked ~ .btn-map-mode-switch-circle::before {
+  content: "\f055"; /* plus icon */
 }
 
 .map-component-container {

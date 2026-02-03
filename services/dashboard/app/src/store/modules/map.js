@@ -1,12 +1,12 @@
 const state = () => ({
   center: {
-    lng: "11.3426000",
-    lat: "44.4939000",
+    lng: "12.2356576",
+    lat: "44.14771",
     name: "Piazza Maggiore",
   },
   currentCoords: {
-    lng: "11.3426000",
-    lat: "44.4939000",
+    lng: "12.2356576",
+    lat: "44.14771",
   },
   zoom: 13,
   selectedMeasurement: "pm25",
