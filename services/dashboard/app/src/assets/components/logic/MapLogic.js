@@ -61,7 +61,9 @@ export default {
            * Al momento se viene richiesto il refresh dei sensori
            * L'icon del cluster non viene ricalcolata fino a che non
            * avviene una misurazione ed ignora quindi le
-           * misurazioni già presenti
+           * misurazioni già presenti.
+           * Potrebbe essere una migliore idea mettere nel cluster
+           * semplicemente il conto di quanti sensori sono al suo interno
            */
           return;
         }
