@@ -2,10 +2,10 @@ import L from "leaflet";
 import { mapState, mapGetters, mapMutations } from "vuex";
 import pushpinSvg from "@/assets/pushpin.svg";
 
-import { createLeafletMap } from "@/maps/leafletMap";
-import { createSensorMarkers } from "@/maps/sensorMarkers";
-import { buildHeatmapPoints } from "@/maps/heatmapManager";
-import { reverseGeocode } from "@/services/geocoding";
+import { createLeafletMap } from "./useLeafletMap";
+import { createSensorMarkers } from "./sensorMarkers";
+import { buildHeatmapPoints } from "./heatmapManager";
+import { reverseGeocode } from "./geocoding";
 
 export default {
   name: "MapComponent",
@@ -16,7 +16,8 @@ export default {
       center: (s) => s.map.center,
       zoom: (s) => s.map.zoom,
     }),
-    ...mapGetters("measurements", ["lastMeasurement", "getMeasurementsTypes"]),
+    ...mapGetters("measurements", ["lastMeasurement"]),
+    ...mapGetters("data", ["getMeasurementsTypes"]),
     ...mapGetters("sensors", ["allSensors", "getSensor"]),
     ...mapGetters("stats", ["getIntensity"]),
   },
@@ -59,6 +60,7 @@ export default {
       });
 
       this.leaflet.updateHeatmap(points);
+      this.markers.refresh();
     },
   },
 
@@ -83,8 +85,12 @@ export default {
 
     map.on("click", this.onMapClick);
 
-    this.markers = createSensorMarkers(map, this.pushpinIcon, (sensor) =>
-      this.$emit("marker-click", sensor),
+    this.markers = createSensorMarkers(
+      map,
+      this.pushpinIcon,
+      (sensor) => this.$emit("marker-click", sensor),
+      this.$store.state.map.selectedMeasurement,
+      this.getIntensity,
     );
   },
 };

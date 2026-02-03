@@ -24,6 +24,48 @@
   </div>
 </template>
 
+<style>
+.cluster-average {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  background-clip: padding-box;
+}
+
+.cluster-good {
+  background-color: #00e400;
+  border: 5px solid rgba(0, 228, 0, 0.5);
+  color: black;
+}
+.cluster-fair {
+  background-color: #feff00;
+  border: 5px solid rgba(254, 255, 0, 0.5);
+  color: black;
+}
+.cluster-moderate {
+  background-color: #ff7e00;
+  border: 5px solid rgba(255, 126, 0, 0.5);
+  color: black;
+}
+.cluster-poor {
+  background-color: #ff0000;
+  border: 5px solid rgba(255, 0, 0, 0.5);
+  color: black;
+}
+.cluster-very-poor {
+  background-color: #8f3f97;
+  border: 5px solid rgba(143, 63, 151, 0.5);
+  color: black;
+}
+.cluster-extremely-poor {
+  background-color: #7e0023;
+  border: 5px solid rgba(126, 0, 35, 0.5);
+  color: white;
+}
+</style>
+
 <style scoped lang="scss">
 .pushpin-icon {
   background: none !important;

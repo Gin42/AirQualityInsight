@@ -45,6 +45,16 @@ export default class Sensor {
     return this.distance_center;
   }
 
+  getLastMeasurement() {
+    if (!this.measurements.size) return null;
+    return this.measurements.values().next().value;
+  }
+
+  getLatestMeasurementValue(type) {
+    const last = this.getLastMeasurement();
+    return last?.data?.[type] ?? null;
+  }
+
   getLastMeasurementReceived() {
     return this.lastMeasurementReceived;
   }

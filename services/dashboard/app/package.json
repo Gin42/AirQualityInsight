@@ -23,6 +23,7 @@
         "jwt-builder": "^1.1.0",
         "leaflet": "^1.9.4",
         "leaflet.heat": "^0.2.0",
+        "leaflet.markercluster": "^1.5.3",
         "socket.io-client": "^4.8.1",
         "turf": "^3.0.14",
         "vue": "^3.5.13",

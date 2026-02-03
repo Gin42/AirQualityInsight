@@ -1,6 +1,64 @@
 import L from "leaflet";
+import "leaflet.markercluster/dist/leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster";
 
-export function createSensorMarkers(map, icon, onClick) {
+export function createSensorMarkers(
+  map,
+  icon,
+  onClick,
+  selectedMeasurement,
+  getIntensity,
+) {
+  const radius = (zoom) => {
+    if (zoom >= 15) return 30;
+    if (zoom >= 10) return 60;
+    return 100;
+  };
+
+  const cluster = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    spiderfyOnMaxZoom: false,
+    maxClusterRadius: radius(map.zoom),
+    animate: true,
+    iconCreateFunction: function (cluster) {
+      let sum = 0;
+      let count = 0;
+
+      cluster.getAllChildMarkers().forEach((marker) => {
+        const sensor = marker.sensor;
+        if (!sensor || !sensor.getActive()) return;
+
+        const value = Number(
+          sensor.getLatestMeasurementValue(selectedMeasurement),
+        );
+
+        if (Number.isNaN(value)) return;
+
+        sum += value;
+        count++;
+      });
+
+      const average = count ? (sum / count).toFixed(1) : "/";
+
+      const intensity = getIntensity({
+        concentration: Number(average),
+        pollutant: selectedMeasurement,
+      });
+
+      const formattedLabel = intensity.label.toLowerCase().replace(/\s+/g, "-");
+
+      return L.divIcon({
+        html: `<b>${average}</b>`,
+        className: `cluster-average cluster-${formattedLabel}`,
+        iconSize: L.point(40, 40),
+      });
+    },
+  });
+
+  map.addLayer(cluster);
+
   function add(sensor) {
     if (sensor.getMarker()) return;
 
@@ -8,7 +66,11 @@ export function createSensorMarkers(map, icon, onClick) {
       map,
     );
 
+    marker.sensor =
+      sensor; /*TEST, potrebbe essere un accrocchio che possiamo evitarci */
+
     marker.on("click", () => onClick(sensor));
+    cluster.addLayer(marker);
     sensor.setMarker(marker);
   }
 
@@ -16,6 +78,7 @@ export function createSensorMarkers(map, icon, onClick) {
     const marker = sensor.getMarker();
     if (!marker) return;
     marker.remove();
+    cluster.removeLayer(marker);
     sensor.setMarker(null);
   }
 
@@ -32,5 +95,9 @@ export function createSensorMarkers(map, icon, onClick) {
     }
   }
 
-  return { sync };
+  function refresh() {
+    cluster.refreshClusters();
+  }
+
+  return { sync, refresh };
 }
