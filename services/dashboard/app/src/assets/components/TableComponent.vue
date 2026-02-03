@@ -4,7 +4,7 @@
   <div class="table-wrapper">
     <table>
       <thead>
-        <tr class="secondary-color">
+        <tr class="secondary-color-no-hover">
           <th
             v-for="column in columns"
             :key="column.key"

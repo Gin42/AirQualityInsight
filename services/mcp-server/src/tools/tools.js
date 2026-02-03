@@ -42,7 +42,7 @@ export const tools = [
             "Represent if the sensor is active (true) or inactive (false)",
         },
       },
-      required: ["name", "longitude", "latitude", "active"],
+      required: ["name", "longitude", "latitude"],
     },
   },
   {

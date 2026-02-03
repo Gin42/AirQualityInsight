@@ -1,5 +1,6 @@
 <script>
 import { mapState, mapActions } from "vuex";
+
 export default {
   name: "LoginForm",
   computed: {
@@ -26,9 +27,11 @@ export default {
         @click="isMobileMenuOpen = !isMobileMenuOpen"
         class="navbar-toggle icon-button"
       >
-        <i class="fa-solid fa-bars" v-if="!isMobileMenuOpen"></i>
-        <i class="fa-solid fa-xmark" v-if="isMobileMenuOpen"></i>
+        <i class="fa-solid fa-bars menu-icon" v-if="!isMobileMenuOpen"></i>
+        <i class="fa-solid fa-xmark menu-icon" v-if="isMobileMenuOpen"></i>
       </button>
+
+      <img src="../icons/logo.svg" alt="AirQualityInsight logo" class="logo" />
 
       <p class="website-name">AirQualityInsight</p>
 
@@ -75,7 +78,6 @@ export default {
           >
             Logout
           </button>
-          <p class="username">{{ this.username ? this.username : "Guest" }}</p>
         </li>
       </ul>
     </div>
@@ -93,11 +95,17 @@ export default {
   background-color: var(--primary-color);
 }
 
+.logo {
+  height: inherit;
+  padding: 0.3rem;
+}
+
 .website-name {
   font-size: 1.5em;
   font-weight: bold;
   cursor: default;
   flex: 1;
+  margin: 0;
 }
 
 .navbar-toggle {
@@ -110,6 +118,7 @@ export default {
   justify-content: space-between;
   width: 100%;
   position: relative;
+  height: inherit;
 }
 
 ul.navbar-menu {
@@ -125,10 +134,15 @@ ul.navbar-menu li {
   padding: 0 1rem;
 }
 
+.router-link-active {
+  border-bottom: 3px solid black;
+}
+
 li.nav-route a,
 .auth-button a {
   text-decoration: none;
   color: var(--secondary-text-color);
+  padding: 0.2rem 0.3rem;
 }
 
 .auth-div {
@@ -150,7 +164,15 @@ li.nav-route a,
   margin-right: 1rem;
 }
 
+.menu-icon {
+  margin-right: 1rem;
+}
+
 @media (max-width: 800px) {
+  .logo {
+    display: none;
+  }
+
   .navbar-toggle {
     display: contents;
     justify-self: start;
@@ -190,7 +212,7 @@ li.nav-route a,
     display: flex;
     width: -webkit-fill-available;
     height: 100vh;
-    margin: 0 -1rem;
+    margin: -1rem;
     z-index: 10;
   }
 

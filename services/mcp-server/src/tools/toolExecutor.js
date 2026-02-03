@@ -50,8 +50,8 @@ const toolHandlers = {
     return compactSensors(sensors);
   },
 
-  addSensor: async ({ name, longitude, latitude, active }) => {
-    if (!name || longitude == null || latitude == null || active == null) {
+  addSensor: async ({ name, longitude, latitude, active = true }) => {
+    if (!name || longitude == null || latitude == null) {
       throw new Error("Missing required sensor fields");
     }
 

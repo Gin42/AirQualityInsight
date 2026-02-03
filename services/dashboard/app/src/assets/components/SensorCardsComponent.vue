@@ -180,8 +180,8 @@ export default {
   width: 100%;
   height: 90%;
   background-color: #3590f3;
-  mask: url("../pushpinVector.svg") no-repeat left;
-  -webkit-mask: url("../pushpinVector.svg") no-repeat left;
+  mask: url("../icons/pushpinVector.svg") no-repeat left;
+  -webkit-mask: url("../icons/pushpinVector.svg") no-repeat left;
   mask-size: auto;
   -webkit-mask-size: contain;
   opacity: 0.2;

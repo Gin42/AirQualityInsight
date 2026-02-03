@@ -8,11 +8,15 @@ import LastMeasurementsView from "../views/LastMeasurementsView.vue";
 import AuthView from "@/views/AuthView.vue";
 
 const routes = [
-  { path: "/", component: HomeView },
+  { path: "/", component: HomeView, name: "Home" },
   { path: "/:pathMatch(.*)*", component: NotFoundView },
-  { path: "/map", component: MapView },
-  { path: "/stats", component: StatsView },
-  { path: "/lastMeasurements", component: LastMeasurementsView },
+  { path: "/map", component: MapView, name: "Map" },
+  { path: "/stats", component: StatsView, name: "Stats" },
+  {
+    path: "/lastMeasurements",
+    component: LastMeasurementsView,
+    name: "Last measurement",
+  },
   { path: "/login", component: AuthView },
 ];
 

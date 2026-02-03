@@ -1,6 +1,6 @@
 import L from "leaflet";
 import { mapState, mapGetters, mapMutations } from "vuex";
-import pushpinSvg from "@/assets/pushpin.svg";
+import pushpinSvg from "@/assets/icons/pushpin.svg";
 
 import { createLeafletMap } from "./useLeafletMap";
 import { createSensorMarkers } from "./sensorMarkers";

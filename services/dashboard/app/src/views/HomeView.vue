@@ -25,7 +25,6 @@ export default {
     createInfoIcon(title) {
       return `<i class="fas fa-info-circle" title="${title}"></i>`;
     },
-
     async sendTest() {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const res = await fetch(`${apiUrl}/api/sensor`, {
@@ -47,6 +46,8 @@ export default {
       if (extremely_poor) return `&gt; ${threshold}`;
       return `&le; ${threshold}`;
     };
+
+    this.infoMeasurement.data = [];
 
     for (const [key, data] of Object.entries(this.getMeasurementsTypes)) {
       this.infoMeasurement.data.push({
@@ -76,36 +77,25 @@ export default {
     <div class="description">
       <h2>Description</h2>
       <p>
-        Simulation project of a sensor system to monitor air quality, with data
-        sent to a server for real-time analysis and visualization.
+        This project simulate a sensors' newtwork to monitor air quality, with
+        fictitious data sent to a server for real-time analysis and
+        visualization on a dedicated dashboard.
       </p>
       <p>
-        The system simulates a network of sensors, such as Raspberry Pi, capable
-        of measuring air quality. These measurements will be sent to a server,
-        which will analyze them and present the data in real-time on a dedicated
-        dashboard.
-      </p>
-      <p>
-        <span>
-          The case study subject is the city of Bologna, the sensors are
-          displaced into his boundaries.
-        </span>
-        <span>
-          The center of the map is located in
-          <i>“{{ center.name }}”</i> [ lat: <code>{{ center.lat }}</code
-          >, lng: <code>{{ center.lng }}</code>
-          ].
-        </span>
-        <span>
-          The distance of the sensors from the center is in meters [m].
-        </span>
+        An user can be a normal user or have administrator permits. The first
+        can view the collected data via an interactive map or examine statistics
+        via tables, while the latter can interact with the sensors, modifying,
+        deleting, or adding new ones. They will also have access to a virtual
+        agent capable of performing the aforementioned operations on demand.
       </p>
 
+      <!-- TEST BUTTON
       <button @click="sendTest">TRY SEARCH</button>
+      -->
 
       <p class="project-link">
         <i class="fa-brands fa-github"></i>
-        <a href="https://github.com/MatteoZenoBagli/AirQualityInsight"
+        <a href="https://github.com/Gin42/AirQualityInsight.git"
           >GitHub's project page link</a
         >
       </p>
@@ -115,11 +105,9 @@ export default {
     <p class="ranges">
       The table below explains what types of measurements are collected and how
       they are interpreted. It shows the measurement name, the unit of
-      measurement, the sampling interval, and 3 indicators that represent the
-      quality of the obtained measurement: the closer the measurement value is
-      to the quality thresholds, the better the value. If you hover the cursor
-      over the information label, a brief description of the measure is
-      displayed.
+      measurement, the sampling interval, and the ranges of each quality
+      threshold. If you hover the cursor over the information label, a brief
+      description of the measure is displayed.
     </p>
 
     <div class="measurement-ranges">

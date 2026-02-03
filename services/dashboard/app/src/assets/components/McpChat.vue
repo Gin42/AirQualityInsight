@@ -113,7 +113,7 @@ export default {
   <div class="chatbot">
     <div class="chatbot-button-icon">
       <button class="primary-color chatbot-button" @click="isOpen = !isOpen">
-        <img src="../chatbot-icon.svg" alt="Chatbot" />
+        <img src="../icons/chatbot-icon.svg" alt="Chatbot" />
       </button>
     </div>
 
