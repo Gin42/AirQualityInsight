@@ -2,6 +2,11 @@
 import { mapGetters, mapActions } from "vuex";
 import SensorCardsComponent from "./SensorCardsComponent.vue";
 
+const SearchState = Object.freeze({
+  EMPTY: "empty",
+  FULL: "full",
+});
+
 export default {
   name: "SensorInfoComponent",
   components: {
@@ -17,7 +22,37 @@ export default {
     ...mapGetters("sensors", ["allSensorsCount", "allSensors"]),
 
     sensorsToDisplay() {
-      return this.sensor ? [this.sensor] : this.allSensors;
+      let sensors = this.sensor ? [this.sensor] : this.allSensors;
+
+      if (this.searchQuery) {
+        const q = this.searchQuery.toLowerCase();
+        sensors = sensors.filter((s) => s.getName().toLowerCase().includes(q));
+      }
+
+      if (this.filterProperty) {
+        sensors = sensors.filter(
+          (s) => s[this.filterProperty.key] === this.filterProperty.value,
+        );
+      }
+
+      return sensors;
+    },
+
+    setSearchState(value) {
+      this.searchState = value;
+    },
+
+    onSearchAction() {
+      switch (this.searchState) {
+        case this.SearchState.EMPTY:
+          this.setSearchState(SearchState.FULL);
+          break;
+
+        case this.SearchState.FULL:
+          this.setSearchState(SearchState.EMPTY);
+          this.searchQuery = "";
+          break;
+      }
     },
 
     hasSelectedSensor() {
@@ -31,7 +66,6 @@ export default {
       this.$emit("select-sensor", sensor);
     },
     clearSensor() {
-      console.log("I clean i clean");
       this.$emit("select-sensor", null);
     },
   },
@@ -41,6 +75,10 @@ export default {
       formData: {
         name: null,
       },
+      searchQuery: "",
+      filterProperty: null,
+      searchState: SearchState.EMPTY,
+      SearchState,
     };
   },
   watch: {
@@ -70,15 +108,45 @@ export default {
         <i class="fa-solid fa-arrow-left"></i>
         Return to sensors list
       </button>
+
+      <div
+        class="search-container bg-color sensor-search"
+        v-if="!hasSelectedSensor"
+      >
+        <form @submit.prevent="onSearchAction" class="search-form">
+          <input
+            type="text"
+            placeholder="Search for a sensor"
+            name="search"
+            v-model="searchQuery"
+            autocomplete="off"
+            class="bg-color"
+          />
+          <button type="submit" class="btn tertiary-color">
+            <i class="fa fa-search" v-if="searchState === SearchState.EMPTY">
+            </i>
+            <i
+              class="fa-solid fa-x"
+              v-if="searchState === SearchState.FULL"
+            ></i>
+          </button>
+        </form>
+      </div>
+
       <SensorCardsComponent
         :data="sensorsToDisplay"
         @select-sensor="onSelectSensor"
+        @delete-sensor="clearSensor"
       ></SensorCardsComponent>
     </div>
   </div>
 </template>
 
 <style>
+.sensor-search {
+  margin-bottom: 1rem;
+}
+
 .sensor-info {
   display: flex;
   flex-direction: column;
@@ -87,6 +155,7 @@ export default {
   padding: 0 1rem 1rem 1rem;
   overflow-y: scroll;
   border-radius: 8px;
+  margin-left: 1rem;
 }
 
 .link-button {

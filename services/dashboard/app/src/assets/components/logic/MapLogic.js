@@ -131,14 +131,15 @@ export default {
       map.getContainer().style.cursor = addMode ? "crosshair" : "grab";
     });
 
+    this.heatmapManager = createHeatMap();
+
     this.markers = createSensorMarkers(
       map,
       this.pushpinIcon,
       (sensor) => this.$emit("marker-click", sensor),
       () => this.$store.state.map.selectedMeasurement,
       this.getIntensity,
+      this.heatmapManager.clearHeatMapOfSensor,
     );
-
-    this.heatmapManager = createHeatMap();
   },
 };

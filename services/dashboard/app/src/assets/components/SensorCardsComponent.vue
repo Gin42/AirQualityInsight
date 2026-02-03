@@ -15,8 +15,9 @@ export default {
       "updateSensorStatus",
     ]),
 
-    onDeleteSensor(sensor) {
-      this.deleteSensor(sensor.getId());
+    async onDeleteSensor(sensor) {
+      await this.deleteSensor(sensor.getId());
+      this.$emit("delete-sensor");
     },
 
     onModifySensor(name) {
@@ -117,13 +118,17 @@ export default {
         </li>
         <li>
           <p>Status</p>
-          <label class="switch" @click.stop>
+
+          <label class="switch btn-switch btn-active-switch" @click.stop>
             <input
               type="checkbox"
+              id="sensor_active"
+              name="sensor_active"
               @click="onToggleSensorStatus(sensor, $event)"
               :checked="sensor.getActive()"
             />
-            <span class="slider round"></span>
+            <span class="btn-switch-inner btn-active-switch-inner"></span>
+            <span class="btn-switch-circle btn-active-switch-circle"></span>
           </label>
         </li>
         <li>
@@ -254,72 +259,26 @@ li.delete-li {
   justify-content: end;
 }
 
-.switch label {
-  display: flex;
-  flex-direction: row;
-}
-
-.switch input {
-  display: none;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  cursor: pointer;
+.btn-active-switch-inner {
   background-color: var(--danger-color);
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-  width: 3.5rem;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 }
 
-.slider:before {
-  content: "\f00d";
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  font-size: 1em;
-  color: var(--danger-color);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: white;
-  transition: 0.4s;
-  width: fit-content;
-  height: fit-content;
-  padding: 0.3rem;
-}
-
-input:checked + .slider::before {
-  content: "\f00c"; /* check icon */
-  color: var(--success-color);
-}
-
-input:checked + .slider {
+/* When checked, track becomes success */
+.btn-active-switch input:checked + .btn-active-switch-inner {
   background-color: var(--success-color);
 }
 
-input:focus + .slider {
-  box-shadow: 0 0 1px #23b964;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
+.btn-active-switch input:checked ~ .btn-active-switch-circle {
   transform: translateX(26px);
+  content: "\f00c";
 }
 
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-  padding: 0.2rem;
+.btn-active-switch-circle::before {
+  content: "\f00d";
+  color: #1d1b20;
 }
 
-.slider.round:before {
-  border-radius: 50%;
+.btn-active-switch input:checked ~ .btn-active-switch-circle::before {
+  content: "\f00c";
 }
 </style>

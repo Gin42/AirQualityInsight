@@ -11,6 +11,7 @@ export function createSensorMarkers(
   onClick,
   getSelectedMeasurement,
   getIntensity,
+  clearHeatMapOfSensor,
 ) {
   const radius = (zoom) => {
     if (zoom >= 15) return 30;
@@ -75,9 +76,9 @@ export function createSensorMarkers(
   function remove(sensor) {
     const marker = sensor.getMarker();
     if (!marker) return;
-    //marker.remove();
     cluster.removeLayer(marker);
     sensor.setMarker(null);
+    clearHeatMapOfSensor(sensor);
   }
 
   function sync(newSensors, oldSensors) {

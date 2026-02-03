@@ -323,6 +323,7 @@ export default {
   padding: 0 1rem 1rem 1rem;
   overflow-y: scroll;
   border-radius: 8px;
+  margin-right: 1rem;
 }
 
 ul.how-to-list {

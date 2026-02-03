@@ -347,15 +347,15 @@ export default {
         {{ this.activeSensors ? "Stop" : "Start" }}
       </button>
       <div class="btn mode-switch">
-        <label class="switch btn-map-mode-switch" @click.stop>
+        <label class="switch btn-switch btn-map-mode-switch" @click.stop>
           <input
             type="checkbox"
             id="map_mode"
             name="map_mode"
             @click="onToggleMapMode($event)"
           />
-          <span class="btn-map-mode-switch-inner"></span>
-          <span class="btn-map-mode-switch-circle"></span>
+          <span class="btn-switch-inner btn-map-mode-switch-inner"></span>
+          <span class="btn-switch-circle btn-map-mode-switch-circle"></span>
         </label>
       </div>
     </div>
@@ -501,6 +501,10 @@ export default {
   margin: 1rem;
 }
 
+.fa-search {
+  color: var(--background-color);
+}
+
 .mode-switch {
   background-color: var(--tertiary-color);
   border-radius: 8px;
@@ -508,48 +512,6 @@ export default {
   p {
     margin: 0;
   }
-}
-
-.btn-map-mode-switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-.btn-map-mode-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.btn-map-mode-switch-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  border-radius: 34px;
-  transition: background-color 0.3s;
-}
-
-.btn-map-mode-switch-circle {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 30px;
-  height: 30px;
-  background-color: #fff;
-  border-radius: 50%;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  font-size: 16px;
-  pointer-events: none;
 }
 
 .btn-map-mode-switch input:checked ~ .btn-map-mode-switch-circle {
