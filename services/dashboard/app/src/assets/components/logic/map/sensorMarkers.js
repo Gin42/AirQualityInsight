@@ -22,8 +22,8 @@ export function createSensorMarkers(
   const cluster = L.markerClusterGroup({
     showCoverageOnHover: false,
     spiderfyOnMaxZoom: false,
-    maxClusterRadius: radius(map.zoom),
-    animate: true,
+    maxClusterRadius: (zoom) => radius(map.getZoom),
+    animate: false,
     iconCreateFunction: function (cluster) {
       let sum = 0;
       let count = 0;
@@ -75,7 +75,8 @@ export function createSensorMarkers(
 
   function remove(sensor) {
     const marker = sensor.getMarker();
-    if (!marker) return;
+    if (!marker || !marker._map) return;
+
     cluster.removeLayer(marker);
     sensor.setMarker(null);
     clearHeatMapOfSensor(sensor);
@@ -114,6 +115,7 @@ export function createSensorMarkers(
   }
 
   function refresh() {
+    if (!map.hasLayer(cluster)) return;
     cluster.refreshClusters();
   }
 

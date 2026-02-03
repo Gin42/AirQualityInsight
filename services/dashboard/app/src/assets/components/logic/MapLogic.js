@@ -141,5 +141,26 @@ export default {
       this.getIntensity,
       this.heatmapManager.clearHeatMapOfSensor,
     );
+
+    this.markers.sync(this.allSensors, []);
+    this._prevSensors = [...this.allSensors];
+  },
+  beforeUnmount() {
+    for (const sensor of this.allSensors) {
+      sensor.setMarker(null);
+    }
+
+    if (this.markers) {
+      this.markers.clear();
+      this.markers = null;
+    }
+
+    if (this.leaflet?.map) {
+      this.leaflet.map.off();
+      this.leaflet.map.remove();
+    }
+
+    this.leaflet = null;
+    this._prevSensors = [];
   },
 };
