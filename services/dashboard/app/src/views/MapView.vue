@@ -292,7 +292,7 @@ export default {
           autocomplete="off"
           class="bg-color"
         />
-        <button type="submit" class="btn tertiary-color">
+        <button type="submit" class="btn tertiary-color search-button">
           <i class="fa fa-search" v-if="searchState === SearchState.EMPTY"> </i>
           <i class="fa-solid fa-x" v-if="searchState === SearchState.FULL"></i>
           <i
@@ -333,6 +333,28 @@ export default {
     </div>
 
     <div class="component-header-buttons" v-if="!isLoading">
+      <div class="btn mode-switch" v-if="getUsername != null">
+        <label class="map-switch" @click.stop>
+          <input
+            type="checkbox"
+            v-model="isAddMode"
+            @click="onToggleMapMode($event)"
+            class="map-mode-input"
+          />
+          <span class="map-track">
+            <span class="map-option option-view">
+              <i class="fa-solid fa-eye"></i>
+              <span>View</span>
+            </span>
+            <span class="map-option option-edit">
+              <i class="fa-solid fa-pencil"></i>
+              <span>Edit</span>
+            </span>
+            <span class="map-active-bg"></span>
+          </span>
+        </label>
+      </div>
+
       <!-- Refresh and stop buttons -->
       <button @click="refreshSensors" class="btn tertiary-color">
         <i class="fas fa-sync-alt"></i> Refresh
@@ -353,18 +375,6 @@ export default {
         ></i>
         {{ this.activeSensors ? "Stop" : "Start" }}
       </button>
-      <div class="btn mode-switch" v-if="getUsername != null">
-        <label class="switch btn-switch btn-map-mode-switch" @click.stop>
-          <input
-            type="checkbox"
-            id="map_mode"
-            name="map_mode"
-            @click="onToggleMapMode($event)"
-          />
-          <span class="btn-switch-inner btn-map-mode-switch-inner"></span>
-          <span class="btn-switch-circle btn-map-mode-switch-circle"></span>
-        </label>
-      </div>
     </div>
 
     <TrinityRingsSpinner
@@ -436,6 +446,7 @@ export default {
 
   .fa-circle-notch {
     animation: rotation 1s linear infinite;
+    color: white;
   }
 
   @keyframes rotation {
@@ -462,7 +473,8 @@ export default {
 
     button {
       border-radius: 50px;
-      color: black;
+      color: white;
+      aspect-ratio: 1 / 1;
     }
   }
 }
@@ -514,27 +526,63 @@ export default {
   color: var(--background-color);
 }
 
-.mode-switch {
-  background-color: var(--tertiary-color);
-  border-radius: 8px;
+.map-switch {
+  position: relative;
+  display: inline-block;
+  width: 140px; // slightly wider for comfort
+  height: 40px; // taller for better spacing
 
-  p {
-    margin: 0;
+  input.map-mode-input {
+    display: none; // hide checkbox
   }
-}
 
-.btn-map-mode-switch input:checked ~ .btn-map-mode-switch-circle {
-  transform: translateX(26px);
-  content: "\f055"; /* plus icon */
-}
+  .map-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: var(--surface-color); // track
+    border-radius: 8px;
+    display: flex;
+    overflow: hidden;
 
-.btn-map-mode-switch-circle::before {
-  content: "\f06e"; /* map icon */
-  color: #1d1b20;
-}
+    .map-option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2; // text above active-bg
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
 
-.btn-map-mode-switch input:checked ~ .btn-map-mode-switch-circle::before {
-  content: "\f055"; /* plus icon */
+      transition: color 0.3s;
+      gap: 0.2rem;
+    }
+
+    .map-active-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%; // exactly half of the track
+      height: 100%;
+      background-color: var(--tertiary-color);
+      border-radius: 8px;
+      z-index: 1; // behind text
+      transition: left 0.3s;
+    }
+  }
+
+  input.map-mode-input:checked ~ .map-track .map-active-bg {
+    left: 50%; // move to the second half
+  }
+
+  input.map-mode-input:checked ~ .map-track .option-edit {
+    color: #fff;
+  }
+
+  input.map-mode-input:not(:checked) ~ .map-track .option-view {
+    color: #fff;
+  }
 }
 
 .map-component-container {
