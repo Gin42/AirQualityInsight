@@ -45,6 +45,8 @@ router.post("/", async (req, res) => {
     },
   ];
 
+  let toolResult = null;
+
   try {
     const response = await askAi(contents);
     let content = response.candidates[0].content;
@@ -58,7 +60,9 @@ router.post("/", async (req, res) => {
         throw new Error("Invalid tool call received from model");
       }
 
-      const toolResult = await executeTool(toolCall.name, toolCall.args);
+      console.log("toolCall name:", toolCall.name);
+
+      toolResult = await executeTool(toolCall.name, toolCall.args);
 
       contents.push({
         role: "model",
@@ -71,7 +75,7 @@ router.post("/", async (req, res) => {
           {
             functionResponse: {
               name: toolCall.name,
-              response: { result: toolResult },
+              response: { result: toolResult.sensors },
             },
           },
         ],
@@ -87,7 +91,7 @@ router.post("/", async (req, res) => {
         .map((p) => p.text)
         .join("\n") ?? "";
 
-    return res.json({ answer: text });
+    return res.json({ answer: text, toolResult: toolResult });
   } catch (err) {
     console.error("Chat error:", err);
     return res.status(500).json({ error: "Chat failed" });

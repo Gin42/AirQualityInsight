@@ -44,6 +44,7 @@ export default {
       }),
       prevSensors: [],
       heatmapManager: null,
+      geoData: null,
     };
   },
   watch: {
@@ -99,6 +100,19 @@ export default {
       this.leaflet.updateHeatmap(points);
       this.markers.refresh();
     },
+
+    "$route.query.sensorId": {
+      immediate: true,
+      handler(newId) {
+        if (!newId) return;
+
+        const sensor = this.getSensor(newId);
+        if (!sensor || !this.leaflet) return;
+
+        this.centerOnLocation(sensor.lat, sensor.lng, this.zoom);
+        this.$emit("marker-click", sensor);
+      },
+    },
   },
   methods: {
     ...mapMutations("map", ["setCenter", "setZoom"]),
@@ -152,6 +166,17 @@ export default {
 
     this.markers.sync(this.allSensors, []);
     this._prevSensors = [...this.allSensors];
+
+    const route = this.$route;
+
+    if (route.query.sensorId) {
+      const sensor = this.getSensor(route.query.sensorId);
+
+      if (sensor) {
+        this.centerOnLocation(sensor.lat, sensor.lng, this.zoom);
+        this.$emit("marker-click", sensor);
+      }
+    }
   },
   beforeUnmount() {
     for (const sensor of this.allSensors) {

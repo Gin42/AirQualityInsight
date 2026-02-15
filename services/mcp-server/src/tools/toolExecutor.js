@@ -6,6 +6,7 @@ const mainRoute = "/api/sensor";
 
 function compactSensors(sensors) {
   return sensors.map((s) => ({
+    id: s.sensor_id,
     name: s.name,
     location: s.location?.coordinates,
     status: s.active ? "active" : "inactive",
@@ -41,7 +42,10 @@ const toolHandlers = {
     if (!sensors.length) {
       throw new Error(`Sensor "${name}" not found`);
     }
-    return compactSensors(sensors);
+    return {
+      action: name ? "get_single_sensor" : null,
+      sensors: compactSensors(sensors),
+    };
   },
 
   addSensor: async ({ name, longitude, latitude, active = true }) => {
@@ -70,7 +74,10 @@ const toolHandlers = {
     if (!res.ok) throw new Error(`Backend error: ${res.status}`);
 
     const sensor = await res.json();
-    return compactSensors([sensor]);
+    return {
+      action: "add_sensor",
+      sensors: compactSensors([sensor]),
+    };
   },
 
   deleteSensor: async ({ name }) => {
@@ -94,7 +101,9 @@ const toolHandlers = {
     if (!response.ok) throw new Error(`Backend error: ${response.status}`);
 
     const result = await response.json();
-    return result;
+    return {
+      sensors: result,
+    };
   },
   updateSensor: async ({ oldName, newName }) => {
     if (!oldName || !newName) {
@@ -104,7 +113,7 @@ const toolHandlers = {
     const selectedSensor = await searchSensor(oldName);
 
     if (!selectedSensor.length) {
-      throw new Error(`Sensor "${name}" not found`);
+      throw new Error(`Sensor "${oldName}" not found`);
     }
 
     const response = await fetch(
@@ -119,7 +128,10 @@ const toolHandlers = {
     if (!response.ok) throw new Error(`Backend error: ${response.status}`);
 
     const result = await response.json();
-    return result;
+    return {
+      action: "update_sensor",
+      sensors: result,
+    };
   },
   updateSensorStatus: async ({ name, active }) => {
     if (!name || active == null) {
@@ -144,10 +156,13 @@ const toolHandlers = {
     if (!response.ok) throw new Error(`Backend error: ${response.status}`);
 
     const result = await response.json();
-    return result;
+    return {
+      action: "update_sensor_status",
+      sensors: result,
+    };
   },
   updateAllSensorStatus: async ({ active }) => {
-    if (active === null) {
+    if (active == null) {
       throw new Error("Missing required sensor fields");
     }
 
@@ -160,7 +175,9 @@ const toolHandlers = {
     if (!response.ok) throw new Error(`Backend error: ${response.status}`);
 
     const result = await response.json();
-    return result;
+    return {
+      sensors: result,
+    };
   },
 };
 

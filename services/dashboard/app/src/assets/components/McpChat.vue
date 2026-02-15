@@ -56,11 +56,24 @@ export default {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const response = await res.json();
 
-        // push AI message
-        this.messages.push({
-          from: MessageFrom.AI,
-          text: response.answer,
-        });
+        if (
+          response.toolResult?.action &&
+          response.toolResult.sensors?.length
+        ) {
+          this.messages.push({
+            from: MessageFrom.AI,
+            text: response.answer, // AI text
+            link: {
+              label: "View on map",
+              sensorId: response.toolResult.sensors[0].id,
+            },
+          });
+        } else {
+          this.messages.push({
+            from: MessageFrom.AI,
+            text: response.answer,
+          });
+        }
 
         this.refreshSensors();
       } catch (err) {
@@ -105,6 +118,14 @@ export default {
 
       textArea.style.height = "auto";
     },
+
+    goToSensor(sensorId) {
+      isOpen = false;
+      this.$router.push({
+        name: "Map",
+        query: { sensorId },
+      });
+    },
   },
 };
 </script>
@@ -134,7 +155,17 @@ export default {
               class="chat-message"
               :class="msg.from"
             >
-              {{ msg.text }}
+              <p>{{ msg.text }}</p>
+
+              <p v-if="msg.link">
+                <a
+                  href="#"
+                  class="chat-link"
+                  @click.prevent="goToSensor(msg.link.sensorId)"
+                >
+                  {{ msg.link.label }}
+                </a>
+              </p>
             </div>
           </div>
 
@@ -318,6 +349,16 @@ export default {
   100% {
     opacity: 0.2;
   }
+}
+
+.chat-link {
+  margin-left: 0.5rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.chat-link:hover {
+  opacity: 0.8;
 }
 
 @media (max-width: 425px) {

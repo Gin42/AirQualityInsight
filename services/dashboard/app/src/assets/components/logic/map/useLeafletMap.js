@@ -1,6 +1,7 @@
 import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
+import { useRoute } from "vue-router";
 
 export function createLeafletMap() {
   let map = null;
