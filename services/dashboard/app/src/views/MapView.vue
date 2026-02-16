@@ -170,91 +170,6 @@ export default {
       this.setSearchState(SearchState.EMPTY);
     },
 
-    rankSuggestion(s, queryLength) {
-      let score = 0;
-
-      if (typeof s.place_rank === "number") {
-        score += (30 - s.place_rank) * 10;
-      }
-
-      switch (s.class) {
-        case "boundary": // country / region
-          score += 200;
-          break;
-        case "place": // city / town / village
-          score += 150;
-          break;
-        case "highway": // streets
-          score += 50;
-          break;
-        case "amenity": // POI
-          score += 0;
-          break;
-        default:
-          score += 10;
-      }
-
-      score += (s.importance || 0) * 100;
-
-      if (queryLength <= 3 && s.place_rank <= 16) {
-        score += 150;
-      }
-
-      return score;
-    },
-
-    async getSuggestions() {
-      if (!this.searchQuery || this.searchQuery.length < 3) {
-        this.searchSuggestions = [];
-        return;
-      }
-
-      const currentQuery = this.searchQuery;
-
-      const limit = 20;
-
-      const query = new URLSearchParams({
-        q: this.searchQuery,
-        format: "json",
-        addressdetails: 1,
-        limit: limit,
-      }).toString();
-
-      try {
-        const response = await fetchFromApi(
-          `https://nominatim.openstreetmap.org/search?${query}`,
-        );
-
-        if (this.searchQuery === currentQuery) {
-          this.searchSuggestions =
-            response
-              .map((s) => ({
-                ...s,
-                _score: this.rankSuggestion(s, this.searchQuery.length),
-              }))
-              .sort((a, b) => b._score - a._score)
-              .slice(0, limit) || [];
-        }
-      } catch (error) {
-        console.error("Unable to fetch suggestions:", error);
-      }
-    },
-    onSearchInput() {
-      if (this.searchState === this.SearchState.FULL) {
-        this.setSearchState(this.SearchState.EMPTY);
-      }
-      /*clearTimeout(this.timeout);
-      this.timeout = setTimeout(() => {
-        this.getSuggestions();
-      }, 300);*/
-    },
-
-    selectSuggestion(suggestion) {
-      this.searchQuery = suggestion.display_name;
-      this.searchSuggestions = [];
-      this.submitSearchQuery(suggestion);
-    },
-
     onSearchAction() {
       switch (this.searchState) {
         case this.SearchState.EMPTY:
@@ -300,35 +215,6 @@ export default {
           ></i>
         </button>
       </form>
-      <!--
-      Da discuterne con kelvin perchè nominatim non nasce ed è sconsigliato/proibito 
-      fare autocompletition, e i suggerimenti che da non sono particolarmente buoni. 
-      Potrei usare altri API o sistemi come photon e pelias, ma prima facciamo che ho
-      tutte le funzionalità e poi faccio roba in più
-      <ul
-        v-if="this.searchSuggestions.length"
-        class="search-suggestions bg-color"
-      >
-        <li
-          v-for="(s, index) in this.searchSuggestions"
-          :key="index"
-          @click="selectSuggestion(s)"
-          class="bg-color"
-        >
-          <i class="fa-solid fa-earth-americas" v-if="s.place_rank <= 3"></i>
-          <i
-            class="fa-solid fa-flag"
-            v-if="s.place_rank >= 4 && s.place_rank <= 12"
-          ></i>
-          <i
-            class="fa-solid fa-city"
-            v-if="s.place_rank >= 13 && s.place_rank <= 20"
-          ></i>
-          <i class="fa-solid fa-location-dot" v-if="s.place_rank >= 21"></i>
-          <p>{{ s.display_name }}</p>
-        </li>
-        
-      </ul>-->
     </div>
 
     <div class="component-header-buttons" v-if="!isLoading">
@@ -341,13 +227,13 @@ export default {
             class="map-mode-input"
           />
           <span class="map-track">
-            <span class="map-option option-view">
+            <span class="map-option option-view" aria-label="Map view mode">
               <i class="fa-solid fa-eye"></i>
-              <span>View</span>
+              <span class="btn-text">View</span>
             </span>
-            <span class="map-option option-edit">
+            <span class="map-option option-edit" aria-label="Map edit mode">
               <i class="fa-solid fa-pencil"></i>
-              <span>Edit</span>
+              <span class="btn-text">Edit</span>
             </span>
             <span class="map-active-bg"></span>
           </span>
@@ -356,12 +242,14 @@ export default {
 
       <!-- Refresh and stop buttons -->
       <button @click="refreshSensors" class="btn tertiary-color">
-        <i class="fas fa-sync-alt"></i> Refresh
+        <i class="fas fa-sync-alt"></i>
+        <span class="btn-text" aria-label="Refresh map">Refresh</span>
       </button>
       <button
         @click="handleActiveSensors"
         class="btn tertiary-color"
         v-if="getUsername != null"
+        aria-label="Stop sensor measuring"
       >
         <i
           :class="[
@@ -372,7 +260,9 @@ export default {
             },
           ]"
         ></i>
-        {{ this.activeSensors ? "Stop" : "Start" }}
+        <span class="btn-text">{{
+          this.activeSensors ? "Stop" : "Start"
+        }}</span>
       </button>
     </div>
 
@@ -407,6 +297,17 @@ export default {
       @close-all="closeAll"
       v-if="!isLoading"
     ></MapButtonComponent>
+
+    <div class="surface-color map-legend">
+      <div
+        v-for="(threshold, key) in getThresholds"
+        :key="key"
+        class="legend-item"
+      >
+        <div class="color-circle" :class="`circle-${key}`"></div>
+        <p>{{ threshold.label }}</p>
+      </div>
+    </div>
 
     <transition name="slide-right">
       <SensorInfoComponent
@@ -512,21 +413,25 @@ export default {
   color: var(--background-color);
 }
 
+.mode-switch {
+  padding: 0;
+}
+
 .map-switch {
   position: relative;
   display: inline-block;
-  width: 140px; // slightly wider for comfort
-  height: 40px; // taller for better spacing
+  width: 8.75rem;
+  height: 2.5rem;
 
   input.map-mode-input {
-    display: none; // hide checkbox
+    display: none;
   }
 
   .map-track {
     position: relative;
     width: 100%;
     height: 100%;
-    background-color: var(--surface-color); // track
+    background-color: var(--surface-color);
     border-radius: 8px;
     display: flex;
     overflow: hidden;
@@ -555,6 +460,10 @@ export default {
       border-radius: 8px;
       z-index: 1; // behind text
       transition: left 0.3s;
+    }
+
+    .map-active-bg:hover {
+      background-color: var(--tertiary-hover);
     }
   }
 
@@ -616,5 +525,77 @@ export default {
   z-index: 10;
   pointer-events: none;
   place-self: center;
+}
+
+.map-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  align-items: flex-start;
+  grid-area: 3 / 1 / 4 / 2;
+  border: 1px solid black;
+  z-index: 1;
+  height: fit-content;
+  justify-self: center;
+  align-self: end;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 0.3rem;
+  width: 90%;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.2rem;
+
+  p {
+    margin: 0;
+    font-size: 0.8em;
+  }
+}
+
+.color-circle {
+  width: 0.8rem;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  margin-bottom: 0.1rem;
+}
+
+.circle-good {
+  background-color: #00e400;
+}
+.circle-fair {
+  background-color: #feff00;
+}
+.circle-moderate {
+  background-color: #ff7e00;
+}
+.circle-poor {
+  background-color: #ff0000;
+}
+.circle-very_poor {
+  background-color: #8f3f97;
+}
+.circle-extremely_poor {
+  background-color: #7e0023;
+}
+
+@media (min-width: 420px) {
+  .map-legend {
+    width: fit-content;
+    margin-left: 0.3rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .btn-text {
+    display: none;
+  }
+
+  .map-switch {
+    width: 4rem;
+  }
 }
 </style>

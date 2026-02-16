@@ -286,11 +286,15 @@ li.delete-li {
 }
 
 .btn-active-switch-circle::before {
+  font-family: "Font Awesome 6 Free"; /* important */
+  font-weight: 900; /* solid style for fa-solid icons */
   content: "\f00d";
   color: #1d1b20;
 }
 
 .btn-active-switch input:checked ~ .btn-active-switch-circle::before {
+  font-family: "Font Awesome 6 Free"; /* important */
+  font-weight: 900; /* solid style for fa-solid icons */
   content: "\f00c";
 }
 </style>

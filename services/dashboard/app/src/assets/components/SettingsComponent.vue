@@ -322,7 +322,6 @@ export default {
   padding: 0 1rem 1rem 1rem;
   overflow-y: scroll;
   border-radius: 8px;
-  margin-right: 1rem;
 }
 
 ul.how-to-list {
@@ -480,6 +479,7 @@ select {
 @media (min-width: 800px) {
   .settings {
     grid-area: 1 / 1 / 4 / 2;
+    margin-right: 1rem;
   }
 }
 </style>

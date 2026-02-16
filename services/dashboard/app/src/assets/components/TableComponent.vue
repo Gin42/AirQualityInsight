@@ -84,7 +84,6 @@ td {
 }
 
 tbody tr {
-  font-family: monospace;
   font-size: 1em;
 }
 

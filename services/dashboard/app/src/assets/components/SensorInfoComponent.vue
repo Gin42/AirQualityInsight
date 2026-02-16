@@ -146,7 +146,6 @@ export default {
   padding: 0 1rem 1rem 1rem;
   overflow-y: scroll;
   border-radius: 8px;
-  margin-left: 1rem;
 }
 
 .link-button {
@@ -161,6 +160,7 @@ export default {
 @media (min-width: 800px) {
   .sensor-info {
     grid-area: 1 / 3 / 4 / 4;
+    margin-left: 1rem;
   }
 }
 </style>

@@ -26,6 +26,7 @@ export default {
       <button
         @click="isMobileMenuOpen = !isMobileMenuOpen"
         class="navbar-toggle icon-button"
+        aria-label="Toggle menu"
       >
         <i class="fa-solid fa-bars menu-icon" v-if="!isMobileMenuOpen"></i>
         <i class="fa-solid fa-xmark menu-icon" v-if="isMobileMenuOpen"></i>
@@ -154,7 +155,7 @@ li.nav-route a,
 
 .auth-button {
   margin: 0.5rem 0;
-  font-size: 1em;
+  font-size: 1.3em;
   padding: 0.5rem;
   height: fit-content;
 }
