@@ -75,7 +75,7 @@ router.post("/", async (req, res) => {
           {
             functionResponse: {
               name: toolCall.name,
-              response: { result: toolResult.sensors },
+              response: { result: toolResult },
             },
           },
         ],
@@ -83,6 +83,9 @@ router.post("/", async (req, res) => {
 
       const finalResponse = await askAi(contents);
       content = finalResponse.candidates[0].content;
+
+      console.log("Final parts:", content.parts);
+      console.log("Final response", JSON.stringify(finalResponse, null, 2));
     }
 
     const text =

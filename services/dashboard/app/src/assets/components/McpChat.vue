@@ -1,6 +1,8 @@
 <script>
 import { nextTick } from "vue";
 import { mapActions } from "vuex";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 const MessageFrom = {
   AI: "ai",
@@ -55,6 +57,8 @@ export default {
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const response = await res.json();
+
+        console.log("Response:", JSON.stringify(response, null, 2));
 
         if (
           response.toolResult?.action &&
@@ -127,6 +131,14 @@ export default {
       });
     },
   },
+  computed: {
+    renderedMessages() {
+      return this.messages.map((msg) => ({
+        ...msg,
+        html: DOMPurify.sanitize(marked.parse(msg.text)),
+      }));
+    },
+  },
 };
 </script>
 
@@ -150,12 +162,12 @@ export default {
         <div ref="chatContainer" class="inner-chat">
           <div class="messages">
             <div
-              v-for="(msg, index) in messages"
+              v-for="(msg, index) in renderedMessages"
               :key="index"
               class="chat-message"
               :class="msg.from"
             >
-              <p>{{ msg.text }}</p>
+              <div class="message" v-html="msg.html"></div>
 
               <p v-if="msg.link">
                 <a
@@ -320,6 +332,23 @@ export default {
 .chat-message.ai {
   align-self: flex-start;
   background: var(--primary-color);
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+
+  p {
+    margin: 0;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    align-items: flex-start;
+    padding-left: 1rem;
+  }
 }
 
 .loading-message {
