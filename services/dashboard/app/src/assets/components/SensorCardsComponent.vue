@@ -23,8 +23,10 @@ export default {
     ]),
 
     async onDeleteSensor(sensor) {
+      this.isDeleting = true;
       await this.deleteSensor(sensor.getId());
       this.$emit("delete-sensor");
+      this.isDeleting = false;
     },
 
     onModifySensor(name) {
@@ -56,6 +58,7 @@ export default {
       formData: {
         name: null,
       },
+      isDeleting: false,
     };
   },
 };
@@ -156,6 +159,7 @@ export default {
             class="sensor-action-btn danger-color"
             @click="onDeleteSensor(sensor)"
           >
+            <i class="fa-solid fa-circle-notch" v-if="isDeleting"></i>
             DELETE
           </button>
         </li>

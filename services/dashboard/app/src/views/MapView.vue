@@ -444,20 +444,6 @@ export default {
   padding: 0 0.5rem;
   margin-top: 1rem;
 
-  .fa-circle-notch {
-    animation: rotation 1s linear infinite;
-    color: white;
-  }
-
-  @keyframes rotation {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   .search-form {
     width: 100%;
     display: flex;
