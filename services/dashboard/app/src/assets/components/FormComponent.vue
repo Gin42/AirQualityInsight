@@ -1,5 +1,14 @@
 <template>
-  <div class="form-popup surface-color" id="createSensorForm" ref="sensorForm">
+  <div
+    class="form-popup surface-color"
+    id="createSensorForm"
+    ref="sensorForm"
+    @click.stop
+  >
+    <button class="icon-button" @click="$emit('close-form')">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
     <form class="form-container" @submit.prevent="submitForm">
       <h2>Create new sensor</h2>
 
@@ -39,26 +48,18 @@
       </div>
 
       <div class="form-content">
-        <label for="active" class="switch">Active:</label>
+        <label for="active">Active:</label>
         <input
           type="checkbox"
           id="checkbox"
           name="active"
           v-model="formData.active"
         />
-        <span class="slider round"></span>
       </div>
 
-      <div class="form-buttons">
-        <button type="submit" class="btn tertiary-color">Create</button>
-        <button
-          type="button"
-          class="btn cancel tertiary-color"
-          @click="$emit('close-form')"
-        >
-          Close
-        </button>
-      </div>
+      <button type="submit" class="btn tertiary-color submit-form-button">
+        Create
+      </button>
     </form>
   </div>
 </template>
@@ -103,6 +104,11 @@ export default {
       this.formData.latitude = this.initialLatitude;
       this.formData.longitude = this.initialLongitude;
     },
+    handleClickOutside(event) {
+      if (!this.$refs.sensorForm.contains(event.target)) {
+        this.$emit("close-form");
+      }
+    },
   },
   watch: {
     initialLatitude(newLat) {
@@ -115,6 +121,12 @@ export default {
       this.formData.name = newName;
     },
   },
+  mounted() {
+    document.addEventListener("click", this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener("click", this.handleClickOutside);
+  },
 };
 </script>
 
@@ -124,21 +136,27 @@ export default {
   flex-direction: column;
   grid-area: 1 / 1 / 4 / 4;
   z-index: 2;
-  padding: 0 1rem 1rem 1rem;
-  overflow-y: auto;
-  border-radius: 8px;
+  padding: 1rem;
+  padding-top: 0;
+  border-radius: 16px;
+  width: 80%;
+  height: max-content;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid black;
+  justify-self: center;
+  align-self: center;
 
   .form-container {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    width: 50%;
+    width: -webkit-fill-available;
     align-self: center;
     font-size: 1em;
   }
 
-  .form-content,
-  .form-buttons {
+  .form-content {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -158,18 +176,16 @@ export default {
     background-color: --surface-color;
   }
 
-  .form-buttons {
-    gap: 1rem;
-    margin: 1rem 0;
-    justify-content: flex-end;
-  }
-
   #longitudeField:hover,
   #latitudeField:hover {
     cursor: context-menu;
   }
   #checkbox:hover {
     cursor: pointer;
+  }
+
+  .submit-form-button {
+    margin-top: 1rem;
   }
 }
 </style>

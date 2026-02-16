@@ -135,11 +135,24 @@ export default {
 
     async onMapClick(e) {
       if (!this.addMode) return;
-      const lat = +e.latlng.lat.toFixed(7);
-      const lng = +e.latlng.lng.toFixed(7);
-      const name = await reverseGeocode(lat, lng);
 
-      this.$emit("open-form", { latitude: lat, longitude: lng, name });
+      const mapContainer = this.leaflet.map.getContainer();
+
+      // Set loading cursor
+      mapContainer.style.cursor = "wait";
+
+      try {
+        const lat = +e.latlng.lat.toFixed(7);
+        const lng = +e.latlng.lng.toFixed(7);
+
+        const name = await reverseGeocode(lat, lng);
+
+        this.$emit("open-form", { latitude: lat, longitude: lng, name });
+      } catch (err) {
+        console.error("Reverse geocode failed", err);
+      } finally {
+        mapContainer.style.cursor = this.addMode ? "crosshair" : "grab";
+      }
     },
   },
 
