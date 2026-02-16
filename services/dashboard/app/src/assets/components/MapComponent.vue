@@ -65,6 +65,11 @@
   border: 5px solid rgba(126, 0, 35, 0.5);
   color: white;
 }
+.cluster-no-data {
+  background-color: #b8b7b9;
+  border: 5px solid rgba(184, 183, 185, 0.5);
+  color: black;
+}
 </style>
 
 <style scoped lang="scss">

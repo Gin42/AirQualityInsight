@@ -41,14 +41,18 @@ export function createSensorMarkers(
         count++;
       });
 
-      const average = count ? (sum / count).toFixed(1) : "/";
+      const average =
+        sum === 0 || count === 0 ? "NDA" : (sum / count).toFixed(1);
 
-      const intensity = getIntensity({
-        concentration: Number(average),
-        pollutant: measurement,
-      });
+      let formattedLabel = "no-data";
+      if (average !== "NDA") {
+        const intensity = getIntensity({
+          concentration: Number(average),
+          pollutant: measurement,
+        });
 
-      const formattedLabel = intensity.label.toLowerCase().replace(/\s+/g, "-");
+        formattedLabel = intensity.label.toLowerCase().replace(/\s+/g, "-");
+      }
 
       return L.divIcon({
         html: `<b>${average}</b>`,
