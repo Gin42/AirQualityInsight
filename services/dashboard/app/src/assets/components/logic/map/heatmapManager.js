@@ -38,5 +38,20 @@ export function createHeatMap() {
     }
   }
 
-  return { buildHeatmapPoints, changeHeatmapPoints, clearHeatMapOfSensor };
+  function clearHeatMap(measurementTypes) {
+    if (!measurementTypes) {
+      console.error("measurementTypes is not defined or is null");
+      return;
+    }
+    for (const type of Object.keys(measurementTypes)) {
+      measurementTypes[type].heatLatLng.clear();
+    }
+  }
+
+  return {
+    buildHeatmapPoints,
+    changeHeatmapPoints,
+    clearHeatMapOfSensor,
+    clearHeatMap,
+  };
 }

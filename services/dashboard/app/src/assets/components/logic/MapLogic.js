@@ -58,6 +58,8 @@ export default {
           this.markers.clear();
           this._prevSensors = [];
           this.leaflet.updateHeatmap([]);
+          console.log("Types", this.getMeasurementsTypes);
+          this.heatmapManager.clearHeatMap(this.getMeasurementsTypes);
           /** Da controllare con Kelvin:
            * Al momento se viene richiesto il refresh dei sensori
            * L'icon del cluster non viene ricalcolata fino a che non
@@ -66,6 +68,7 @@ export default {
            * Potrebbe essere una migliore idea mettere nel cluster
            * semplicemente il conto di quanti sensori sono al suo interno
            */
+
           return;
         }
 

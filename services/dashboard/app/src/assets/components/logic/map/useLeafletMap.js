@@ -36,10 +36,18 @@ export function createLeafletMap() {
 
   function updateHeatmap(points) {
     if (!heatLayer) return;
-    heatLayer.setLatLngs(points);
-    heatLayer.setOptions({
-      radius: Math.max(8, map.getZoom() * 2),
-    });
+
+    if (points.length === 0) {
+      heatLayer.setLatLngs([]);
+      heatLayer.setOptions({
+        radius: Math.max(8, map.getZoom() * 2),
+      });
+    } else {
+      heatLayer.setLatLngs(points);
+      heatLayer.setOptions({
+        radius: Math.max(8, map.getZoom() * 2),
+      });
+    }
   }
 
   function setSearchLayer(data) {
