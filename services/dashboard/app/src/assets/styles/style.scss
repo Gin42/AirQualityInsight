@@ -52,7 +52,7 @@ body {
   background-color: var(--background-color);
   margin: 0;
   height: 100%;
-
+  width: 100%;
   font-family: "Arial", sans-serif;
   letter-spacing: 1px;
   color: var(--text-color);
@@ -76,16 +76,6 @@ body {
   width: auto;
   margin: 0 auto;
   height: 100%;
-}
-
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 0 1rem;
-  &-component {
-    overflow: hidden;
-  }
 }
 
 button {
