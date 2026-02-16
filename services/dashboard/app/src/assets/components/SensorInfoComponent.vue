@@ -17,6 +17,10 @@ export default {
       type: Object,
       default: null,
     },
+    selected: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     ...mapGetters("sensors", ["allSensorsCount", "allSensors"]),
@@ -27,12 +31,6 @@ export default {
       if (this.searchQuery) {
         const q = this.searchQuery.toLowerCase();
         sensors = sensors.filter((s) => s.getName().toLowerCase().includes(q));
-      }
-
-      if (this.filterProperty) {
-        sensors = sensors.filter(
-          (s) => s[this.filterProperty.key] === this.filterProperty.value,
-        );
       }
 
       return sensors;
@@ -54,10 +52,6 @@ export default {
           break;
       }
     },
-
-    hasSelectedSensor() {
-      return !!this.sensor;
-    },
   },
   methods: {
     ...mapActions("sensors", ["deleteSensor", "modifySensor"]),
@@ -76,7 +70,6 @@ export default {
         name: null,
       },
       searchQuery: "",
-      filterProperty: null,
       searchState: SearchState.EMPTY,
       SearchState,
     };
@@ -104,15 +97,12 @@ export default {
     </button>
 
     <div>
-      <button v-if="hasSelectedSensor" class="link-button" @click="clearSensor">
+      <button v-if="selected" class="link-button" @click="clearSensor">
         <i class="fa-solid fa-arrow-left"></i>
         Return to sensors list
       </button>
 
-      <div
-        class="search-container bg-color sensor-search"
-        v-if="!hasSelectedSensor"
-      >
+      <div class="search-container bg-color sensor-search" v-if="!selected">
         <form @submit.prevent="onSearchAction" class="search-form">
           <input
             type="text"
@@ -135,6 +125,7 @@ export default {
 
       <SensorCardsComponent
         :data="sensorsToDisplay"
+        :selected="selected"
         @select-sensor="onSelectSensor"
         @delete-sensor="clearSensor"
       ></SensorCardsComponent>

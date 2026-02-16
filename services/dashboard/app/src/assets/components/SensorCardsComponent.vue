@@ -7,6 +7,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    selected: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     ...mapGetters("user", ["getUsername"]),
@@ -78,7 +82,7 @@ export default {
             <button
               class="icon-button modify"
               @click="onModifySensor(sensor.getName())"
-              v-if="data.length === 1 && getUsername != null"
+              v-if="selected === true && getUsername != null"
             >
               <i class="fa-regular fa-pen-to-square"></i>
             </button>
@@ -147,7 +151,7 @@ export default {
           <p>Time since last measurement</p>
           <p>{{ sensor.getTimeSinceMeasurement() }}</p>
         </li>
-        <li class="delete-li" v-if="data.length === 1 && getUsername != null">
+        <li class="delete-li" v-if="selected === true && getUsername != null">
           <button
             class="sensor-action-btn danger-color"
             @click="onDeleteSensor(sensor)"

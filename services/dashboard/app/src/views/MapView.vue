@@ -78,9 +78,8 @@ export default {
       }
       this.activeSensors = !this.activeSensors;
     },
-    handleMarkerClick(sensor) {
+    handleSelectSensor(sensor) {
       this.selectedSensor = sensor;
-
       if (sensor) {
         this.centerMapOnSensor(sensor);
         this.showInfo();
@@ -390,7 +389,7 @@ export default {
       :thresholds="getThresholds"
       :loading="isLoading"
       :add-mode="isAddMode"
-      @marker-click="handleMarkerClick"
+      @marker-click="handleSelectSensor"
       @open-form="showForm"
       @loading-change="isLoading = $event"
     />
@@ -413,8 +412,9 @@ export default {
       <SensorInfoComponent
         v-if="isInfoVisible && !isLoading"
         @close-info="hideInfo"
-        @select-sensor="handleMarkerClick"
+        @select-sensor="handleSelectSensor"
         :sensor="selectedSensor"
+        :selected="!!selectedSensor"
       >
       </SensorInfoComponent>
     </transition>
