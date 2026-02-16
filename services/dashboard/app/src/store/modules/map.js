@@ -1,12 +1,12 @@
 const state = () => ({
   center: {
-    lng: "12.2356576",
     lat: "44.14771",
-    name: "Piazza Maggiore",
+    lng: "12.2356576",
+    name: "Via dell'Università 50, 47522 Cesena FC, Italia",
   },
   currentCoords: {
-    lng: "12.2356576",
     lat: "44.14771",
+    lng: "12.2356576",
   },
   zoom: 13,
   selectedMeasurement: "pm25",

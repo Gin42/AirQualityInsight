@@ -15,24 +15,24 @@
       </div>
 
       <div class="form-content">
-        <label for="longitudeField">Longitude:</label>
-        <input
-          type="text"
-          id="longitudeField"
-          name="longitude"
-          v-model="formData.longitude"
-          required
-          :readonly="true"
-        />
-      </div>
-
-      <div class="form-content">
         <label for="latitudeField">Latitude:</label>
         <input
           type="text"
           id="latitudeField"
           name="latitude"
           v-model="formData.latitude"
+          required
+          :readonly="true"
+        />
+      </div>
+
+      <div class="form-content">
+        <label for="longitudeField">Longitude:</label>
+        <input
+          type="text"
+          id="longitudeField"
+          name="longitude"
+          v-model="formData.longitude"
           required
           :readonly="true"
         />

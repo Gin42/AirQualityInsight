@@ -28,13 +28,13 @@ export const tools = [
           type: Type.STRING,
           description: "The name of the sensor",
         },
-        longitude: {
-          type: Type.NUMBER,
-          description: "The longitude at which the sensor is located",
-        },
         latitude: {
           type: Type.NUMBER,
           description: "The latitude at which the sensor is located",
+        },
+        longitude: {
+          type: Type.NUMBER,
+          description: "The longitude at which the sensor is located",
         },
         active: {
           type: Type.BOOLEAN,
@@ -42,7 +42,7 @@ export const tools = [
             "Represent if the sensor is active (true) or inactive (false)",
         },
       },
-      required: ["name", "longitude", "latitude"],
+      required: ["name", "latitude", "longitude"],
     },
   },
   {

@@ -114,7 +114,7 @@ const actions = {
           name: data.name,
           location: {
             type: "Point",
-            coordinates: [data.longitude, data.latitude],
+            coordinates: [data.latitude, data.longitude],
           },
           active: data.active,
           last_seen: new Date(),

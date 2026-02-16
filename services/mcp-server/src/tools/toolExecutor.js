@@ -48,7 +48,7 @@ const toolHandlers = {
     };
   },
 
-  addSensor: async ({ name, longitude, latitude, active = true }) => {
+  addSensor: async ({ name, latitude, longitude, active = true }) => {
     if (!name || longitude == null || latitude == null) {
       throw new Error("Missing required sensor fields");
     }
@@ -64,7 +64,7 @@ const toolHandlers = {
         name: name,
         location: {
           type: "Point",
-          coordinates: [Number(longitude), Number(latitude)],
+          coordinates: [Number(latitude), Number(longitude)],
         },
         active: active,
         last_seen: new Date(),

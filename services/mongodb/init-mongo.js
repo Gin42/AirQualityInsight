@@ -43,7 +43,7 @@ db.createCollection("sensors", {
               maxItems: 2,
               items: {
                 bsonType: "double",
-                description: "[longitude, latitude]",
+                description: "[latitude, longitude]",
               },
             },
           },
@@ -188,13 +188,13 @@ if (reset) {
     print(`Found ${sensors.length} sensors in JSON`);
 
     for (let i = 0; i < sensors.length; i++) {
-      const { lon, lat } = sensors[i];
+      const { lat, lng } = sensors[i];
       const entry = {
         sensor_id: toSensorId(i),
         name: "Sensore di prova",
         location: {
           type: "Point",
-          coordinates: [lon, lat],
+          coordinates: [lat, lng],
         },
         ip: generateIPAddresses(i),
         active: true,

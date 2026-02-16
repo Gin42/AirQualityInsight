@@ -85,11 +85,11 @@ export default {
         this.showInfo();
       }
     },
-    showForm({ longitude, latitude, name }) {
+    showForm({ latitude, longitude, name }) {
       if (this.isAddMode) {
         this.name = name;
-        this.longitude = longitude;
         this.latitude = latitude;
+        this.longitude = longitude;
         this.isFormVisible = true;
       }
     },
