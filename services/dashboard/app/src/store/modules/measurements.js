@@ -39,8 +39,11 @@ const mutations = {
     delete measurement.data;
     state.measurements.unshift(measurement);
 
-    if (state.measurements.length > state.maxMeasurements) {
-      state.measurements = state.measurements.slice(0, state.maxMeasurements);
+    if (state.measurements.length > state.currentMeasurements) {
+      state.measurements = state.measurements.slice(
+        0,
+        state.currentMeasurements,
+      );
     }
   },
   setCurrentMeasurements(state, value) {
