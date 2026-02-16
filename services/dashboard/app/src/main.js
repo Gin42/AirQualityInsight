@@ -1,6 +1,7 @@
 // main.js
 import "./assets/styles/style.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import "tippy.js/dist/tippy.css";
 
 import { createApp } from "vue";
 import { store } from "./store";

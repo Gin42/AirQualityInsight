@@ -1,12 +1,12 @@
 <script>
 import { mapState, mapGetters, mapActions, mapMutations } from "vuex";
+import tippy from "tippy.js";
+
 export default {
   name: "SettingsComponent",
   data() {
     return {
       isCollapsibleOpen: false,
-      showHelpPopup: false,
-      tooltipPosition: "left",
       showCopiedPopup: false,
       bubbleLeft: 0,
     };
@@ -57,18 +57,6 @@ export default {
     toggleCollapsible() {
       this.isCollapsibleOpen = !this.isCollapsibleOpen;
     },
-    showTooltip() {
-      this.showHelpPopup = true;
-
-      this.$nextTick(() => {
-        const tooltip = this.$refs.helpPopup;
-        if (!tooltip) return;
-      });
-    },
-
-    hideTooltip() {
-      this.showHelpPopup = false;
-    },
     copyCoords() {
       const coordText = `${this.currentCoords.lat}\t${this.currentCoords.lng}`;
 
@@ -112,6 +100,31 @@ export default {
   },
   mounted() {
     this.updateBubblePosition();
+
+    tippy(this.$refs.measurementInfo, {
+      content: "The higher the limit, the more accurate the measurements.",
+      placement: "left",
+      theme: "light-border",
+      animation: "shift-away",
+      arrow: true,
+      trigger: "mouseenter focus click",
+
+      maxWidth: 200,
+      allowHTML: true,
+      interactive: true,
+      flip: true,
+      boundary: "viewport",
+      popperOptions: {
+        modifiers: [
+          {
+            name: "preventOverflow",
+            options: {
+              padding: 8,
+            },
+          },
+        ],
+      },
+    });
   },
 };
 </script>
@@ -192,21 +205,7 @@ export default {
           <div class="measurements-controls-header">
             <p>Limit of measurements:</p>
             <div class="info-tooltip">
-              <i
-                class="fa-solid fa-circle-info"
-                @mouseenter="showTooltip"
-                @mouseleave="hideTooltip"
-                @click.prevent="showTooltip"
-              ></i>
-
-              <div
-                class="help-popup popup"
-                v-if="showHelpPopup"
-                :class="tooltipPosition"
-                ref="helpPopup"
-              >
-                The higher the limit, the more accurate the measurements.
-              </div>
+              <i ref="measurementInfo" class="fa-solid fa-circle-info"></i>
             </div>
           </div>
           <div class="slider-containter">

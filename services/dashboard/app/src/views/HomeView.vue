@@ -3,6 +3,7 @@ import { mapState, mapGetters } from "vuex";
 import TableComponent from "../assets/components/TableComponent.vue";
 import tableData from "../assets/data/tableData.json";
 import McpChat from "@/assets/components/McpChat.vue";
+import tippy from "tippy.js";
 
 export default {
   name: "HomeView",
@@ -24,8 +25,27 @@ export default {
   },
   methods: {
     createInfoIcon(title) {
-      return `<i class="fas fa-info-circle" title="${title}"></i>`;
+      return `
+            <i
+              class="fas fa-info-circle info-icon"
+              data-tippy-content="${title.replace(/"/g, "&quot;")}"
+            ></i>
+          `;
     },
+
+    initTooltips() {
+      tippy(".info-icon", {
+        theme: "light-border",
+        animation: "shift-away",
+        arrow: true,
+        delay: [100, 100],
+        placement: "top",
+        trigger: "mouseenter focus click", // supports mobile
+        hideOnClick: true,
+        interactive: false,
+      });
+    },
+
     async sendTest() {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const res = await fetch(`${apiUrl}/api/sensor`, {
@@ -67,6 +87,17 @@ export default {
         info: this.createInfoIcon(data.info.description),
       });
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.initTooltips();
+    });
+  },
+
+  updated() {
+    this.$nextTick(() => {
+      this.initTooltips();
+    });
   },
 };
 </script>
