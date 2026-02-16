@@ -1,5 +1,6 @@
 // main.js
-import "./assets/styles/style.scss"; //forse da eliminare
+import "./assets/styles/style.scss";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 import { createApp } from "vue";
 import { store } from "./store";
