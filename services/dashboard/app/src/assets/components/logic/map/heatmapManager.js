@@ -30,10 +30,11 @@ export function createHeatMap() {
     );
   }
 
-  function clearHeatMapOfSensor({ sensor }) {
-    if (!sensor || !sensor.sensor_id) return;
+  function clearHeatMapOfSensor({ sensor, measurementTypes }) {
+    if (!sensor?.sensor_id) return;
+
     for (const type of Object.keys(measurementTypes)) {
-      measurementTypes[type].heatLatLng.set(sensor.sensor_id, []);
+      measurementTypes[type].heatLatLng.delete(sensor.sensor_id);
     }
   }
 

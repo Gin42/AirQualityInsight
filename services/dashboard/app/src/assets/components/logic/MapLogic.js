@@ -161,7 +161,11 @@ export default {
       (sensor) => this.$emit("marker-click", sensor),
       () => this.$store.state.map.selectedMeasurement,
       this.getIntensity,
-      this.heatmapManager.clearHeatMapOfSensor,
+      (sensor) =>
+        this.heatmapManager.clearHeatMapOfSensor({
+          sensor,
+          measurementTypes: this.getMeasurementsTypes,
+        }),
     );
 
     this.markers.sync(this.allSensors, []);
