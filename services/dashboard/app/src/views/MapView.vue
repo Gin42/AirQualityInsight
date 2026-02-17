@@ -10,6 +10,7 @@ import SensorCardsComponent from "@/assets/components/SensorCardsComponent.vue";
 import { TrinityRingsSpinner } from "epic-spinners";
 import { fetchFromApi } from "@/services/api";
 import McpChat from "@/assets/components/McpChat.vue";
+import LegendComponent from "@/assets/components/LegendComponent.vue";
 
 const SearchState = Object.freeze({
   EMPTY: "empty",
@@ -29,6 +30,7 @@ export default {
     SensorCardsComponent,
     TrinityRingsSpinner,
     McpChat,
+    LegendComponent,
   },
   computed: {
     ...mapState({
@@ -265,6 +267,8 @@ export default {
           this.activeSensors ? "Stop" : "Start"
         }}</span>
       </button>
+
+      <LegendComponent></LegendComponent>
     </div>
 
     <TrinityRingsSpinner
@@ -298,17 +302,6 @@ export default {
       @close-all="closeAll"
       v-if="!isLoading"
     ></MapButtonComponent>
-
-    <div class="surface-color map-legend">
-      <div
-        v-for="(threshold, key) in getThresholds"
-        :key="key"
-        class="legend-item"
-      >
-        <div class="color-circle" :class="`circle-${key}`"></div>
-        <p>{{ threshold.label }}</p>
-      </div>
-    </div>
 
     <transition name="slide-right">
       <SensorInfoComponent
@@ -526,68 +519,6 @@ export default {
   z-index: 10;
   pointer-events: none;
   place-self: center;
-}
-
-.map-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  align-items: flex-start;
-  grid-area: 3 / 1 / 4 / 2;
-  border: 1px solid black;
-  z-index: 1;
-  height: fit-content;
-  justify-self: start;
-  align-self: end;
-  border-radius: 8px;
-  padding: 0.5rem;
-  margin-bottom: 0.3rem;
-  width: 90%;
-}
-
-.legend-item {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.2rem;
-
-  p {
-    margin: 0;
-    font-size: 0.8em;
-  }
-}
-
-.color-circle {
-  width: 0.8rem;
-  aspect-ratio: 1/1;
-  border-radius: 50%;
-  margin-bottom: 0.1rem;
-}
-
-.circle-good {
-  background-color: #00e400;
-}
-.circle-fair {
-  background-color: #feff00;
-}
-.circle-moderate {
-  background-color: #ff7e00;
-}
-.circle-poor {
-  background-color: #ff0000;
-}
-.circle-very_poor {
-  background-color: #8f3f97;
-}
-.circle-extremely_poor {
-  background-color: #7e0023;
-}
-
-@media (min-width: 420px) {
-  .map-legend {
-    width: fit-content;
-    margin-left: 0.3rem;
-  }
 }
 
 @media (max-width: 800px) {
