@@ -1,6 +1,7 @@
 const state = {
   stats: new Map(),
   eaqi: {},
+  timestamp: null,
 };
 
 const getters = {
@@ -46,15 +47,15 @@ const getters = {
     },
 };
 
-const mutations = {};
+const mutations = {
+  setTimestamp(state, timestamp) {
+    state.timestamp = timestamp;
+  },
+};
 
 const actions = {
-  clearStats({ dispatch }) {
-    dispatch("initializeStats");
-    dispatch("updateEAQI");
-  },
-
-  update({ dispatch }, { measurementData }) {
+  update({ commit, dispatch }, { measurementData, timestamp }) {
+    commit("setTimestamp", timestamp);
     dispatch("updateStats", { measurementData });
     dispatch("updateEAQI");
   },

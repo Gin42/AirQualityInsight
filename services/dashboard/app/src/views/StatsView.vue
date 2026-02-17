@@ -8,12 +8,10 @@ export default {
   computed: {
     ...mapState({
       eaqi: (state) => state.stats.eaqi,
+      timestamp: (state) => state.stats.timestamp,
     }),
     ...mapGetters("stats", ["getStats", "getEaqi"]),
     ...mapGetters("table", ["getStatsTable"]),
-  },
-  methods: {
-    ...mapActions("stats", ["clearStats"]),
   },
 };
 </script>
@@ -41,6 +39,7 @@ export default {
 
       <div v-if="eaqi" class="surface-color eaqi-container">
         <h2 class="eaqi-title">Live EAQI</h2>
+
         <ul class="eaqi-list">
           <div class="quality-row">
             <li>
@@ -59,6 +58,11 @@ export default {
               <li>
                 It's <b>mean concentration</b> is
                 {{ eaqi?.mean ?? "N/A" }} µg/m³
+              </li>
+              <li>
+                <p class="small-text">
+                  [Calculated on {{ timestamp ?? "N/A" }} ]
+                </p>
               </li>
             </div>
           </div>
@@ -83,10 +87,10 @@ export default {
 
     <div class="dashboard-component stats-component-container">
       <div class="component-header stats-header">
-        <h2>Statistics</h2>
-        <button @click="this.clearStats" class="btn danger-color">
-          <i class="fas fa-trash"></i> Clear
-        </button>
+        <div class="header-title">
+          <h2>Statistics</h2>
+          <p class="small-text">[Calculated on {{ timestamp ?? "N/A" }} ]</p>
+        </div>
       </div>
       <TableComponent
         ref="measurementComponent"
@@ -98,8 +102,26 @@ export default {
 </template>
 
 <style lang="scss">
+.small-text {
+  margin: 0;
+  font-size: 0.7em;
+  color: var(--text-color);
+}
+
 .stats-container {
   padding-bottom: 2rem;
+}
+
+.header-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  margin: 1rem 0;
+
+  h2 {
+    margin: 0;
+  }
 }
 
 .eaqi-desc,

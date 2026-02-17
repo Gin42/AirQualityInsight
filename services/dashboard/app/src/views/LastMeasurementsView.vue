@@ -13,16 +13,6 @@ export default {
     ...mapGetters("table", ["getMeasurementsTable"]),
     ...mapGetters("sensors", ["getSensor"]),
   },
-  methods: {
-    clearMeasurements() {
-      /** Vogliamo che questo cancelli tutte le misurazioni registrate? O dovrebbe cancellare solo
-       *  quelle di questa tabella?
-       */
-      console.log("Clear measurement");
-      //TO DO: this.collectedMeasurement.data = [];
-    },
-  },
-  created() {},
 };
 </script>
 
@@ -30,10 +20,6 @@ export default {
   <div class="dashboard-component measurements-component-container">
     <div class="component-header">
       <h2>Last {{ this.maxMessages }} measurements received</h2>
-
-      <button @click="clearMeasurements" class="btn danger-color">
-        <i class="fas fa-trash"></i> Clear
-      </button>
     </div>
     <TableComponent
       ref="measurementComponent"

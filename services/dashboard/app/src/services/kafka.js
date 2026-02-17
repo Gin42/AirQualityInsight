@@ -68,6 +68,7 @@ socket.on("kafka-message", (message) => {
 
     store.dispatch("stats/update", {
       measurementData: formattedData.data,
+      timestamp: formattedData.timestamp,
     });
   }
 });
