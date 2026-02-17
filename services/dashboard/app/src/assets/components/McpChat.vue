@@ -124,7 +124,7 @@ export default {
     },
 
     goToSensor(sensorId) {
-      isOpen = false;
+      this.isOpen = false;
       this.$router.push({
         name: "Map",
         query: { sensorId },
@@ -167,17 +167,19 @@ export default {
               class="chat-message"
               :class="msg.from"
             >
-              <div class="message" v-html="msg.html"></div>
+              <div class="message">
+                <div v-html="msg.html"></div>
 
-              <p v-if="msg.link">
-                <a
-                  href="#"
-                  class="chat-link"
-                  @click.prevent="goToSensor(msg.link.sensorId)"
-                >
-                  {{ msg.link.label }}
-                </a>
-              </p>
+                <p v-if="msg.link">
+                  <a
+                    href="#"
+                    class="chat-link"
+                    @click.prevent="goToSensor(msg.link.sensorId)"
+                  >
+                    {{ msg.link.label }}
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
 
@@ -196,6 +198,7 @@ export default {
               class="surface-color chat-input"
               rows="1"
               ref="textArea"
+              id="user-text-area"
             ></textarea>
 
             <button
@@ -320,7 +323,7 @@ export default {
   padding: 0.5rem 0.75rem;
   border-radius: 12px;
   font-size: 0.9rem;
-  white-space: pre-wrap;
+  //white-space: pre-wrap;
   width: fit-content;
 }
 
@@ -381,7 +384,6 @@ export default {
 }
 
 .chat-link {
-  margin-left: 0.5rem;
   text-decoration: underline;
   cursor: pointer;
 }

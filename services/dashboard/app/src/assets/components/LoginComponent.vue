@@ -7,6 +7,7 @@
       type="text"
       placeholder="Username"
       name="username"
+      id="username"
       required
     />
     <label for="password">Password:</label>
@@ -15,6 +16,7 @@
       type="password"
       placeholder="Password"
       name="password"
+      id="password"
       required
     />
     <button class="tertiary-color" type="submit">Login</button>

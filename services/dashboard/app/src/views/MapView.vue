@@ -200,6 +200,7 @@ export default {
         <input
           type="text"
           placeholder="Search..."
+          id="search"
           name="search"
           v-model="searchQuery"
           @input="onSearchInput"
@@ -536,7 +537,7 @@ export default {
   border: 1px solid black;
   z-index: 1;
   height: fit-content;
-  justify-self: center;
+  justify-self: start;
   align-self: end;
   border-radius: 8px;
   padding: 0.5rem;
