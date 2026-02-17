@@ -1,6 +1,6 @@
 import L from "leaflet";
 import { mapState, mapGetters, mapMutations } from "vuex";
-import pushpinSvg from "@/assets/icons/pushpin.svg";
+import pushpinSvg from "../../icons/pushpinVector.svg";
 
 import { createLeafletMap } from "./map/useLeafletMap";
 import { createSensorMarkers } from "./map/sensorMarkers";
@@ -58,16 +58,7 @@ export default {
           this.markers.clear();
           this._prevSensors = [];
           this.leaflet.updateHeatmap([]);
-          console.log("Types", this.getMeasurementsTypes);
           this.heatmapManager.clearHeatMap(this.getMeasurementsTypes);
-          /** Da controllare con Kelvin:
-           * Al momento se viene richiesto il refresh dei sensori
-           * L'icon del cluster non viene ricalcolata fino a che non
-           * avviene una misurazione ed ignora quindi le
-           * misurazioni già presenti.
-           * Potrebbe essere una migliore idea mettere nel cluster
-           * semplicemente il conto di quanti sensori sono al suo interno
-           */
 
           return;
         }

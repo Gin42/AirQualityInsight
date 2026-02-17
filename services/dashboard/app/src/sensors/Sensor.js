@@ -3,8 +3,8 @@ export default class Sensor {
   constructor(data, center) {
     this.sensor_id = data.sensor_id;
     this.name = data.name;
-    this.lat = data.location.coordinates[1];
-    this.lng = data.location.coordinates[0];
+    this.lat = data.location.coordinates[0];
+    this.lng = data.location.coordinates[1];
     this.active = data.active; //true or false
     this.ip = data.ip;
     this.last_seen = data.last_seen;
