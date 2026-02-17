@@ -27,7 +27,7 @@ export default {
           The EAQI (European Air Quality Index) is and index based on
           concentration values for up to five key pollutants:
           <ul class="eaqi-desc">
-            <li>Particulate matter (PM10)</li>
+            <li>Coarse particulate matter (PM10)</li>
             <li>Fine particulate matter (PM2.5)</li>
             <li>Nitrogen dioxide (NO2)</li>
             <li>Ozone (O3)</li>
@@ -98,6 +98,10 @@ export default {
 </template>
 
 <style lang="scss">
+.stats-container {
+  padding-bottom: 2rem;
+}
+
 .eaqi-desc,
 .eaqi-list {
   display: flex;
@@ -107,10 +111,9 @@ export default {
 .eaqi-component-container {
   display: flex;
   flex-direction: row;
-  width: 100&;
+  width: 100%;
   height: fit-content;
   padding: 1rem;
-  margin-top: 2rem;
   gap: 2rem;
 }
 
@@ -177,5 +180,22 @@ hr {
 .stats-header {
   margin: 0 !important;
   padding: 0 !important;
+}
+
+@media (max-width: 650px) {
+  .eaqi-component-container {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 1rem;
+  }
+
+  .eaqi-container,
+  .eaqi-desc-container {
+    width: 100%;
+  }
+
+  .eaqi-container {
+    flex: 1;
+  }
 }
 </style>

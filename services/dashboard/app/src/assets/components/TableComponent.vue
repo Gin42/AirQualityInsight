@@ -67,9 +67,8 @@
 
 <style scoped lang="scss">
 .table-wrapper {
-  width: 100%;
+  width: 98%;
   overflow-x: auto;
-  height: 500px;
 }
 
 table {
