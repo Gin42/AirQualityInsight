@@ -471,13 +471,12 @@ export default {
 }
 
 .map-component-container {
-  height: 90vh;
+  height: 93vh;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   grid-column-gap: 0px;
   grid-row-gap: 0px;
-  margin: 1rem 0;
 }
 
 .slide-left-enter-active,

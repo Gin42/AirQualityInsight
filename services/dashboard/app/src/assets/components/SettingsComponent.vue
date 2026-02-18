@@ -345,6 +345,7 @@ ul.how-to-list {
   padding-bottom: 2rem;
   border: #222 1px solid;
   border-top: transparent;
+  border-radius: 0 0 8px 8xp;
 }
 
 ul.how-to-list li {
@@ -360,10 +361,12 @@ ul.how-to-list li {
   justify-content: space-between;
   padding: 0.5rem;
   border: #222 1px solid;
+  border-radius: 8px;
 }
 
 .collapsible-header.open {
   border-bottom: transparent;
+  border-radius: 8px 8px 0 0;
 }
 
 .collapsible-button {
