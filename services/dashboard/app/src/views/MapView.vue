@@ -131,29 +131,24 @@ export default {
     setSearchState(value) {
       this.searchState = value;
     },
-    async submitSearchQuery(preselectedSuggestion = null) {
+    async submitSearchQuery() {
       try {
         if (!this.searchQuery) return;
         this.setSearchState(SearchState.LOADING);
 
         let geojsonData;
 
-        if (preselectedSuggestion) {
-          geojsonData = preselectedSuggestion.geojson;
-        } else {
-          const query = new URLSearchParams({
-            q: this.searchQuery,
-            polygon_geojson: 1,
-            format: "json",
-          }).toString();
+        const query = new URLSearchParams({
+          q: this.searchQuery,
+          polygon_geojson: 1,
+          format: "json",
+        }).toString();
 
-          const response = await fetchFromApi(
-            `https://nominatim.openstreetmap.org/search?${query}`,
-          );
+        const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+        const response = await fetchFromApi(`${apiUrl}/api/search?${query}`);
 
-          if (!response?.length) throw "No results found";
-          geojsonData = response[0].geojson;
-        }
+        if (!response?.length) throw "No results found";
+        geojsonData = response[0].geojson;
 
         this.$refs.mapComponent?.setSearchLayer(geojsonData);
       } catch (error) {
@@ -166,6 +161,12 @@ export default {
     clearSearch() {
       this.$refs.mapComponent?.clearSearchLayer();
       this.setSearchState(SearchState.EMPTY);
+    },
+
+    onSearchInput() {
+      if (this.searchState === this.SearchState.FULL) {
+        this.setSearchState(this.SearchState.EMPTY);
+      }
     },
 
     onSearchAction() {
@@ -295,7 +296,6 @@ export default {
     <MapButtonComponent
       @toggle-settings="toggleSettings"
       @toggle-info="toggleInfo"
-      @close-all="closeAll"
       v-if="!isLoading"
     ></MapButtonComponent>
 

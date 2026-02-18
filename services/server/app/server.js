@@ -93,6 +93,27 @@ app.get("/api/latest", async (req, res) => {
   }
 });
 
+app.get("/api/search", async (req, res) => {
+  const { q } = req.query;
+
+  const query = new URLSearchParams({
+    q,
+    polygon_geojson: 1,
+    format: "json",
+  }).toString();
+
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?${query}`,
+    );
+
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Search failed" });
+  }
+});
+
 // WebSocket connections handler
 io.on("connection", (socket) => {
   if (serverReady) {
