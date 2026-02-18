@@ -18,6 +18,13 @@ export default {
     userPrompt() {
       this.adjustTextAreaHeight();
     },
+    isOpen(value) {
+      if (value) {
+        document.addEventListener("click", this.handleClickOutside);
+      } else {
+        document.removeEventListener("click", this.handleClickOutside);
+      }
+    },
   },
   data() {
     return {
@@ -130,6 +137,11 @@ export default {
         query: { sensorId },
       });
     },
+    handleClickOutside(event) {
+      if (!this.$refs.chatWrapper.contains(event.target)) {
+        this.isOpen = false;
+      }
+    },
   },
   computed: {
     renderedMessages() {
@@ -143,7 +155,7 @@ export default {
 </script>
 
 <template>
-  <div class="chatbot">
+  <div class="chatbot" ref="chatWrapper">
     <div class="chatbot-button-icon">
       <button class="primary-color chatbot-button" @click="isOpen = !isOpen">
         <img src="../icons/chatbot-icon.svg" alt="Chatbot" />
@@ -225,6 +237,7 @@ export default {
   flex-direction: row;
   align-items: flex-end;
   gap: 0.5rem;
+  padding: 0 !important;
 }
 
 .chatbot-button-icon {

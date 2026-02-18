@@ -62,6 +62,11 @@ export default {
     clearSensor() {
       this.$emit("select-sensor", null);
     },
+    handleClickOutside(event) {
+      if (!this.$refs.infoContainer.contains(event.target)) {
+        this.$emit("close-info");
+      }
+    },
   },
   data() {
     return {
@@ -87,11 +92,21 @@ export default {
       },
     },
   },
+  mounted() {
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.addEventListener("click", this.handleClickOutside);
+      }, 0);
+    });
+  },
+  beforeUnmount() {
+    document.removeEventListener("click", this.handleClickOutside);
+  },
 };
 </script>
 
 <template>
-  <div class="sensor-info surface-color">
+  <div class="sensor-info surface-color" ref="infoContainer">
     <button class="icon-button" @click="$emit('close-info')">
       <i class="fa-solid fa-xmark"></i>
     </button>

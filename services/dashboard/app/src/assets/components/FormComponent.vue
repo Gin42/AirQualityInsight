@@ -122,7 +122,11 @@ export default {
     },
   },
   mounted() {
-    document.addEventListener("click", this.handleClickOutside);
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.addEventListener("click", this.handleClickOutside);
+      }, 0);
+    });
   },
   beforeUnmount() {
     document.removeEventListener("click", this.handleClickOutside);

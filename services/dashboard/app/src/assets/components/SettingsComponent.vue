@@ -97,6 +97,11 @@ export default {
       if (this.gridType !== "none")
         mapContainer.classList.add(`grid-${this.gridType}`);
     },
+    handleClickOutside(event) {
+      if (!this.$refs.settingsContainer.contains(event.target)) {
+        this.$emit("close-settings");
+      }
+    },
   },
   mounted() {
     this.updateBubblePosition();
@@ -125,12 +130,21 @@ export default {
         ],
       },
     });
+
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.addEventListener("click", this.handleClickOutside);
+      }, 0);
+    });
+  },
+  beforeUnmount() {
+    document.removeEventListener("click", this.handleClickOutside);
   },
 };
 </script>
 
 <template>
-  <div class="settings surface-color">
+  <div class="settings surface-color" ref="settingsContainer" @click.stop>
     <button class="icon-button" @click="$emit('close-settings')">
       <i class="fa-solid fa-xmark"></i>
     </button>
