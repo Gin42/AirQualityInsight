@@ -61,15 +61,18 @@ export default {
             Statistics
           </RouterLink>
         </li>
-        <li class="auth-div">
-          <button v-if="!username" class="auth-button tertiary-color">
-            <RouterLink to="/login" @click="isMobileMenuOpen = false">
-              Login
-            </RouterLink>
-          </button>
-          <button
+        <li class="nav-route">
+          <RouterLink
+            to="/login"
+            @click="isMobileMenuOpen = false"
+            v-if="!username"
+          >
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            Login
+          </RouterLink>
+          <div
+            class="log-link"
             v-if="username"
-            class="auth-button tertiary-color"
             @click="
               () => {
                 isMobileMenuOpen = false;
@@ -77,8 +80,9 @@ export default {
               }
             "
           >
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
             Logout
-          </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -140,24 +144,10 @@ ul.navbar-menu li {
 }
 
 li.nav-route a,
-.auth-button a {
+.log-link {
   text-decoration: none;
   color: var(--secondary-text-color);
   padding: 0.2rem 0.3rem;
-}
-
-.auth-div {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  align-items: center;
-}
-
-.auth-button {
-  margin: 0.5rem 0;
-  font-size: 1.3em;
-  padding: 0.5rem;
-  height: fit-content;
 }
 
 .navbar-menu li i {
@@ -167,6 +157,10 @@ li.nav-route a,
 
 .menu-icon {
   margin-right: 1rem;
+}
+
+.log-link {
+  cursor: pointer;
 }
 
 @media (max-width: 800px) {

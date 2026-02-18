@@ -43,12 +43,12 @@ export default {
 .dashboard {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  padding: 0 1rem;
+  height: 90vh;
 }
 
 .dashboard > * {
   flex-shrink: 0;
+  padding: 0 1rem 2rem 1rem;
 }
 
 .dashboard RouterView {

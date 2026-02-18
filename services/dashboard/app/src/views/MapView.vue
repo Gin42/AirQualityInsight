@@ -114,10 +114,6 @@ export default {
     hideSettings() {
       this.isSettingsVisible = false;
     },
-    closeAll() {
-      this.hideInfo();
-      this.hideSettings();
-    },
     centerMapOnSensor(sensor) {
       if (!this.$refs.mapComponent) return;
       if (!sensor.getLat()) return;

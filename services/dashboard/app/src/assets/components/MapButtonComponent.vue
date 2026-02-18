@@ -9,9 +9,6 @@ export default {
     <button class="btn-map tertiary-color" @click="$emit('toggle-settings')">
       <i class="fa-solid fa-gear"></i>
     </button>
-    <button class="btn-map tertiary-color" @click="$emit('close-all')">
-      <i class="fa-solid fa-map-location-dot"></i>
-    </button>
     <button class="btn-map tertiary-color" @click="$emit('toggle-info')">
       <i class="fa-solid fa-map-pin"></i>
     </button>
@@ -35,10 +32,6 @@ export default {
 }
 
 .btn-group-map :nth-child(2) {
-  border-radius: 0px;
-}
-
-.btn-group-map :nth-child(3) {
   border-radius: 0px 8px 8px 0px;
 }
 

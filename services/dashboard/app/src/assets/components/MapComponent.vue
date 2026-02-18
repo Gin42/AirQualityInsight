@@ -25,6 +25,10 @@
 </template>
 
 <style>
+.dashboard > .map-component-container {
+  padding: 0;
+}
+
 .cluster-average {
   border-radius: 50%;
   display: flex;
