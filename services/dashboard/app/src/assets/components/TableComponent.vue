@@ -116,7 +116,6 @@ th {
 
     .sort-arrow {
       font-size: 10px;
-      //color: #bbb;
       transition: color 0.2s;
       line-height: 1;
     }

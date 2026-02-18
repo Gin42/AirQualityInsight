@@ -433,7 +433,6 @@ ul.how-to-list li {
   align-items: center;
 }
 
-/* Shift left if overflowing right */
 .help-popup.left {
   right: 0;
   left: auto;

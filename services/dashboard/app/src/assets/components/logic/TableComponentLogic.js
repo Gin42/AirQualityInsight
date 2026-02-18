@@ -32,12 +32,10 @@ export default {
         const aVal = a[this.sortConfig.key];
         const bVal = b[this.sortConfig.key];
 
-        // Handle null/undefined values
         if (aVal == null && bVal == null) return 0;
         if (aVal == null) return this.sortConfig.direction === "asc" ? 1 : -1;
         if (bVal == null) return this.sortConfig.direction === "asc" ? -1 : 1;
 
-        // Determine sort type based on value
         const isNumeric = !isNaN(aVal) && !isNaN(bVal);
         const isDate = this.isDateString(aVal) && this.isDateString(bVal);
 
@@ -46,7 +44,6 @@ export default {
         if (isNumeric) comparison = parseFloat(aVal) - parseFloat(bVal);
         else if (isDate) comparison = new Date(aVal) - new Date(bVal);
         else {
-          // String comparison (case-insensitive)
           const aStr = String(aVal).toLowerCase();
           const bStr = String(bVal).toLowerCase();
           comparison = aStr.localeCompare(bStr);
@@ -65,12 +62,10 @@ export default {
         this.sortConfig.direction =
           this.sortConfig.direction === "asc" ? "desc" : "asc";
       else {
-        // Set new column and default to ascending
         this.sortConfig.key = column.key;
         this.sortConfig.direction = "asc";
       }
 
-      // Emit sort event for parent component awareness
       this.$emit("sort-changed", {
         key: this.sortConfig.key,
         direction: this.sortConfig.direction,
@@ -78,10 +73,8 @@ export default {
     },
 
     isDateString(value) {
-      // Simple date detection - you might want to customize this based on your date formats
       if (typeof value !== "string") return false;
 
-      // Check for common date patterns
       const datePatterns = [
         /^\d{4}-\d{2}-\d{2}/, // YYYY-MM-DD
         /^\d{2}\/\d{2}\/\d{4}/, // MM/DD/YYYY

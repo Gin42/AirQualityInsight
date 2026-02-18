@@ -68,8 +68,7 @@ export function createSensorMarkers(
     if (sensor.getMarker()) return;
 
     const marker = L.marker([sensor.getLat(), sensor.getLng()], { icon });
-    marker.sensor =
-      sensor; /*TEST, potrebbe essere un accrocchio che possiamo evitarci */
+    marker.sensor = sensor;
 
     marker.on("click", () => onClick(sensor));
     cluster.addLayer(marker);

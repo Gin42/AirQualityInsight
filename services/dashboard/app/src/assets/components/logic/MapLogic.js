@@ -129,7 +129,6 @@ export default {
 
       const mapContainer = this.leaflet.map.getContainer();
 
-      // Set loading cursor
       mapContainer.style.cursor = "wait";
 
       try {

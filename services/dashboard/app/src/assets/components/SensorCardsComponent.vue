@@ -185,7 +185,7 @@ export default {
 
 /* Card styling */
 .sensor-card {
-  position: relative; /* Needed for pseudo-element */
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 1rem;

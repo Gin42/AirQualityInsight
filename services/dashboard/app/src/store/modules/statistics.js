@@ -119,7 +119,7 @@ function calculateEAQI(pollutants) {
   let dominantPollutant = null;
 
   for (const pollutant of pollutants) {
-    if (!pollutant) continue; // skip missing
+    if (!pollutant) continue;
     if (dominantPollutant === null) {
       dominantPollutant = pollutant;
     } else if (
@@ -136,7 +136,7 @@ function calculateEAQI(pollutants) {
     measurement: dominantPollutant.measurement,
     mean: dominantPollutant.mean,
     intensity: dominantPollutant.intensity,
-    // Instead of HTML, just color & label
+
     quality: {
       color: dominantPollutant.intensity.color,
       label: dominantPollutant.intensity.label,

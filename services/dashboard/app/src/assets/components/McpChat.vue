@@ -47,7 +47,6 @@ export default {
 
       this.loading = true;
 
-      // push USER message
       this.messages.push({
         from: MessageFrom.USER,
         text: this.userPrompt,
@@ -73,7 +72,7 @@ export default {
         ) {
           this.messages.push({
             from: MessageFrom.AI,
-            text: response.answer, // AI text
+            text: response.answer,
             link: {
               label: "View on map",
               sensorId: response.toolResult.sensors[0].id,
@@ -336,7 +335,7 @@ export default {
   padding: 0.5rem 0.75rem;
   border-radius: 12px;
   font-size: 0.9rem;
-  //white-space: pre-wrap;
+
   width: fit-content;
 }
 

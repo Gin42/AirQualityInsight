@@ -131,12 +131,10 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start listening immediately
 server.listen(port, () =>
   console.log(`Server running on http://localhost:${port}`),
 );
 
-// Then do initialization in the background
 async function init() {
   try {
     await connectWithRetry();
