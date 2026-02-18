@@ -120,7 +120,7 @@ export default {
       <div class="search-container bg-color sensor-search" v-if="!selected">
         <form @submit.prevent="onSearchAction" class="search-form">
           <input
-            id="search"
+            id="filter"
             type="text"
             placeholder="Search for a sensor"
             name="search"

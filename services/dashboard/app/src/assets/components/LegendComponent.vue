@@ -34,7 +34,7 @@ export default {
       allowHTML: true,
       interactive: true,
       trigger: "click",
-      placement: "left",
+      placement: "bottom-start",
       theme: "legend-theme",
     });
   },

@@ -99,7 +99,7 @@ export default {
             <label class="label" for="name">Sensor:</label>
             <input
               type="text"
-              id="nameField"
+              id="sensorNameModify"
               name="name"
               v-model="formData.name"
               required
@@ -129,11 +129,15 @@ export default {
         <li>
           <p>Status</p>
 
-          <label class="switch btn-switch btn-active-switch" @click.stop>
+          <label
+            for="sensorActive"
+            class="switch btn-switch btn-active-switch"
+            @click.stop
+          >
             <input
               type="checkbox"
-              id="sensor_active"
-              name="sensor_active"
+              id="sensorActive"
+              name="sensorActive"
               @click="onToggleSensorStatus(sensor, $event)"
               :checked="sensor.getActive()"
               :disabled="!getUsername"

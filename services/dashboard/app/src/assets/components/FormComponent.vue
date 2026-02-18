@@ -16,7 +16,7 @@
         <label for="name">Sensor name:</label>
         <input
           type="text"
-          id="nameField"
+          id="sensorName"
           name="name"
           v-model="formData.name"
           required
@@ -51,7 +51,7 @@
         <label for="active">Active:</label>
         <input
           type="checkbox"
-          id="checkbox"
+          id="activeCheckbox"
           name="active"
           v-model="formData.active"
         />
