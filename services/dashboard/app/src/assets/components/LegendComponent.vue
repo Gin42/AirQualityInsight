@@ -103,22 +103,22 @@ i.info-button {
 }
 
 .circle-good {
-  background-color: #00e400;
+  background-color: var(--AQI-good);
 }
 .circle-fair {
-  background-color: #feff00;
+  background-color: var(--AQI-fair);
 }
 .circle-moderate {
-  background-color: #ff7e00;
+  background-color: var(--AQI-moderate);
 }
 .circle-poor {
-  background-color: #ff0000;
+  background-color: var(--AQI-poor);
 }
 .circle-very_poor {
-  background-color: #8f3f97;
+  background-color: var(--AQI-very-poor);
 }
 .circle-extremely_poor {
-  background-color: #7e0023;
+  background-color: var(--AQI-extremely-poor);
 }
 
 @media (min-width: 420px) {

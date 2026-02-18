@@ -345,7 +345,7 @@ ul.how-to-list {
   padding-bottom: 2rem;
   border: #222 1px solid;
   border-top: transparent;
-  border-radius: 0 0 8px 8xp;
+  border-radius: 0 0 8px 8px;
 }
 
 ul.how-to-list li {
@@ -490,7 +490,8 @@ ul.how-to-list li {
 }
 
 select {
-  border: 2px solid black;
+  border: 1px solid black;
+  border-radius: 8px;
 }
 
 @media (min-width: 800px) {

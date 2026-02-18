@@ -40,32 +40,32 @@
 }
 
 .cluster-good {
-  background-color: #00e400;
+  background-color: var(--AQI-good);
   border: 5px solid rgba(0, 228, 0, 0.5);
   color: black;
 }
 .cluster-fair {
-  background-color: #feff00;
+  background-color: var(--AQI-fair);
   border: 5px solid rgba(254, 255, 0, 0.5);
   color: black;
 }
 .cluster-moderate {
-  background-color: #ff7e00;
+  background-color: var(--AQI-moderate);
   border: 5px solid rgba(255, 126, 0, 0.5);
   color: black;
 }
 .cluster-poor {
-  background-color: #ff0000;
+  background-color: var(--AQI-poor);
   border: 5px solid rgba(255, 0, 0, 0.5);
   color: black;
 }
 .cluster-very-poor {
-  background-color: #8f3f97;
+  background-color: var(--AQI-very-poor);
   border: 5px solid rgba(143, 63, 151, 0.5);
   color: black;
 }
 .cluster-extremely-poor {
-  background-color: #7e0023;
+  background-color: var(--AQI-extremely-poor);
   border: 5px solid rgba(126, 0, 35, 0.5);
   color: white;
 }
