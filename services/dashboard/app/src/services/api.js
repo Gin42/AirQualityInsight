@@ -1,17 +1,14 @@
 export async function fetchFromApi(url, options = {}) {
-  const jsonResponse = await fetch(url, options); // Pass options to fetch
+  try {
+    const response = await fetch(url, options);
 
-  if (!jsonResponse.ok) {
-    throw new Error(`HTTP error! status: ${jsonResponse.status}`);
+    if (!response.ok) {
+      throw new Error("API error");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.warn("Backend unreachable");
+    return null; // graceful fallback
   }
-
-  console.log(jsonResponse);
-
-  const response = await jsonResponse.json();
-
-  if (!response || Object.keys(response).length === 0) {
-    throw new Error("API returned an empty response");
-  }
-
-  return response;
 }

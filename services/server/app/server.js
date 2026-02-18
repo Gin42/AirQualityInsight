@@ -131,11 +131,16 @@ io.on("connection", (socket) => {
   });
 });
 
-async function startServer() {
+// Start listening immediately
+server.listen(port, () =>
+  console.log(`Server running on http://localhost:${port}`),
+);
+
+// Then do initialization in the background
+async function init() {
   try {
     await connectWithRetry();
     await initializeWoTGateway(io, port);
-
     await ensureTopics();
     await createProducer();
     await runAckConsumer();
@@ -145,13 +150,11 @@ async function startServer() {
     serverReady = true;
     io.emit("server:ready");
 
-    server.listen(port, () =>
-      console.log(`Server running on http://localhost:${port}`),
-    );
+    console.log("Server fully initialized and ready");
   } catch (err) {
     console.error("Fatal startup error:", err);
     process.exit(1);
   }
 }
 
-startServer();
+init();

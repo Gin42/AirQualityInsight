@@ -5,17 +5,10 @@ import { mapGetters } from "vuex";
 export default {
   name: "LoadingView",
   computed: {
-    ...mapGetters(["isInitialized"]),
+    ...mapGetters(["isAppReady"]),
   },
   components: {
     TrinityRingsSpinner,
-  },
-  watch: {
-    isInitialized(val) {
-      if (val) {
-        this.$router.push({ name: "Home" });
-      }
-    },
   },
 };
 </script>

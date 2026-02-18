@@ -1,4 +1,5 @@
 import { createStore } from "vuex";
+import { router } from "../router/router";
 import sensors from "./modules/sensors";
 import measurements from "./modules/measurements";
 import stats from "./modules/statistics";
@@ -16,6 +17,13 @@ export const store = createStore({
   getters: {
     isInitialized: (state) => {
       return state.initialized;
+    },
+    isAppReady: (state) => {
+      return (
+        state.initialized &&
+        store.getters["socket/isSocketConnected"] &&
+        store.getters["socket/isServerReady"]
+      );
     },
   },
   mutations: {
@@ -56,3 +64,16 @@ export const store = createStore({
     map,
   },
 });
+
+store.watch(
+  (state, getters) => getters.isAppReady,
+  (isReady) => {
+    if (!isReady && router.currentRoute.value.name !== "Loading") {
+      router.push({ name: "Loading" });
+    }
+    if (isReady && router.currentRoute.value.name === "Loading") {
+      router.push({ name: "Home" });
+    }
+  },
+  { immediate: true },
+);

@@ -22,10 +22,6 @@ export default {
       });
     },
   },
-  async created() {
-    await this.initializeAll();
-    await this.checkAuth();
-  },
   computed: {
     ...mapGetters(["isInitialized"]),
   },

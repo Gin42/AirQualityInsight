@@ -30,13 +30,17 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const store = useStore();
 
-  if (!store.getters.isInitialized && to.name !== "Loading") {
+  const isReady = store.getters.isAppReady;
+
+  if (!isReady && to.name !== "Loading") {
     return next({ name: "Loading" });
   }
 
-  await checkAuthValidity(store);
+  if (store.getters["socket/isSocketConnected"]) {
+    await checkAuthValidity(store);
+  }
 
-  if (to.name === "Loading") {
+  if (isReady && to.name === "Loading") {
     return next({ name: "Home" });
   }
 

@@ -12,15 +12,19 @@ export const socket = io(serverUrl, {
   timeout: 5000,
 });
 
-socket.on("connect", () => {
+socket.on("connect", async () => {
   console.log("Connected to server");
   store.commit("socket/setConnected", true);
+  if (!store.getters.isInitialized) {
+    await store.dispatch("initializeAll");
+  }
 });
 
 socket.on("disconnect", () => {
   console.log("Disconnected from server");
   store.commit("socket/setConnected", false);
   store.commit("socket/setServerReady", false);
+  store.commit("setInitialized", false);
 });
 
 socket.on("server:ready", () => {
