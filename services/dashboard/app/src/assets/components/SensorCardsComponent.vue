@@ -194,14 +194,10 @@ export default {
 .sensor-card::before {
   content: "";
   position: absolute;
-  width: 100%;
-  height: 90%;
-  background-color: #3590f3;
-  mask: url("../icons/pushpinVector.svg") no-repeat left;
-  -webkit-mask: url("../icons/pushpinVector.svg") no-repeat left;
-  mask-size: auto;
-  -webkit-mask-size: contain;
-  opacity: 0.2;
+  inset: 0;
+  background: url("../icons/pushpinVectorCard.svg") no-repeat left center;
+  background-size: auto 80%;
+  opacity: 0.15;
   pointer-events: none;
 }
 
@@ -282,19 +278,5 @@ li.delete-li {
 
 .btn-active-switch input:checked ~ .btn-active-switch-circle {
   transform: translateX(26px);
-  content: "\f00c";
-}
-
-.btn-active-switch-circle::before {
-  font-family: "Font Awesome 6 Free"; /* important */
-  font-weight: 900; /* solid style for fa-solid icons */
-  content: "\f00d";
-  color: #1d1b20;
-}
-
-.btn-active-switch input:checked ~ .btn-active-switch-circle::before {
-  font-family: "Font Awesome 6 Free"; /* important */
-  font-weight: 900; /* solid style for fa-solid icons */
-  content: "\f00c";
 }
 </style>

@@ -332,7 +332,6 @@ export default {
   height: fit-content;
   border-radius: 50px;
   border: 1.5px solid black;
-  padding: 0 0.5rem;
   margin-top: 1rem;
 
   .search-form {
@@ -340,6 +339,7 @@ export default {
     display: flex;
     flex-direction: row;
     padding: 0.5rem;
+    padding-left: 1rem;
 
     input {
       width: 100%;
