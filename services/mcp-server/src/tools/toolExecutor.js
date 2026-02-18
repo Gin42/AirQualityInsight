@@ -13,12 +13,12 @@ function compactSensors(sensors) {
   }));
 }
 
-function isValidWGS84(lat, lon) {
-  if (typeof lat !== "number" || typeof lon !== "number") return false;
+function isValidWGS84(lat, lng) {
+  if (typeof lat !== "number" || typeof lng !== "number") return false;
 
-  if (Number.isNaN(lat) || Number.isNaN(lon)) return false;
+  if (Number.isNaN(lat) || Number.isNaN(lng)) return false;
 
-  return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 }
 
 async function searchSensor(name = null) {
