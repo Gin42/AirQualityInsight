@@ -88,7 +88,7 @@ tbody tr {
 
 th,
 td {
-  padding: 0.5rem;
+  padding: 0.3rem;
   text-align: left;
 
   &.text-center {

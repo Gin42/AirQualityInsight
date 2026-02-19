@@ -1,6 +1,6 @@
 """ 
 producer.py
-It's role is to send info about the measurements to the server
+Its role is to send info about the measurements to the server
 and to send ACK when it receive info from the server
 """
 from kafka import  KafkaProducer
