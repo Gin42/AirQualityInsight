@@ -109,7 +109,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations("map", ["setCenter", "setZoom"]),
+    ...mapMutations("map", ["setCurrentCoords", "setZoom"]),
 
     centerOnLocation(lat, lng, zoom = 16) {
       if (!this.leaflet) return;
@@ -152,6 +152,20 @@ export default {
     const map = this.leaflet.init("map", this.center, this.zoom, () =>
       this.$emit("loading-change", false),
     );
+
+    map.on("moveend", () => {
+      const center = map.getCenter();
+      console.log("MAPPA", center);
+      this.setCurrentCoords({
+        lat: center.lat.toFixed(7),
+        lng: center.lng.toFixed(7),
+      });
+    });
+
+    map.on("zoomend", () => {
+      console.log("ZOOM", map.getZoom());
+      this.setZoom(map.getZoom());
+    });
 
     map.on("click", this.onMapClick);
 

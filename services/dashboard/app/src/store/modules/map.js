@@ -1,12 +1,12 @@
 const state = () => ({
   center: {
-    lat: "44.14771",
-    lng: "12.2356576",
+    lat: 44.14771,
+    lng: 12.2356576,
     name: "Via dell'Università 50, 47522 Cesena FC, Italia",
   },
   currentCoords: {
-    lat: "44.14771",
-    lng: "12.2356576",
+    lat: 44.14771,
+    lng: 12.2356576,
   },
   zoom: 13,
   selectedMeasurement: "pm25",
@@ -31,8 +31,8 @@ const mutations = {
   },
   setCurrentCoords(state, currentCoords) {
     state.currentCoords = {
-      lng: currentCoords.lng,
       lat: currentCoords.lat,
+      lng: currentCoords.lng,
     };
   },
 };

@@ -258,13 +258,6 @@ export default {
       <li class="curr-measurements-li">
         <p>Current measurements:</p>
         <p>{{ allMeasurementsCount }}</p>
-        <button
-          @click="clearMeasurements"
-          class="btn danger-color clear-measurements"
-          v-if="getUsername != null"
-        >
-          <i class="fas fa-trash"></i> Clear
-        </button>
       </li>
 
       <hr />
