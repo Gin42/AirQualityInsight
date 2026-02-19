@@ -96,6 +96,17 @@ const getSensor = async (req, res) => {
   }
 };
 
+const checkName = async (req, res) => {
+  const { name, id } = req.body;
+
+  try {
+    const isNameUsed = await sensorService.isNameTaken(name, id);
+    res.json(isNameUsed);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   addSensor,
   getSensor,
@@ -103,4 +114,5 @@ module.exports = {
   modifySensor,
   updateStatus,
   setAllStatus,
+  checkName,
 };

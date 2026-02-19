@@ -62,10 +62,6 @@ const deleteSensorData = async (sensorId) => {
 
 const modifySensorData = async (sensorId, sensorName) => {
   try {
-    if (await isNameTaken(sensorName, sensorId)) {
-      throw new Error(`Sensor name ${sensorName} already used`);
-    }
-
     const modifiedSensor = await Sensor.findOneAndUpdate(
       { sensor_id: sensorId },
       { $set: { name: sensorName } },
@@ -145,11 +141,14 @@ function generateIPAddresses(i) {
   ].join(".");
 }
 
-const isNameTaken = async (name, sensorId) => {
-  return await Sensor.exists({
-    name,
-    sensor_id: { $ne: sensorId },
-  });
+const isNameTaken = async (name, sensorId = null) => {
+  const query = { name };
+
+  if (sensorId) {
+    query.sensor_id = { $ne: sensorId };
+  }
+
+  return await Sensor.exists(query);
 };
 
 module.exports = {
@@ -161,4 +160,5 @@ module.exports = {
   countSensors,
   generateIPAddresses,
   updateAllSensorsStatus,
+  isNameTaken,
 };

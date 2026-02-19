@@ -103,29 +103,39 @@ const actions = {
     }
   },
 
-  async addSensor({ commit, rootState }, data) {
+  async addSensor({ dispatch, commit, rootState }, data) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
 
-      const response = await fetchFromApi(`${apiUrl}/api/sensor/addSensor`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.name,
-          location: {
-            type: "Point",
-            coordinates: [data.latitude, data.longitude],
-          },
-          active: data.active,
-          last_seen: new Date(),
-        }),
+      const nameAvailability = await dispatch("isNameTaken", {
+        name: data.name,
+        id: null,
       });
 
-      if (response) {
-        commit("addNewSensor", {
-          sensorData: response,
-          center: rootState.map.center,
+      if (!nameAvailability) {
+        const response = await fetchFromApi(`${apiUrl}/api/sensor/addSensor`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: data.name,
+            location: {
+              type: "Point",
+              coordinates: [data.latitude, data.longitude],
+            },
+            active: data.active,
+            last_seen: new Date(),
+          }),
         });
+
+        if (response) {
+          commit("addNewSensor", {
+            sensorData: response,
+            center: rootState.map.center,
+          });
+        }
+      } else {
+        alert("Name already taken, choose another one");
+        return;
       }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
@@ -150,20 +160,33 @@ const actions = {
     }
   },
 
-  async modifySensor({ commit }, { sensorId, sensorName }) {
+  async modifySensor({ dispatch, commit }, { sensorId, sensorName }) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
 
-      const response = await fetchFromApi(`${apiUrl}/api/sensor/${sensorId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: sensorName }),
+      const nameAvailability = await dispatch("isNameTaken", {
+        name: sensorName,
+        id: sensorId,
       });
-      if (response) {
-        commit("modifySensorData", {
-          sensorId,
-          sensorName,
-        });
+
+      if (!nameAvailability) {
+        const response = await fetchFromApi(
+          `${apiUrl}/api/sensor/${sensorId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: sensorName }),
+          },
+        );
+        if (response) {
+          commit("modifySensorData", {
+            sensorId,
+            sensorName,
+          });
+        }
+      } else {
+        alert("Name already taken, choose another one");
+        return;
       }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
@@ -208,6 +231,29 @@ const actions = {
       }
     } catch (error) {
       console.error("Unable to send sensor to API:", error);
+    }
+  },
+
+  async isNameTaken({}, { name, id = null }) {
+    try {
+      const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+      const response = await fetchFromApi(
+        `${apiUrl}/api/sensor/checkSensorName`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name,
+            id: id,
+          }),
+        },
+      );
+
+      if (response) {
+        return response;
+      }
+    } catch (error) {
+      console.error("Unable to fetch sensors from API:", error);
     }
   },
 
