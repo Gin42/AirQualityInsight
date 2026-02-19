@@ -30,11 +30,15 @@ const actions = {
 
       if (!response.error) {
         commit("setAuth", response.username);
+      } else {
+        alert(response.error);
+        return;
       }
 
       return response;
     } catch (error) {
       console.error("Unable to login", error);
+
       throw error;
     }
   },

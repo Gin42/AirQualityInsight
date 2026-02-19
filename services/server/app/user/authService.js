@@ -8,7 +8,7 @@ const loginUser = async (credentials) => {
     if (!user) {
       return { error: "Invalid credentials" };
     }
-    const isMatch = user.comparePassword(credentials.password);
+    const isMatch = await user.comparePassword(credentials.password);
     if (!isMatch) {
       return { error: "Incorrect password" };
     } else {
