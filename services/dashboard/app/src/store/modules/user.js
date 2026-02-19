@@ -2,10 +2,12 @@ import { fetchFromApi } from "@/services/api";
 
 const state = () => ({
   username: null,
+  authFormError: null,
 });
 
 const getters = {
   getUsername: (state) => state.username,
+  getAuthError: (state) => state.authFormError,
 };
 
 const mutations = {
@@ -15,11 +17,15 @@ const mutations = {
   resetAuth(state) {
     state.username = null;
   },
+  setAuthError(state, title) {
+    state.authFormError = title;
+  },
 };
 
 const actions = {
   async login({ commit }, userData) {
     try {
+      commit("setAuthError", null);
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
       const response = await fetchFromApi(`${apiUrl}/api/auth/login`, {
         method: "POST",
@@ -31,7 +37,8 @@ const actions = {
       if (!response.error) {
         commit("setAuth", response.username);
       } else {
-        alert(response.error);
+        console.log("Errore", response.error);
+        commit("setAuthError", response.error);
         return;
       }
 
