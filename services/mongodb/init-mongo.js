@@ -191,7 +191,7 @@ if (reset) {
       const { lat, lng } = sensors[i];
       const entry = {
         sensor_id: toSensorId(i),
-        name: "Sensore di prova",
+        name: `Sensore di prova ${i + 1}`,
         location: {
           type: "Point",
           coordinates: [lat, lng],

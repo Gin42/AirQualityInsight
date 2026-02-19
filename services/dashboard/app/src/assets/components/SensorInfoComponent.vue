@@ -106,7 +106,7 @@ export default {
 </script>
 
 <template>
-  <div class="sensor-info surface-color" ref="infoContainer">
+  <div class="sensor-info surface-color" ref="infoContainer" @click.stop>
     <button class="icon-button" @click="$emit('close-info')">
       <i class="fa-solid fa-xmark"></i>
     </button>
