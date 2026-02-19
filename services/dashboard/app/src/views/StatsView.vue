@@ -56,8 +56,7 @@ export default {
                 The <b>worst pollutant</b> is {{ eaqi?.measurement ?? "N/A" }}
               </li>
               <li>
-                It's <b>mean concentration</b> is
-                {{ eaqi?.mean ?? "N/A" }} µg/m³
+                Its <b>mean concentration</b> is {{ eaqi?.mean ?? "N/A" }} µg/m³
               </li>
               <li>
                 <p class="small-text">
