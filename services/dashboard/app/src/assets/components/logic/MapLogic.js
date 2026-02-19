@@ -155,7 +155,6 @@ export default {
 
     map.on("moveend", () => {
       const center = map.getCenter();
-      console.log("MAPPA", center);
       this.setCurrentCoords({
         lat: center.lat.toFixed(7),
         lng: center.lng.toFixed(7),
@@ -163,7 +162,6 @@ export default {
     });
 
     map.on("zoomend", () => {
-      console.log("ZOOM", map.getZoom());
       this.setZoom(map.getZoom());
     });
 
