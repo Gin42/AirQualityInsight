@@ -1,5 +1,5 @@
 <template>
-  <div class="form-container">
+  <div class="form-wrapper">
     <LoginComponent></LoginComponent>
   </div>
 </template>
@@ -16,10 +16,12 @@ export default {
 </script>
 
 <style lang="scss">
-.form-container {
+.form-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 1.5em;
+  height: 100%;
+  justify-content: center;
 }
 </style>

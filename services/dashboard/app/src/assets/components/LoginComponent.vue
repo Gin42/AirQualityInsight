@@ -1,31 +1,33 @@
 <template>
-  <p class="message">Welcome back to AirQualityInsight</p>
-  <form class="login-form" @submit.prevent="handleLogin">
-    <label for="username">Username:</label>
-    <input
-      v-model="username"
-      type="text"
-      placeholder="Username"
-      name="username"
-      id="username"
-      required
-    />
-    <label for="password">Password:</label>
-    <input
-      v-model="password"
-      type="password"
-      placeholder="Password"
-      name="password"
-      id="password"
-      required
-    />
-    <transition name="fade">
-      <p v-if="getAuthError" class="error-text">
-        {{ getAuthError }}
-      </p>
-    </transition>
-    <button class="tertiary-color" type="submit">Login</button>
-  </form>
+  <div class="form-login-container surface-color">
+    <p class="message">Welcome back to AirQualityInsight</p>
+    <form class="login-form" @submit.prevent="handleLogin">
+      <label for="username">Username:</label>
+      <input
+        v-model="username"
+        type="text"
+        placeholder="Username"
+        name="username"
+        id="username"
+        required
+      />
+      <label for="password">Password:</label>
+      <input
+        v-model="password"
+        type="password"
+        placeholder="Password"
+        name="password"
+        id="password"
+        required
+      />
+      <transition name="fade">
+        <p v-if="getAuthError" class="error-text">
+          {{ getAuthError }}
+        </p>
+      </transition>
+      <button class="tertiary-color" type="submit">Login</button>
+    </form>
+  </div>
 </template>
 
 <script>
@@ -77,6 +79,18 @@ export default {
 </script>
 
 <style lang="scss">
+.form-login-container {
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid black;
+  flex-direction: column;
+  padding: 1rem;
+  width: 70%;
+  max-width: 35rem;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
@@ -103,5 +117,6 @@ export default {
   width: fit-content;
   font-size: 1em;
   padding: 0.5rem 1rem;
+  color: white;
 }
 </style>

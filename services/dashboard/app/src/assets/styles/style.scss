@@ -247,7 +247,7 @@ ul {
 }
 
 .error-text {
-  color: red;
+  color: var(--danger-color);
   font-size: 0.9rem;
   margin-top: 0 !important;
 }
