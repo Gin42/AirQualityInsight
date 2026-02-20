@@ -112,15 +112,13 @@ export default {
                 required
               />
               <div class="form-buttons">
-                <button class="icon-button" type="submit">
-                  <i class="fa-solid fa-check"></i>
-                </button>
+                <button class="tertiary-color" type="submit">Edit</button>
                 <button
                   type="button"
-                  class="icon-button"
+                  class="tertiary-color"
                   @click="isModify = false"
                 >
-                  <i class="fa-solid fa-x"></i>
+                  Cancel
                 </button>
               </div>
             </form>
@@ -256,17 +254,19 @@ export default {
   flex-direction: row;
 }
 
+.form-buttons > button {
+  color: white;
+  font-size: 1em;
+  margin: 0.3rem;
+  padding: 0.5rem;
+}
+
 .name-form {
   width: 100%;
   justify-content: space-evenly;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.2rem;
-}
-
-.form-buttons > button {
-  font-size: 1em;
-  margin: 0.1rem;
 }
 
 .name-li-wrapper {
