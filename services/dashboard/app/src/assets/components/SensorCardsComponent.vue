@@ -40,8 +40,6 @@ export default {
         sensorId: sensor.getId(),
         sensorName: this.formData.name,
       });
-
-      console.log(JSON.stringify(this.getNameError, null, 2));
       if (this.getNameError.value === false) {
         this.isModify = false;
       }
@@ -304,26 +302,5 @@ li.delete-li {
 
 .btn-active-switch input:checked ~ .btn-active-switch-circle {
   transform: translateX(26px);
-}
-
-.error-text {
-  color: red;
-  font-size: 0.9rem;
-  margin-top: 0 !important;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.form-wrapper {
-  display: flex;
-  flex-direction: column;
 }
 </style>

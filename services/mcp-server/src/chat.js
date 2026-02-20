@@ -60,8 +60,6 @@ router.post("/", async (req, res) => {
         throw new Error("Invalid tool call received from model");
       }
 
-      console.log("toolCall name:", toolCall.name);
-
       toolResult = await executeTool(toolCall.name, toolCall.args);
 
       contents.push({
@@ -83,9 +81,6 @@ router.post("/", async (req, res) => {
 
       const finalResponse = await askAi(contents);
       content = finalResponse.candidates[0].content;
-
-      console.log("Final parts:", content.parts);
-      console.log("Final response", JSON.stringify(finalResponse, null, 2));
     }
 
     const text =

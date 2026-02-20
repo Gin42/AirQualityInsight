@@ -57,6 +57,12 @@
         />
       </div>
 
+      <transition name="fade">
+        <p v-if="getNameError.value" class="error-text">
+          Name already used, chose another one
+        </p>
+      </transition>
+
       <button type="submit" class="btn tertiary-color submit-form-button">
         Create
       </button>
@@ -65,9 +71,12 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 export default {
   name: "FormComponent",
+  computed: {
+    ...mapGetters("sensors", ["getNameError"]),
+  },
   props: {
     initialLongitude: {
       type: Number,
@@ -94,10 +103,13 @@ export default {
   },
   methods: {
     ...mapActions("sensors", ["addSensor"]),
-    submitForm() {
-      this.addSensor(this.formData);
-      this.resetForm();
-      this.$emit("close-form");
+    async submitForm() {
+      await this.addSensor(this.formData);
+
+      if (this.getNameError.value === false) {
+        this.resetForm();
+        this.$emit("close-form");
+      }
     },
     resetForm() {
       this.formData.name = this.initialName;
@@ -119,6 +131,9 @@ export default {
     },
     initialName(newName) {
       this.formData.name = newName;
+    },
+    "formData.name"(newVal, oldVal) {
+      this.$store.commit("sensors/setNameError", false);
     },
   },
   mounted() {

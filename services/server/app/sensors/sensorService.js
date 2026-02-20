@@ -150,7 +150,6 @@ const isNameTaken = async (name, sensorId = null) => {
     }
 
     const nameUsed = await Sensor.exists(query);
-    console.log("Is name taken?", !!nameUsed);
     return !!nameUsed;
   } catch (error) {
     console.error("Error checking name:", error);

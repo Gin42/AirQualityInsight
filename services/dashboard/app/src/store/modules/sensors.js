@@ -113,6 +113,7 @@ const actions = {
   async addSensor({ dispatch, commit, rootState }, data) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
+
       commit("setNameError", {
         value: false,
       });
@@ -200,7 +201,6 @@ const actions = {
           });
         }
       } else {
-        console.log("Senti io nel caso mi metto in errore");
         commit("setNameError", {
           value: true,
         });

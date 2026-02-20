@@ -64,8 +64,6 @@ export default {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const response = await res.json();
 
-        console.log("Response:", JSON.stringify(response, null, 2));
-
         if (
           response.toolResult?.action &&
           response.toolResult.sensors?.length
