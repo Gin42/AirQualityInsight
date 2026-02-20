@@ -3,12 +3,13 @@ export async function fetchFromApi(url, options = {}) {
     const response = await fetch(url, options);
 
     if (!response.ok) {
-      throw new Error("API error");
+      const errorMessage = `API error: ${response.status} ${response.statusText}`;
+      throw new Error(errorMessage);
     }
 
     return await response.json();
   } catch (error) {
-    console.warn("Backend unreachable");
-    return null; // graceful fallback
+    console.warn("Backend unreachable:", error.message);
+    return null;
   }
 }

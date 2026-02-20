@@ -101,7 +101,9 @@ const checkName = async (req, res) => {
 
   try {
     const isNameUsed = await sensorService.isNameTaken(name, id);
-    res.json(isNameUsed);
+    console.log("The big reveal, is it taken?", isNameUsed);
+
+    res.json({ isTaken: isNameUsed });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

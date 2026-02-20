@@ -14,6 +14,7 @@ export default {
   },
   computed: {
     ...mapGetters("user", ["getUsername"]),
+    ...mapGetters("sensors", ["getNameError"]),
   },
   methods: {
     ...mapActions("sensors", [
@@ -34,13 +35,16 @@ export default {
       this.formData.name = name;
     },
 
-    submitForm(sensor) {
-      this.modifySensor({
+    async submitForm(sensor) {
+      await this.modifySensor({
         sensorId: sensor.getId(),
         sensorName: this.formData.name,
       });
 
-      this.isModify = false;
+      console.log(JSON.stringify(this.getNameError, null, 2));
+      if (this.getNameError.value === false) {
+        this.isModify = false;
+      }
     },
 
     onToggleSensorStatus(sensor, event) {
@@ -60,6 +64,11 @@ export default {
       },
       isDeleting: false,
     };
+  },
+  watch: {
+    "formData.name"(newVal, oldVal) {
+      this.$store.commit("sensors/setNameError", false);
+    },
   },
 };
 </script>
@@ -90,33 +99,39 @@ export default {
               <i class="fa-regular fa-pen-to-square"></i>
             </button>
           </div>
-
-          <form
-            class="name-form"
-            @submit.prevent="submitForm(sensor)"
-            v-if="isModify"
-          >
-            <label class="label" for="name">Sensor:</label>
-            <input
-              type="text"
-              id="sensorNameModify"
-              name="name"
-              v-model="formData.name"
-              required
-            />
-            <div class="form-buttons">
-              <button class="icon-button" type="submit">
-                <i class="fa-solid fa-check"></i>
-              </button>
-              <button
-                type="button"
-                class="icon-button"
-                @click="isModify = false"
-              >
-                <i class="fa-solid fa-x"></i>
-              </button>
-            </div>
-          </form>
+          <div class="form-wrapper">
+            <form
+              class="name-form"
+              @submit.prevent="submitForm(sensor)"
+              v-if="isModify"
+            >
+              <label class="label" for="name">Sensor:</label>
+              <input
+                type="text"
+                id="sensorNameModify"
+                name="name"
+                v-model="formData.name"
+                required
+              />
+              <div class="form-buttons">
+                <button class="icon-button" type="submit">
+                  <i class="fa-solid fa-check"></i>
+                </button>
+                <button
+                  type="button"
+                  class="icon-button"
+                  @click="isModify = false"
+                >
+                  <i class="fa-solid fa-x"></i>
+                </button>
+              </div>
+            </form>
+            <transition name="fade">
+              <p v-if="getNameError.value" class="error-text">
+                Name already used, chose another one
+              </p>
+            </transition>
+          </div>
         </li>
         <li>
           <p>Latitude:</p>
@@ -136,7 +151,7 @@ export default {
           >
             <input
               type="checkbox"
-              id="sensorActive"
+              :id="'sensorActive-' + sensor.getId()"
               name="sensorActive"
               @click="onToggleSensorStatus(sensor, $event)"
               :checked="sensor.getActive()"
@@ -247,6 +262,13 @@ export default {
   width: 100%;
   justify-content: space-evenly;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+.form-buttons > button {
+  font-size: 1em;
+  margin: 0.1rem;
 }
 
 .name-li-wrapper {
@@ -282,5 +304,26 @@ li.delete-li {
 
 .btn-active-switch input:checked ~ .btn-active-switch-circle {
   transform: translateX(26px);
+}
+
+.error-text {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 0 !important;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
 }
 </style>

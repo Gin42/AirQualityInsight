@@ -19,9 +19,11 @@
       id="password"
       required
     />
-    <p v-if="getAuthError" class="error-text">
-      {{ getAuthError }}
-    </p>
+    <transition name="fade">
+      <p v-if="getAuthError" class="error-text">
+        {{ getAuthError }}
+      </p>
+    </transition>
     <button class="tertiary-color" type="submit">Login</button>
   </form>
 </template>
@@ -107,15 +109,15 @@ export default {
   color: red;
   font-size: 0.9rem;
   margin-top: 4px;
+}
 
-  .fade-enter-active,
-  .fade-leave-active {
-    transition: opacity 0.3s ease;
-  }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
 
-  .fade-enter-from,
-  .fade-leave-to {
-    opacity: 0;
-  }
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

@@ -142,13 +142,20 @@ function generateIPAddresses(i) {
 }
 
 const isNameTaken = async (name, sensorId = null) => {
-  const query = { name };
+  try {
+    const query = { name };
 
-  if (sensorId) {
-    query.sensor_id = { $ne: sensorId };
+    if (sensorId) {
+      query.sensor_id = { $ne: sensorId };
+    }
+
+    const nameUsed = await Sensor.exists(query);
+    console.log("Is name taken?", !!nameUsed);
+    return !!nameUsed;
+  } catch (error) {
+    console.error("Error checking name:", error);
+    return false;
   }
-
-  return await Sensor.exists(query);
 };
 
 module.exports = {

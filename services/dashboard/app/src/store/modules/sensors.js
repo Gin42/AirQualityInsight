@@ -4,6 +4,7 @@ import { reactive } from "vue";
 
 const state = () => ({
   sensors: reactive(new Map()),
+  nameError: false,
 });
 
 //GETTERS
@@ -20,6 +21,9 @@ const getters = {
     );
   },
   getSensor: (state) => (id) => state.sensors.get(id),
+  getNameError: (state) => {
+    return state.nameError;
+  },
 };
 
 //MUTATIONS
@@ -73,6 +77,9 @@ const mutations = {
       state.sensors.set(id, sensor);
     }
   },
+  setNameError(state, value) {
+    state.nameError = value;
+  },
 };
 
 //ACTIONS
@@ -106,7 +113,9 @@ const actions = {
   async addSensor({ dispatch, commit, rootState }, data) {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
-
+      commit("setNameError", {
+        value: false,
+      });
       const nameAvailability = await dispatch("isNameTaken", {
         name: data.name,
         id: null,
@@ -134,7 +143,9 @@ const actions = {
           });
         }
       } else {
-        alert("Name already taken, choose another one");
+        commit("setNameError", {
+          value: true,
+        });
         return;
       }
     } catch (error) {
@@ -164,6 +175,10 @@ const actions = {
     try {
       const apiUrl = import.meta.env.VITE_SOCKET_SERVER_URL;
 
+      commit("setNameError", {
+        value: false,
+      });
+
       const nameAvailability = await dispatch("isNameTaken", {
         name: sensorName,
         id: sensorId,
@@ -185,7 +200,10 @@ const actions = {
           });
         }
       } else {
-        alert("Name already taken, choose another one");
+        console.log("Senti io nel caso mi metto in errore");
+        commit("setNameError", {
+          value: true,
+        });
         return;
       }
     } catch (error) {
@@ -250,10 +268,14 @@ const actions = {
       );
 
       if (response) {
-        return response;
+        return response.isTaken;
+      } else {
+        console.error("Failed to check name:", response.statusText);
+        return false;
       }
     } catch (error) {
       console.error("Unable to fetch sensors from API:", error);
+      return false; // Return false if there's an error
     }
   },
 
