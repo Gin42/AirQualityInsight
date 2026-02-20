@@ -1,6 +1,6 @@
 <template>
   <div
-    class="form-popup surface-color"
+    class="form-creation-popup surface-color"
     id="createSensorForm"
     ref="sensorForm"
     @click.stop
@@ -9,10 +9,10 @@
       <i class="fa-solid fa-xmark"></i>
     </button>
 
-    <form class="form-container" @submit.prevent="submitForm">
+    <form class="form-creation-container" @submit.prevent="submitForm">
       <h2>Create new sensor</h2>
 
-      <div class="form-content">
+      <div class="form-creation-content">
         <label for="name">Sensor name:</label>
         <input
           type="text"
@@ -23,7 +23,7 @@
         />
       </div>
 
-      <div class="form-content">
+      <div class="form-creation-content">
         <label for="latitudeField">Latitude:</label>
         <input
           type="text"
@@ -35,7 +35,7 @@
         />
       </div>
 
-      <div class="form-content">
+      <div class="form-creation-content">
         <label for="longitudeField">Longitude:</label>
         <input
           type="text"
@@ -47,7 +47,7 @@
         />
       </div>
 
-      <div class="form-content">
+      <div class="form-creation-content">
         <label for="active">Active:</label>
         <input
           type="checkbox"
@@ -63,7 +63,10 @@
         </p>
       </transition>
 
-      <button type="submit" class="btn tertiary-color submit-form-button">
+      <button
+        type="submit"
+        class="btn tertiary-color submit-form-creation-button"
+      >
         Create
       </button>
     </form>
@@ -150,7 +153,7 @@ export default {
 </script>
 
 <style>
-.form-popup {
+.form-creation-popup {
   display: flex;
   flex-direction: column;
   grid-area: 1 / 1 / 4 / 4;
@@ -165,46 +168,52 @@ export default {
   border: 1px solid black;
   justify-self: center;
   align-self: center;
+  max-width: 35rem;
+}
 
-  .form-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: -webkit-fill-available;
-    align-self: center;
-    font-size: 1em;
-  }
+.form-creation-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: -webkit-fill-available;
+  align-self: center;
+  font-size: 1em !important;
+}
 
-  .form-content {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
+.form-creation-container > h2 {
+  margin: 0.3rem;
+}
 
-  .form-container label {
-    font-weight: bold;
-  }
+.form-creation-content {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
 
-  .form-container input {
-    width: 70% !important;
-    margin: 0 !important;
-  }
+.form-creation-container label {
+  font-weight: bold;
+}
 
-  .form-container input[type="text"] {
-    background-color: --surface-color;
-  }
+.form-creation-container input {
+  width: 70% !important;
+  margin: 0 !important;
+}
 
-  #longitudeField:hover,
-  #latitudeField:hover {
-    cursor: context-menu;
-  }
-  #checkbox:hover {
-    cursor: pointer;
-  }
+.form-creation-container input[type="text"] {
+  background-color: --surface-color;
+}
 
-  .submit-form-button {
-    margin-top: 1rem;
-  }
+#longitudeField:hover,
+#latitudeField:hover {
+  cursor: context-menu;
+}
+#checkbox:hover {
+  cursor: pointer;
+}
+
+.submit-form-creation-button {
+  margin-top: 1rem;
+  align-self: center;
 }
 </style>
